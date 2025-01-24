@@ -1,2 +1,6 @@
-# W25_D1
-Kaitlyn
+# D1
+## Brighton Gosinet
+## Hi, I'm Daxton.
+## Kaitlyn
+## Jeremelle 
+## Sam
