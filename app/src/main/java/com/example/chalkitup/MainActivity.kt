@@ -3,45 +3,61 @@ package com.example.chalkitup
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.chalkitup.ui.theme.ChalkitupTheme
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.chalkitup.ui.screens.HomeScreen
+import com.example.chalkitup.ui.screens.LoginScreen
+import com.example.chalkitup.ui.screens.SignupScreen
+import com.example.chalkitup.ui.viewmodel.AuthViewModel
+
+// Navigation Center, NavHost with navController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
-            ChalkitupTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
+            // Set up NavController and NavHost
+            val navController = rememberNavController()
+            NavHost(navController = navController, startDestination = "login") {
+                // Login Screen
+                composable("login") {
+                    val authViewModel: AuthViewModel = viewModel() // Use viewModel()
+                    LoginScreen(
+                        viewModel = authViewModel,
+                        onLoginSuccess = {
+                            // Navigate to the Home screen after login
+                            navController.navigate("home") {
+                                popUpTo("login") { inclusive = true }
+                            }
+                        },
+                        navController = navController // Pass the navController here
                     )
                 }
+
+                // Signup Screen
+                composable("signup") {
+                    val authViewModel: AuthViewModel = viewModel() // Use viewModel()
+                    SignupScreen(
+                        viewModel = authViewModel,
+                        onSignupSuccess = {
+                            // Navigate to the Home screen after signup
+                            navController.navigate("home") {
+                                popUpTo("signup") { inclusive = true }
+                            }
+                        },
+                        navController = navController // Pass the navController here
+                    )
+                }
+
+                // Home Screen (Main screen after login/signup)
+                composable("home") {
+                    HomeScreen()
+                }
+
+                // contd...
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    ChalkitupTheme {
-        Greeting("Android")
     }
 }

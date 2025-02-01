@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "708905206257",
+    "project_id": "chalkitup-e386e",
+    "storage_bucket": "chalkitup-e386e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:708905206257:android:e307bcdd3cd56a9bacc450",
+        "android_client_info": {
+          "package_name": "com.example.chalkitup"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7fOL49BEt9IGuXSbY6IqBZYwUq0U9qBQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
