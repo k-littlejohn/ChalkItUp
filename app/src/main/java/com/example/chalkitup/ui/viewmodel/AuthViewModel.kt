@@ -29,6 +29,7 @@ class AuthViewModel : ViewModel() {
         password: String,
         firstName: String,
         lastName: String,
+        userType: String,
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {
@@ -39,6 +40,7 @@ class AuthViewModel : ViewModel() {
                     val user = auth.currentUser
                     user?.let {
                         val userData = hashMapOf(
+                            "userType" to userType,
                             "firstName" to firstName,
                             "lastName" to lastName,
                             "email" to email
