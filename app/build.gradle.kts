@@ -11,8 +11,8 @@ android {
 
     defaultConfig {
         applicationId = "com.example.chalkitup"
-        minSdk = 24
-        targetSdk = 35
+        minSdk = 24 //Minimum android version
+        targetSdk = 35 //latest tested version
         versionCode = 1
         versionName = "1.0"
 
