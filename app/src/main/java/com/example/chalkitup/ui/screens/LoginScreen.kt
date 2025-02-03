@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -18,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.example.chalkitup.ui.viewmodel.AuthViewModel
 
 // UI of login screen
@@ -26,8 +24,7 @@ import com.example.chalkitup.ui.viewmodel.AuthViewModel
 @Composable
 fun LoginScreen(
     viewModel: AuthViewModel,
-    onLoginSuccess: () -> Unit,
-    navController: NavController
+    onLoginSuccess: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -36,6 +33,7 @@ fun LoginScreen(
     Column(modifier = Modifier.padding(16.dp).fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally) {
+
         Text("Login")
         TextField(value = email, onValueChange = { email = it }, label = { Text("Email") })
         TextField(value = password, onValueChange = { password = it }, label = { Text("Password") }, visualTransformation = PasswordVisualTransformation())
@@ -50,11 +48,6 @@ fun LoginScreen(
             }
         }) {
             Text("Login")
-        }
-
-        // Navigate to signup screen
-        TextButton(onClick = { navController.navigate("signup") }) {
-            Text("Don't have an account? Sign Up")
         }
 
         if (errorMessage.isNotEmpty()) {
