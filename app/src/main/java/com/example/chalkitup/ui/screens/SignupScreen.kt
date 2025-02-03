@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.example.chalkitup.ui.viewmodel.AuthViewModel
 
 // UI of signup screen
@@ -31,8 +29,7 @@ import com.example.chalkitup.ui.viewmodel.AuthViewModel
 @Composable
 fun SignupScreen(
     viewModel: AuthViewModel,
-    onSignupSuccess: () -> Unit,
-    navController: NavController
+    onSignupSuccess: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -92,11 +89,6 @@ fun SignupScreen(
             }
         }) {
             Text("Sign Up")
-        }
-
-        // Navigate to login screen
-        TextButton(onClick = { navController.navigate("login") }) {
-            Text("Already have an account? Login")
         }
 
         if (errorMessage.isNotEmpty()) {
