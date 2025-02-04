@@ -6,8 +6,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -37,8 +40,15 @@ fun SignupScreen(
     var lastName by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var userType by remember { mutableStateOf<UserType?>(null) } // Track user type: Student or Tutor
+    var selectedSubjects by remember { mutableStateOf<Set<String>>(emptySet()) } // To store selected subjects
+    var selectedGradeLevels by remember { mutableStateOf<Set<Int>>(emptySet()) } // To store selected grade levels
 
-    Column(modifier = Modifier.padding(16.dp).fillMaxSize(),
+    val availableSubjects = listOf("Math", "Science", "English", "History", "Biology", "Physics") // Example subjects
+    val availableGradeLevels = (7..12).toList() // Grade levels from 7 to 12
+
+    Column(modifier = Modifier
+        .padding(16.dp)
+        .fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally) {
 
@@ -47,10 +57,15 @@ fun SignupScreen(
         // User type selection (Student / Tutor)
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
         ) {
             Button(
-                onClick = { userType = UserType.Student },
+                onClick = { userType = UserType.Student
+                    selectedSubjects = emptySet() // Clear subjects list when switching to Student
+                    selectedGradeLevels = emptySet() // Clear grade levels when switching to Student
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (userType == UserType.Student) Color.Blue else Color.Gray
                 )
@@ -70,6 +85,71 @@ fun SignupScreen(
             }
         }
 
+        // Subject selection (only visible for Tutors)
+        // - Firestore and functionality purposes, can change signup UI
+        if (userType == UserType.Tutor) {
+            Text("Select Subjects:")
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // LazyVerticalGrid to arrange subjects in rows of 3
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3), // 3 columns per row
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                items(availableSubjects.size) { index ->
+                    val subject = availableSubjects[index]
+                    val isSelected = selectedSubjects.contains(subject)
+                    Button(
+                        onClick = {
+                            selectedSubjects = if (isSelected) {
+                                selectedSubjects - subject // Remove subject from selection
+                            } else {
+                                selectedSubjects + subject // Add subject to selection
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isSelected) Color.Green else Color.Gray
+                        ),
+                        modifier = Modifier.padding(2.dp)
+                    ) {
+                        Text(subject)
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+
+
+            // Grade level selection (only visible for Tutors)
+            // - Firestore and functionality purposes, can change signup UI
+            Text("Select Grade Levels:")
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                availableGradeLevels.forEach { gradeLevel ->
+                    val isSelected = selectedGradeLevels.contains(gradeLevel)
+                    Button(
+                        onClick = {
+                            selectedGradeLevels = if (isSelected) {
+                                selectedGradeLevels - gradeLevel // Remove grade level from selection
+                            } else {
+                                selectedGradeLevels + gradeLevel // Add grade level to selection
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isSelected) Color.Green else Color.Gray
+                        ),
+                        modifier = Modifier.padding(4.dp)
+                    ) {
+                        Text(gradeLevel.toString())
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
         TextField(value = email, onValueChange = { email = it }, label = { Text("Email") })
         TextField(value = password, onValueChange = { password = it }, label = { Text("Password") }, visualTransformation = PasswordVisualTransformation())
@@ -85,7 +165,10 @@ fun SignupScreen(
                 errorMessage = "Please select a user type"
             } else {
                 //userType!!.name passes the enum value as a string
-                viewModel.signupWithEmail(email, password, firstName, lastName, userType!!.name, onSignupSuccess) { errorMessage = it }
+                viewModel.signupWithEmail(email, password, firstName, lastName,
+                    userType!!.name, selectedSubjects.toList(), selectedGradeLevels.toList(),
+                    onSignupSuccess
+                ) { errorMessage = it }
             }
         }) {
             Text("Sign Up")

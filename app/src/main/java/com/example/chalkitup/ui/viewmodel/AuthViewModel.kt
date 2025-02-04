@@ -30,21 +30,27 @@ class AuthViewModel : ViewModel() {
         firstName: String,
         lastName: String,
         userType: String,
+        subjects: List<String> = emptyList(), // Default to empty list for students
+        grades: List<Int> = emptyList(), // Default to empty list for students
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {
+        // Authenticate user email and password
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    // Save user data in Firestore
                     val user = auth.currentUser
                     user?.let {
+                        // Create user data map
                         val userData = hashMapOf(
                             "userType" to userType,
                             "firstName" to firstName,
                             "lastName" to lastName,
-                            "email" to email
+                            "email" to email,
+                            "subjects" to subjects,
+                            "grades" to grades
                         )
+                        // Save to Firestore
                         firestore.collection("users").document(user.uid)
                             .set(userData)
                             .addOnSuccessListener { onSuccess() }
