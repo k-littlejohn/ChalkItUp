@@ -5,8 +5,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.chalkitup.ui.screens.BookingScreen
 import com.example.chalkitup.ui.screens.HomeScreen
 import com.example.chalkitup.ui.screens.LoginScreen
+import com.example.chalkitup.ui.screens.MessagesScreen
+import com.example.chalkitup.ui.screens.ProfileScreen
+import com.example.chalkitup.ui.screens.SettingsScreen
 import com.example.chalkitup.ui.screens.SignupScreen
 import com.example.chalkitup.ui.screens.StartScreen
 import com.example.chalkitup.ui.viewmodel.AuthViewModel
@@ -54,5 +58,26 @@ fun NavGraph(navController: NavHostController) {
         composable("home") {
             HomeScreen(navController = navController)
         }
+
+        // Booking Screen
+        composable("booking") {
+            BookingScreen(navController = navController)
+        }
+
+        // Messages Screen
+        composable("messages") {
+            MessagesScreen(navController = navController)
+        }
+
+        // Profile Screen
+        composable("profile") {
+            ProfileScreen(navController = navController)
+        }
+
+        // Settings Screen
+        composable("settings") {
+            SettingsScreen(navController = navController)
+        }
+
     }
 }
