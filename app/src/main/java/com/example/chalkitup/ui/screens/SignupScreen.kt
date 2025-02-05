@@ -86,14 +86,13 @@ fun SignupScreen(
         }
 
         // Subject selection (only visible for Tutors)
-        // - Firestore and functionality purposes, can change signup UI
+        // - Firestore and functionality purposes, change signup UI
         if (userType == UserType.Tutor) {
             Text("Select Subjects:")
             Spacer(modifier = Modifier.height(8.dp))
 
-            // LazyVerticalGrid to arrange subjects in rows of 3
             LazyVerticalGrid(
-                columns = GridCells.Fixed(3), // 3 columns per row
+                columns = GridCells.Fixed(3),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
@@ -122,7 +121,7 @@ fun SignupScreen(
 
 
             // Grade level selection (only visible for Tutors)
-            // - Firestore and functionality purposes, can change signup UI
+            // - Firestore and functionality purposes, change signup UI
             Text("Select Grade Levels:")
             Spacer(modifier = Modifier.height(8.dp))
             Row(

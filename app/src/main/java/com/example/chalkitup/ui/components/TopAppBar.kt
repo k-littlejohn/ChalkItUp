@@ -32,6 +32,9 @@ fun MyTopBar(
                 text = when (currentRoute) {
                     "home" -> "Home"
                     "profile" -> "Profile"
+                    "settings" -> "Settings"
+                    "booking" -> "Book a Session"
+                    "messages" -> "Messages"
                     else -> "Chalk It Up"
                 }
             )
@@ -41,6 +44,7 @@ fun MyTopBar(
             containerColor = backgroundColor
         ),
 
+        // Change buttons based on current screen
         navigationIcon = {
             when (currentRoute) {
                 "home" -> {
