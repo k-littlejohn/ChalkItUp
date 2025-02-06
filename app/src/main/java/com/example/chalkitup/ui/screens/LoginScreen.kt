@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.chalkitup.ui.viewmodel.AuthViewModel
 
 // UI of login screen
@@ -24,13 +25,15 @@ import com.example.chalkitup.ui.viewmodel.AuthViewModel
 @Composable
 fun LoginScreen(
     viewModel: AuthViewModel,
-    onLoginSuccess: () -> Unit
+    navController: NavController
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
 
-    Column(modifier = Modifier.padding(16.dp).fillMaxSize(),
+    Column(modifier = Modifier
+        .padding(16.dp)
+        .fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally) {
 
@@ -44,7 +47,10 @@ fun LoginScreen(
             if (email.isEmpty() || password.isEmpty()) {
                 errorMessage = "Email and password cannot be empty"
             } else {
-                viewModel.loginWithEmail(email, password, onLoginSuccess) { errorMessage = it }
+                viewModel.loginWithEmail(email, password,
+                    onSuccess = { navController.navigate("home") },
+                    onEmailError = { navController.navigate("checkEmail") },
+                    onError = { errorMessage = it })
             }
         }) {
             Text("Login")

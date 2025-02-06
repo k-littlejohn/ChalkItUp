@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.chalkitup.ui.screens.BookingScreen
+import com.example.chalkitup.ui.screens.CheckEmailScreen
 import com.example.chalkitup.ui.screens.HomeScreen
 import com.example.chalkitup.ui.screens.LoginScreen
 import com.example.chalkitup.ui.screens.MessagesScreen
@@ -32,12 +33,8 @@ fun NavGraph(navController: NavHostController) {
         composable("login") {
             val authViewModel: AuthViewModel = viewModel()
             LoginScreen(
-                viewModel = authViewModel,
-                onLoginSuccess = {
-                    navController.navigate("home") {
-                        popUpTo("login") { inclusive = true }
-                    }
-                }
+                navController = navController,
+                viewModel = authViewModel
             )
         }
 
@@ -45,12 +42,8 @@ fun NavGraph(navController: NavHostController) {
         composable("signup") {
             val authViewModel: AuthViewModel = viewModel()
             SignupScreen(
-                viewModel = authViewModel,
-                onSignupSuccess = {
-                    navController.navigate("home") {
-                        popUpTo("signup") { inclusive = true }
-                    }
-                }
+                navController = navController,
+                viewModel = authViewModel
             )
         }
 
@@ -77,6 +70,15 @@ fun NavGraph(navController: NavHostController) {
         // Settings Screen
         composable("settings") {
             SettingsScreen(navController = navController)
+        }
+
+        // Check Email Screen
+        composable("checkEmail") {
+            val authViewModel: AuthViewModel = viewModel()
+            CheckEmailScreen(
+                navController = navController,
+                viewModel = authViewModel
+            )
         }
 
     }

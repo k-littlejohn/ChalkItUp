@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.chalkitup.ui.viewmodel.AuthViewModel
 
 // UI of signup screen
@@ -32,7 +33,7 @@ import com.example.chalkitup.ui.viewmodel.AuthViewModel
 @Composable
 fun SignupScreen(
     viewModel: AuthViewModel,
-    onSignupSuccess: () -> Unit
+    navController: NavController
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -166,8 +167,9 @@ fun SignupScreen(
                 //userType!!.name passes the enum value as a string
                 viewModel.signupWithEmail(email, password, firstName, lastName,
                     userType!!.name, selectedSubjects.toList(), selectedGradeLevels.toList(),
-                    onSignupSuccess
-                ) { errorMessage = it }
+                    onSuccess = { navController.navigate("checkEmail") },
+                    onError = { errorMessage = it }
+                )
             }
         }) {
             Text("Sign Up")
