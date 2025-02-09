@@ -19,6 +19,9 @@ class ProfileViewModel : ViewModel() {
     private val _isTutor = MutableLiveData<Boolean>()
     val isTutor: LiveData<Boolean> get() = _isTutor
 
+    private val _profilePictureUrl = MutableLiveData<String?>()
+    val profilePictureUrl: LiveData<String?> get() = _profilePictureUrl
+
     init {
         // Automatically load user profile when ViewModel is created
         loadUserProfile()
@@ -39,6 +42,8 @@ class ProfileViewModel : ViewModel() {
                 val user = document.toObject(UserProfile::class.java)
                 if (user != null) {
                     _userProfile.value = user
+                    loadProfilePicture(userId)
+                    
                     _isTutor.value = user.userType == "Tutor"
                     if (user.userType == "Tutor") {
                         loadTutorCertifications(userId) // Load certifications for tutor
@@ -58,6 +63,15 @@ class ProfileViewModel : ViewModel() {
                 _certifications.value = certificationsList
             }
     }
+
+    private fun loadProfilePicture(userId: String) {
+        FirebaseFirestore.getInstance().collection("users").document(userId)
+            .get()
+            .addOnSuccessListener { document ->
+                _profilePictureUrl.value = document.getString("profilePictureUrl")
+            }
+    }
+
 }
 
 data class UserProfile(

@@ -1,15 +1,20 @@
 package com.example.chalkitup.ui.viewmodel
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 
 class EditProfileViewModel : ViewModel() {
     private val _userProfile = MutableLiveData<UserProfile?>()
     val userProfile: LiveData<UserProfile?> get() = _userProfile
+
+    private val _profilePictureUrl = MutableLiveData<String?>()
+    val profilePictureUrl: LiveData<String?> get() = _profilePictureUrl
 
     init {
         loadUserProfile()
@@ -23,6 +28,7 @@ class EditProfileViewModel : ViewModel() {
                 .addOnSuccessListener { document ->
                     val userData = document.toObject(UserProfile::class.java)
                     _userProfile.value = userData
+                    loadProfilePicture(userId)
                 }
         }
     }
@@ -57,4 +63,27 @@ class EditProfileViewModel : ViewModel() {
                 Log.e("EditProfile", "Profile update failed: ${it.message}")
             }
     }
+
+    fun uploadProfilePicture(imageUri: Uri) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val storageRef = FirebaseStorage.getInstance().reference.child("profile_pictures/$userId.jpg")
+
+        storageRef.putFile(imageUri).continueWithTask {
+            if (!it.isSuccessful) throw it.exception!!
+            storageRef.downloadUrl
+        }.addOnSuccessListener { uri ->
+            FirebaseFirestore.getInstance().collection("users").document(userId)
+                .update("profilePictureUrl", uri.toString())
+        }
+    }
+
+    private fun loadProfilePicture(userId: String) {
+        FirebaseFirestore.getInstance().collection("users").document(userId)
+            .get()
+            .addOnSuccessListener { document ->
+                _profilePictureUrl.value = document.getString("profilePictureUrl")
+            }
+    }
+
+
 }
