@@ -25,6 +25,10 @@ class ProfileViewModel : ViewModel() {
     private val _academicProgress=MutableLiveData<List<String>>()
     val academicProgress: LiveData<List<String>> get() = _academicProgress
 
+    private val _interests=MutableLiveData<List<String>>()
+    val interests: LiveData<List<String>> get() = _interests
+
+
     init {
         // Automatically load user profile when ViewModel is created
         loadUserProfile()
@@ -81,7 +85,18 @@ class ProfileViewModel : ViewModel() {
             }
 
     }
+    private fun loadInterests(userId: String){
+        FirebaseFirestore.getInstance().collection("users").document(userId)
+            .collection("Interests")
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val InterestsList = querySnapshot.documents.mapNotNull { document ->
+                    document.getString("fileUrl") // Get file path stored in Firestore
+                }
+                _academicProgress.value = InterestsList
+            }
 
+    }
     private fun loadProfilePicture(userId: String) {
         FirebaseFirestore.getInstance().collection("users").document(userId)
             .get()
@@ -98,5 +113,7 @@ data class UserProfile(
     val lastName: String = "",
     val email: String = "",
     val subjects: List<String> = emptyList(),
-    val grades: List<Int> = emptyList()
+    val grades: List<Int> = emptyList(),
+    val quote: String ="QUOTE HERE OR BLANK",
+    val location: String="Edmonton"
 )
