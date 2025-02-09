@@ -42,7 +42,8 @@ fun MainScreen() {
 
     ModalNavigationDrawer(
         drawerContent = { NavigationDrawer(navController, drawerState) },
-        drawerState = drawerState
+        drawerState = drawerState,
+        gesturesEnabled = false
     ) {
         Scaffold(
             topBar = {
