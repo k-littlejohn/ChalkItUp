@@ -44,6 +44,7 @@ fun ProfileScreen(
     val certifications by viewModel.certifications.observeAsState()
     val academicProgress by viewModel.academicProgress.observeAsState()
     val profilePictureUrl by viewModel.profilePictureUrl.observeAsState()
+    val interests by viewModel.interests.observeAsState()
 
     Column(
         modifier = Modifier
@@ -67,6 +68,9 @@ fun ProfileScreen(
         userProfile?.let {
             Text("${it.firstName} ${it.lastName}")
             Text(it.email)
+            Text(it.location)
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(it.quote)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -96,21 +100,27 @@ fun ProfileScreen(
                 }
             } else {
                 //----------------STUDENT PROFILE---------------------------------
-                Text("Academic Progress:")
+
+                Text("Academic Performance:")
 
                 if (academicProgress.isNullOrEmpty()) {
                     Text("No progress found.")
                 } else {
                     ProgressGrid(academicProgress!!)
                 }
-
-
-
                     //----------------------------------------------------------------
+                }
+                //list interests
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Interests:")
+
+                if (interests.isNullOrEmpty()) {
+                    Text("No progress found.")
+                } else {
+                    ProgressGrid(interests!!)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-
                 // Edit Profile Button
                 Button(onClick = { navController.navigate("editProfile") }) {
                     Text("Edit Profile")
@@ -180,9 +190,31 @@ fun ProfileScreen(
             }
         }
     }
-    // Display individual certification images
+    // Display individual progress images
     @Composable
     fun ProgressItem(fileUrl: String) {
+        Image(
+            painter = rememberAsyncImagePainter(fileUrl),
+            contentDescription = null,
+            modifier = Modifier
+                .size(100.dp)
+                .padding(4.dp)
+        )
+    }
+    @Composable
+    fun InterestsGrid(interests: List<String>) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(1),
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            items(interests) { fileUrl ->
+                interestsItem(fileUrl)
+            }
+        }
+    }
+    @Composable
+    fun interestsItem(fileUrl: String) {
         Image(
             painter = rememberAsyncImagePainter(fileUrl),
             contentDescription = null,
