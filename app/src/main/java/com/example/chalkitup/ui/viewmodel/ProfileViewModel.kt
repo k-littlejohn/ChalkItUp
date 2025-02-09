@@ -22,6 +22,9 @@ class ProfileViewModel : ViewModel() {
     private val _profilePictureUrl = MutableLiveData<String?>()
     val profilePictureUrl: LiveData<String?> get() = _profilePictureUrl
 
+    private val _academicProgress=MutableLiveData<List<String>>()
+    val academicProgress: LiveData<List<String>> get() = _academicProgress
+
     init {
         // Automatically load user profile when ViewModel is created
         loadUserProfile()
@@ -48,9 +51,12 @@ class ProfileViewModel : ViewModel() {
                     if (user.userType == "Tutor") {
                         loadTutorCertifications(userId) // Load certifications for tutor
                     }
+                    else {
+                        loadStudentProgress(userId) //load progress reports for students
+                    }
+                    }
                 }
             }
-    }
 
     private fun loadTutorCertifications(userId: String) {
         FirebaseFirestore.getInstance().collection("users").document(userId)
@@ -62,6 +68,18 @@ class ProfileViewModel : ViewModel() {
                 }
                 _certifications.value = certificationsList
             }
+    }
+    private fun loadStudentProgress(userId: String){
+        FirebaseFirestore.getInstance().collection("users").document(userId)
+            .collection("academicProgress")
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val ProgressList = querySnapshot.documents.mapNotNull { document ->
+                    document.getString("fileUrl") // Get file path stored in Firestore
+                }
+                _academicProgress.value = ProgressList
+            }
+
     }
 
     private fun loadProfilePicture(userId: String) {

@@ -42,6 +42,7 @@ fun ProfileScreen(
     val userProfile by viewModel.userProfile.observeAsState()
     val isTutor by viewModel.isTutor.observeAsState()
     val certifications by viewModel.certifications.observeAsState()
+    val academicProgress by viewModel.academicProgress.observeAsState()
     val profilePictureUrl by viewModel.profilePictureUrl.observeAsState()
 
     Column(
@@ -94,63 +95,101 @@ fun ProfileScreen(
                     ItemGrid(it.subjects, columns = 4)
                 }
             } else {
-                // Student-specific information
-            }
+                //----------------STUDENT PROFILE---------------------------------
+                Text("Academic Progress:")
 
-            Spacer(modifier = Modifier.height(16.dp))
+                if (academicProgress.isNullOrEmpty()) {
+                    Text("No progress found.")
+                } else {
+                    ProgressGrid(academicProgress!!)
+                }
 
-            // Edit Profile Button
-            Button(onClick = { navController.navigate("editProfile") }) {
-                Text("Edit Profile")
-            }
-        }
-    }
-}
 
-// Grid layout for certifications (3 items per row)
-@Composable
-fun CertificationGrid(certifications: List<String>) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
-        horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        items(certifications) { fileUrl ->
-            CertificationItem(fileUrl)
-        }
-    }
-}
 
-// Grid layout for grades & subjects (4 items per row)
-@Composable
-fun ItemGrid(items: List<String>, columns: Int) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(columns),
-        horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        items(items) { item ->
-            Box(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
-                    .padding(8.dp)
-            ) {
-                Text(text = item, textAlign = TextAlign.Center)
+                    //----------------------------------------------------------------
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Edit Profile Button
+                Button(onClick = { navController.navigate("editProfile") }) {
+                    Text("Edit Profile")
+                }
             }
         }
     }
-}
 
-// Display individual certification images
-@Composable
-fun CertificationItem(fileUrl: String) {
-    Image(
-        painter = rememberAsyncImagePainter(fileUrl),
-        contentDescription = null,
-        modifier = Modifier
-            .size(100.dp)
-            .padding(4.dp)
-    )
-}
+
+    // Grid layout for certifications (3 items per row)
+    @Composable
+    fun CertificationGrid(certifications: List<String>) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            items(certifications) { fileUrl ->
+                CertificationItem(fileUrl)
+            }
+        }
+    }
+
+    // Grid layout for grades & subjects (4 items per row)
+    @Composable
+    fun ItemGrid(items: List<String>, columns: Int) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(columns),
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            items(items) { item ->
+                Box(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
+                        .padding(8.dp)
+                ) {
+                    Text(text = item, textAlign = TextAlign.Center)
+                }
+            }
+        }
+    }
+
+    // Display individual certification images
+    @Composable
+    fun CertificationItem(fileUrl: String) {
+        Image(
+            painter = rememberAsyncImagePainter(fileUrl),
+            contentDescription = null,
+            modifier = Modifier
+                .size(100.dp)
+                .padding(4.dp)
+        )
+    }
+
+    //Grid layout for progress (1 items per row)
+    @Composable
+    fun ProgressGrid(academicProgress: List<String>) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(1),
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            items(academicProgress) { fileUrl ->
+                ProgressItem(fileUrl)
+            }
+        }
+    }
+    // Display individual certification images
+    @Composable
+    fun ProgressItem(fileUrl: String) {
+        Image(
+            painter = rememberAsyncImagePainter(fileUrl),
+            contentDescription = null,
+            modifier = Modifier
+                .size(100.dp)
+                .padding(4.dp)
+        )
+    }
+
 
