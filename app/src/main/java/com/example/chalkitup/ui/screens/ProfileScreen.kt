@@ -2,6 +2,7 @@ package com.example.chalkitup.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -22,11 +24,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
+import com.example.chalkitup.R
 import com.example.chalkitup.ui.viewmodel.ProfileViewModel
 
 @Composable
@@ -37,6 +42,7 @@ fun ProfileScreen(
     val userProfile by viewModel.userProfile.observeAsState()
     val isTutor by viewModel.isTutor.observeAsState()
     val certifications by viewModel.certifications.observeAsState()
+    val profilePictureUrl by viewModel.profilePictureUrl.observeAsState()
 
     Column(
         modifier = Modifier
@@ -46,6 +52,17 @@ fun ProfileScreen(
         verticalArrangement = Arrangement.Top
     ) {
         // Display user information (common for both students and tutors)
+
+        // Profile Picture
+        AsyncImage(
+            model = profilePictureUrl ?: R.drawable.baseline_person_24, // Use default avatar
+            contentDescription = "Profile Picture",
+            modifier = Modifier
+                .size(100.dp)
+                .clip(CircleShape)
+                .border(2.dp, Color.Gray, CircleShape)
+        )
+
         userProfile?.let {
             Text("${it.firstName} ${it.lastName}")
             Text(it.email)

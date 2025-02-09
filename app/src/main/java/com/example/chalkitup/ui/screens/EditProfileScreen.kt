@@ -1,5 +1,9 @@
 package com.example.chalkitup.ui.screens
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,7 +11,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
@@ -24,13 +30,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import com.example.chalkitup.R
 import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
 
 @Composable
 fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewModel) {
     val userProfile by viewModel.userProfile.observeAsState()
+    val profilePictureUrl by viewModel.profilePictureUrl.observeAsState()
     val isTutor by remember(userProfile) {
         derivedStateOf { userProfile?.userType == "Tutor" }
     }
@@ -40,6 +51,11 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
     var email by remember { mutableStateOf("") }
     var selectedSubjects by remember { mutableStateOf(listOf<String>()) }
     var selectedGrades by remember { mutableStateOf(listOf<Int>()) }
+
+    // Profile picture
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let { viewModel.uploadProfilePicture(it) }
+    }
 
     LaunchedEffect(userProfile) {
         userProfile?.let {
@@ -53,6 +69,19 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
 
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Edit Profile")
+
+        // Circular profile picture that acts as a button
+        AsyncImage(
+            model = profilePictureUrl ?: R.drawable.baseline_person_24, // Default profile picture if none is set
+            contentDescription = "Profile Picture",
+            modifier = Modifier
+                .size(100.dp)
+                .clip(CircleShape)
+                .border(2.dp, Color.Gray, CircleShape)
+                .clickable { launcher.launch("image/*") } // When clicked, allow the user to select a new image
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = firstName,
