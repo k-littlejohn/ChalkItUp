@@ -3,8 +3,10 @@ package com.example.chalkitup.ui.viewmodel
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +24,7 @@ class CertificationViewModel : ViewModel() {
 
     private val auth = FirebaseAuth.getInstance()
     private val storage = FirebaseStorage.getInstance()
+    private val firestore = FirebaseFirestore.getInstance()
 
     init {
         getCertifications()
@@ -45,34 +48,41 @@ class CertificationViewModel : ViewModel() {
         }
     }
 
-    fun uploadFiles(context: Context) {
-        val userId = auth.currentUser?.uid
-        userId?.let {
-            val storageRef = storage.reference.child("certifications/$it")
+    fun uploadFiles(context: Context, user: FirebaseUser) {
+        val userId = user.uid  // Use the passed user object
+        val storageRef = storage.reference.child("certifications/$userId")
 
-            // Loop through each selected file and upload
-            _selectedFiles.value.forEach { uri ->
-                val fileName = getFileNameFromUri(context, uri)
-                val fileRef = storageRef.child(fileName)
+        _selectedFiles.value.forEach { uri ->
+            val fileName = getFileNameFromUri(context, uri)
+            val fileRef = storageRef.child(fileName)
 
-                fileRef.putFile(uri).addOnSuccessListener {
-                    // Once the file is uploaded, get the download URL
+            fileRef.putFile(uri)
+                .addOnSuccessListener {
+                    Log.d("Upload", "Storage file uploaded successfully: $fileName")
+
                     fileRef.downloadUrl.addOnSuccessListener { downloadUrl ->
-                        // Save the file metadata to Firestore using the userId
-                        FirebaseFirestore.getInstance().collection("users")
+                        val certificationData = mapOf(
+                            "fileName" to fileName,
+                            "fileUrl" to downloadUrl.toString()
+                        )
+
+                        firestore.collection("users")
                             .document(userId)
                             .collection("certifications")
-                            .add(mapOf(
-                                "fileName" to fileName,
-                                "fileUrl" to downloadUrl.toString()
-                            ))
+                            .add(certificationData)
                             .addOnSuccessListener {
                                 getCertifications()
                                 _selectedFiles.value = emptyList()
+                                Log.d("Upload", "Firestore file uploaded successfully: $fileName")
+                            }
+                            .addOnFailureListener { exception ->
+                                Log.e("Upload", "Firestore file upload failed: ${exception.message}")
                             }
                     }
                 }
-            }
+                .addOnFailureListener { exception ->
+                    Log.e("Upload", "Storage file upload failed: ${exception.message}")
+                }
         }
     }
 
