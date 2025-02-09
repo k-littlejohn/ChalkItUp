@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.chalkitup.ui.screens.BookingScreen
 import com.example.chalkitup.ui.screens.CheckEmailScreen
+import com.example.chalkitup.ui.screens.EditProfileScreen
 import com.example.chalkitup.ui.screens.HomeScreen
 import com.example.chalkitup.ui.screens.LoginScreen
 import com.example.chalkitup.ui.screens.MessagesScreen
@@ -17,6 +18,7 @@ import com.example.chalkitup.ui.screens.StartScreen
 import com.example.chalkitup.ui.screens.UploadCertificationScreen
 import com.example.chalkitup.ui.viewmodel.AuthViewModel
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
+import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
 import com.example.chalkitup.ui.viewmodel.ProfileViewModel
 
 // Navigation Center, NavHost with navController
@@ -69,8 +71,16 @@ fun NavGraph(navController: NavHostController) {
         composable("profile") {
             val profileViewModel: ProfileViewModel = viewModel()
             ProfileScreen(
-//                navController = navController,
+                navController = navController,
                 viewModel = profileViewModel)
+        }
+
+        // Edit Profile Screen
+        composable("editProfile") {
+            val editProfileViewModel: EditProfileViewModel = viewModel()
+            EditProfileScreen(
+                navController = navController,
+                viewModel = editProfileViewModel)
         }
 
         // Settings Screen
