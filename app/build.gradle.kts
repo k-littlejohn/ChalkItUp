@@ -55,6 +55,8 @@ dependencies {
     implementation(libs.androidx.navigation.runtime.android)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.firebase.storage)
+    implementation(libs.androidx.runtime.livedata)
+    testImplementation(libs.testng)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -63,5 +65,5 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.androidx.navigation.compose.v275)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-
+    implementation(libs.coil.compose)
 }
