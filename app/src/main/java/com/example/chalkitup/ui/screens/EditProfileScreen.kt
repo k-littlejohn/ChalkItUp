@@ -117,7 +117,7 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
             Text("Grade Levels")
 
             MultiSelectDropdown(
-                availableOptions = (1..12).map { it.toString() },
+                availableOptions = (7..12).map { it.toString() },
                 selectedOptions = selectedGrades.map { it.toString() },
                 onSelectionChange = { selectedGrades = it.map { it.toInt() } }
             )
