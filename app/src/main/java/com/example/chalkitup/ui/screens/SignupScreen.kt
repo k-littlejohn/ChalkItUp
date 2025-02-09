@@ -167,7 +167,13 @@ fun SignupScreen(
                 //userType!!.name passes the enum value as a string
                 viewModel.signupWithEmail(email, password, firstName, lastName,
                     userType!!.name, selectedSubjects.toList(), selectedGradeLevels.toList(),
-                    onSuccess = { navController.navigate("checkEmail") },
+                    onSuccess = {
+                        if (userType == UserType.Tutor) {
+                            navController.navigate("uploadCertification")
+                        } else {
+                            navController.navigate("checkEmail")
+                        }
+                    },
                     onError = { errorMessage = it }
                 )
             }

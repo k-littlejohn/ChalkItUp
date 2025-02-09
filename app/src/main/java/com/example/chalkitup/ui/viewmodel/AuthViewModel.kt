@@ -5,6 +5,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 // AuthViewModel : Used for login and signup backend
+// authenticates and sends confirmation email
+// stores userdata in database
 
 class AuthViewModel : ViewModel() {
 
