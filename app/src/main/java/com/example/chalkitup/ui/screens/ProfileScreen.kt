@@ -180,7 +180,7 @@ fun ProfileScreen(
             }
         }
     }
-    // Display individual certification images
+    // Display individual progress images
     @Composable
     fun ProgressItem(fileUrl: String) {
         Image(

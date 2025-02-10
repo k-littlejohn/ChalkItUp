@@ -15,12 +15,10 @@ import com.example.chalkitup.ui.screens.ProfileScreen
 import com.example.chalkitup.ui.screens.SettingsScreen
 import com.example.chalkitup.ui.screens.SignupScreen
 import com.example.chalkitup.ui.screens.StartScreen
-//import com.example.chalkitup.ui.screens.UploadCertificationScreen
 import com.example.chalkitup.ui.viewmodel.AuthViewModel
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
 import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
 import com.example.chalkitup.ui.viewmodel.ProfileViewModel
-
 
 // Navigation Center, NavHost with navController
 // On app launch, opens startScreen

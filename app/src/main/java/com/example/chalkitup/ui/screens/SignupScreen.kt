@@ -227,8 +227,10 @@ fun SignupScreen(
                 errorMessage = "All fields must be filled"
             } else if (userType == null) {
                 errorMessage = "Please select a user type"
+            } else if ((userType == UserType.Tutor) &&
+                (selectedSubjects.isEmpty() || selectedGradeLevels.isEmpty()) ){
+                errorMessage = "You must be able to tutor at least 1 subject and 1 grade level"
             } else {
-
                 //userType!!.name passes the enum value as a string
                 authViewModel.signupWithEmail(email, password, firstName, lastName,
                     userType!!.name, selectedSubjects.toList(), selectedGradeLevels.toList(),
