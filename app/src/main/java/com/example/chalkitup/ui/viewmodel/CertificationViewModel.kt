@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 class CertificationViewModel : ViewModel() {
 
     private val _certifications = MutableStateFlow<List<Certification>>(emptyList())
+    val certifications: StateFlow<List<Certification>> = _certifications
 
     private val _selectedFiles = MutableStateFlow<List<Uri>>(emptyList()) // For managing selected files
     val selectedFiles: StateFlow<List<Uri>> = _selectedFiles

@@ -13,8 +13,10 @@ class EditProfileViewModel : ViewModel() {
     private val _userProfile = MutableLiveData<UserProfile?>()
     val userProfile: LiveData<UserProfile?> get() = _userProfile
 
-    private val _profilePictureUrl = MutableLiveData<String?>()
+    val _profilePictureUrl = MutableLiveData<String?>()
     val profilePictureUrl: LiveData<String?> get() = _profilePictureUrl
+
+    private var tempProfilePictureUrl: String? = null // Temporary profile picture
 
     init {
         loadUserProfile()
@@ -37,14 +39,18 @@ class EditProfileViewModel : ViewModel() {
         firstName: String,
         lastName: String,
         subjects: List<String>,
-        grades: List<Int>
+        grades: List<Int>,
+        bio: String,
+        location: String
     ) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val userRef = FirebaseFirestore.getInstance().collection("users").document(userId)
 
         val updateData = mutableMapOf<String, Any>(
             "firstName" to firstName,
-            "lastName" to lastName
+            "lastName" to lastName,
+            "bio" to bio,
+            "location" to location
         )
 
         // Only update tutor fields if they exist
@@ -53,6 +59,10 @@ class EditProfileViewModel : ViewModel() {
                 updateData["subjects"] = subjects
                 updateData["grades"] = grades
             }
+        }
+
+        tempProfilePictureUrl?.let {
+            updateData["profilePictureUrl"] = it
         }
 
         userRef.update(updateData)
@@ -72,8 +82,8 @@ class EditProfileViewModel : ViewModel() {
             if (!it.isSuccessful) throw it.exception!!
             storageRef.downloadUrl
         }.addOnSuccessListener { uri ->
-            FirebaseFirestore.getInstance().collection("users").document(userId)
-                .update("profilePictureUrl", uri.toString())
+            tempProfilePictureUrl = uri.toString()
+            _profilePictureUrl.value = uri.toString() // Update UI immediately
         }
     }
 
@@ -84,6 +94,5 @@ class EditProfileViewModel : ViewModel() {
                 _profilePictureUrl.value = document.getString("profilePictureUrl")
             }
     }
-
 
 }
