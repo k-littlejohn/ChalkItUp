@@ -13,9 +13,6 @@ class ProfileViewModel : ViewModel() {
     private val _userProfile = MutableLiveData<UserProfile?>()
     val userProfile: MutableLiveData<UserProfile?> get() = _userProfile
 
-    private val _certifications = MutableLiveData<List<String>>()
-    val certifications: LiveData<List<String>> get() = _certifications
-
     private val _isTutor = MutableLiveData<Boolean>()
     val isTutor: LiveData<Boolean> get() = _isTutor
 
@@ -30,7 +27,7 @@ class ProfileViewModel : ViewModel() {
         loadUserProfile()
     }
 
-    private fun loadUserProfile() {
+    fun loadUserProfile() {
         val user = FirebaseAuth.getInstance().currentUser
         if (user != null) {
             val userId = user.uid
@@ -46,29 +43,17 @@ class ProfileViewModel : ViewModel() {
                 if (user != null) {
                     _userProfile.value = user
                     loadProfilePicture(userId)
-                    
+
                     _isTutor.value = user.userType == "Tutor"
                     if (user.userType == "Tutor") {
-                        loadTutorCertifications(userId) // Load certifications for tutor
-                    }
-                    else {
+                        //loadTutorCertifications(userId) // Load certifications for tutor
+                    } else {
                         loadStudentProgress(userId) //load progress reports for students
                     }
-                    }
                 }
-            }
-
-    private fun loadTutorCertifications(userId: String) {
-        FirebaseFirestore.getInstance().collection("users").document(userId)
-            .collection("certifications")
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                val certificationsList = querySnapshot.documents.mapNotNull { document ->
-                    document.getString("fileUrl") // Get file path stored in Firestore
-                }
-                _certifications.value = certificationsList
             }
     }
+
     private fun loadStudentProgress(userId: String){
         FirebaseFirestore.getInstance().collection("users").document(userId)
             .collection("academicProgress")
@@ -98,5 +83,7 @@ data class UserProfile(
     val lastName: String = "",
     val email: String = "",
     val subjects: List<String> = emptyList(),
-    val grades: List<Int> = emptyList()
+    val grades: List<Int> = emptyList(),
+    val bio: String = "",
+    val location: String = ""
 )
