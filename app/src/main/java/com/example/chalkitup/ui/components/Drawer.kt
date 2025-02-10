@@ -39,6 +39,8 @@ fun NavigationDrawer(navController: NavController, drawerState: DrawerState) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Each NavigationDrawerItem are the items that are clickable
+                // and take you to another screen
                 NavigationDrawerItem(
                     label = {
                         Text(
@@ -82,6 +84,8 @@ fun NavigationDrawer(navController: NavController, drawerState: DrawerState) {
     }
 }
 
+// Function for the drawer header
+// Anything in this function will go into the header
 @Composable
 fun DrawerHeader() {
 
