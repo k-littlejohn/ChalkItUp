@@ -35,7 +35,7 @@ fun MyTopBar(
                     "settings" -> "Settings"
                     "booking" -> "Book a Session"
                     "messages" -> "Messages"
-                    else -> "Chalk It Up"
+                    else -> "ChalkItUp Tutors"
                 }
             )
         },

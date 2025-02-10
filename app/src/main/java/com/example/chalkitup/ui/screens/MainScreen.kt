@@ -34,15 +34,16 @@ fun MainScreen() {
         }
     }
 
-    val hideBottomBarRoutes = listOf("start","login", "signup","checkEmail")
+    val hideBottomBarRoutes = listOf("start","login", "signup","checkEmail","uploadCertification")
     val showBottomBar = currentRoute !in hideBottomBarRoutes
 
-    val hideTopBarRoutes = listOf("checkEmail")
+    val hideTopBarRoutes = listOf("start","checkEmail","uploadCertification")
     val showTopBar = currentRoute !in hideTopBarRoutes
 
     ModalNavigationDrawer(
         drawerContent = { NavigationDrawer(navController, drawerState) },
-        drawerState = drawerState
+        drawerState = drawerState,
+        gesturesEnabled = false
     ) {
         Scaffold(
             topBar = {

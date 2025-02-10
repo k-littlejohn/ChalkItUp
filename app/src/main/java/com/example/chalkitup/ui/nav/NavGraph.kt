@@ -16,6 +16,7 @@ import com.example.chalkitup.ui.screens.SignupScreen
 import com.example.chalkitup.ui.screens.StartScreen
 import com.example.chalkitup.ui.viewmodel.AuthViewModel
 
+
 // Navigation Center, NavHost with navController
 // On app launch, opens startScreen
 
@@ -80,6 +81,5 @@ fun NavGraph(navController: NavHostController) {
                 viewModel = authViewModel
             )
         }
-
     }
 }
