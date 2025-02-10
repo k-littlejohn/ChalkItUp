@@ -21,6 +21,7 @@ import com.example.chalkitup.ui.viewmodel.CertificationViewModel
 import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
 import com.example.chalkitup.ui.viewmodel.ProfileViewModel
 
+
 // Navigation Center, NavHost with navController
 // On app launch, opens startScreen
 
@@ -99,7 +100,6 @@ fun NavGraph(navController: NavHostController) {
                 viewModel = authViewModel
             )
         }
-
 
     }
 }

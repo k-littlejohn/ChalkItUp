@@ -12,6 +12,31 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
+    primary = TealGreen,
+    secondary = LightBlue,
+    background = DarkGray, // Dark mode background
+    surface = DarkGray,
+    onPrimary = White,
+    onSecondary = White,
+    onBackground = White,
+    onSurface = White
+)
+
+private val LightColorScheme = lightColorScheme(
+    primary = TealGreen,
+    secondary = LightBlue,
+    background = White, //White background
+    surface = White,
+    onPrimary = DarkGray,
+    onSecondary = DarkGray,
+    onBackground = DarkGray,
+    onSurface = DarkGray
+)
+
+
+
+/*
+private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
     secondary = PurpleGrey80,
     tertiary = Pink80
@@ -22,6 +47,8 @@ private val LightColorScheme = lightColorScheme(
     secondary = PurpleGrey40,
     tertiary = Pink40
 
+ */
+
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
     surface = Color(0xFFFFFBFE),
@@ -31,7 +58,7 @@ private val LightColorScheme = lightColorScheme(
     onBackground = Color(0xFF1C1B1F),
     onSurface = Color(0xFF1C1B1F),
     */
-)
+
 
 @Composable
 fun ChalkitupTheme(
