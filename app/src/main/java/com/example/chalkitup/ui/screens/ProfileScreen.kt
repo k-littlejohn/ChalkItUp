@@ -148,6 +148,26 @@ fun ProfileScreen(
         }
     }
 }
+                    //----------------------------------------------------------------
+                }
+                //list interests
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Interests:")
+
+                if (interests.isNullOrEmpty()) {
+                    Text("No progress found.")
+                } else {
+                    ProgressGrid(interests!!)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                // Edit Profile Button
+                Button(onClick = { navController.navigate("editProfile") }) {
+                    Text("Edit Profile")
+                }
+            }
+        }
+    }
 
 // Grid layout for certifications (3 items per row)
 @Composable

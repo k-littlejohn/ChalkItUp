@@ -103,6 +103,7 @@ class ProfileViewModel : ViewModel() {
 
     // Function to load the profile picture URL from Firestore
     //}
+    }
     private fun loadProfilePicture(userId: String) {
         FirebaseFirestore.getInstance().collection("users").document(userId)
             .get()
