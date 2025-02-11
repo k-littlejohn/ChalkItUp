@@ -11,26 +11,29 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 
-// Navigation drawer ui
+// Navigation drawer
 
 @Composable
 fun NavigationDrawer(navController: NavController, drawerState: DrawerState) {
+    // Create a coroutine scope to manage state changes asynchronously
     val coroutineScope = rememberCoroutineScope()
 
+    // ModalDrawerSheet is the main container for the drawer, with a background color set
     ModalDrawerSheet (
         drawerContainerColor = MaterialTheme.colorScheme.primary, // Drawer background color
     ) {
-        // Header Section
+        // Drawer Header Section
         DrawerHeader()
 
+        // Main content of the navigation drawer
         Box(
             modifier = Modifier.fillMaxWidth()
-                .background(MaterialTheme.colorScheme.background)
+                .background(MaterialTheme.colorScheme.background) // Set background color
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
 
+                // Space and title for the "Subjects Offered" section
                 Spacer(modifier = Modifier.height(16.dp))
-
                 Text(
                     text = "Subjects Offered",
                     modifier = Modifier.padding(start = 16.dp),
@@ -50,6 +53,7 @@ fun NavigationDrawer(navController: NavController, drawerState: DrawerState) {
                     },
                     selected = false,
                     onClick = {
+                        // Close the drawer and navigate to the "home" screen when clicked
                         coroutineScope.launch { drawerState.close() }
                         navController.navigate("home")
                     }
@@ -85,7 +89,7 @@ fun NavigationDrawer(navController: NavController, drawerState: DrawerState) {
 }
 
 // Function for the drawer header
-// Anything in this function will go into the header
+// Anything in this function will go into the header section of the navigation drawer
 @Composable
 fun DrawerHeader() {
 

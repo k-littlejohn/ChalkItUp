@@ -18,28 +18,30 @@ import androidx.navigation.NavController
 @Composable
 fun BottomNavigationBar(navController: NavController) {
 
-    // List of the items that are on the Bottom Bar
+    // List of the items that are displayed on the Bottom Bar
     val items = listOf(
-        BottomNavItem("home", Icons.Default.Home, "Home"),
-        BottomNavItem("booking", Icons.Default.Add, "Book"),
-        BottomNavItem("messages", Icons.Default.Face, "Messages"),
-        BottomNavItem("profile", Icons.Default.Person, "Profile")
+        BottomNavItem("home", Icons.Default.Home, "Home"),     // Home icon with label "Home"
+        BottomNavItem("booking", Icons.Default.Add, "Book"),   // Book icon with label "Book"
+        BottomNavItem("messages", Icons.Default.Face, "Messages"), // Messages icon with label "Messages"
+        BottomNavItem("profile", Icons.Default.Person, "Profile")  // Profile icon with label "Profile"
     )
 
-    // Holds the value of the current screen the user is on
+    // Get the current route from the NavController to determine which item is selected
     val currentRoute = navController.currentDestination?.route
 
-    // Populate the bottom bar with the list of items
+    // Create the Bottom Navigation Bar
     NavigationBar {
+        // Iterate over the list of items and create a NavigationBarItem for each
         items.forEach { item ->
             NavigationBarItem(
-                icon = { Icon(item.icon, contentDescription = item.label) },
-                label = { Text(item.label) },
-                selected = currentRoute == item.route,
+                icon = { Icon(item.icon, contentDescription = item.label) }, // Set the icon for the item
+                label = { Text(item.label) }, // Set the label for the item
+                selected = currentRoute == item.route, // Highlight item if it's the current route
                 onClick = {
+                    // Navigate to the corresponding screen when the item is clicked
                     navController.navigate(item.route) {
-                        launchSingleTop = true
-                        restoreState = true
+                        launchSingleTop = true // Only one instance of this screen is launched
+                        restoreState = true // Restore the state of the screen when navigating back
                     }
                 }
             )
@@ -47,5 +49,5 @@ fun BottomNavigationBar(navController: NavController) {
     }
 }
 
-// Data class for navigation items
+// Data class to represent each item in the Bottom Navigation Bar
 data class BottomNavItem(val route: String, val icon: ImageVector, val label: String)
