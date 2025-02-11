@@ -3,8 +3,10 @@ package com.example.chalkitup.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 
-class SettingsViewModel : ViewModel() {
+// Handles SettingScreen logic
+// - delete user's account
 
+class SettingsViewModel : ViewModel() {
 
     // Function to delete user account
     fun deleteAccount(onSuccess: (String) -> Unit, onError: (String) -> Unit) {
