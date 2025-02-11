@@ -23,9 +23,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.ButtonDefaults
 import com.example.chalkitup.ui.theme.*
 import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.graphics.Brush
 
 // Title, then description.
 data class TextEntry(val title: String, val description: String)
+
+// Screen Gradient
+val gradientBrush = Brush.verticalGradient(
+    colors = listOf(
+        Color(0xFF54A4FF), // 5% Blue
+        Color.White, Color.White, Color.White, Color.White // 95% White
+    )
+)
 
 @Composable
 fun StartScreen(navController: NavController) {
@@ -49,9 +58,8 @@ fun StartScreen(navController: NavController) {
     val mulishFont = FontFamily(
         Font(R.font.mulish_font, FontWeight.Normal),
         Font(R.font.mulish_bold, FontWeight.Bold),
-        Font(R.font.mulish_extrabold, FontWeight.ExtraBold) // Add this
+        Font(R.font.mulish_extrabold, FontWeight.ExtraBold)
     )
-
 
     // Auto-Rotate the Images & Text On 4-second Delay
     LaunchedEffect(Unit) {
@@ -61,94 +69,102 @@ fun StartScreen(navController: NavController) {
         }
     }
 
-    Column(
+    Box(
         modifier = Modifier
-            .padding(35.dp)
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxSize()
+            .background(gradientBrush),
+        contentAlignment = Alignment.TopCenter
     ) {
 
-        Spacer(modifier = Modifier.height(110.dp)) // Adjusts the height of image, higher=lower
-
-        // Image & Background To Image (circle)
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
-            Image(
-                painter = painterResource(id = R.drawable.image_background),
-                contentDescription = "Background",
-                modifier = Modifier.size(330.dp)
-            )
-            Image(
-                painter = painterResource(id = images[currentImageIndex]),
-                contentDescription = "Rotating Image",
-                modifier = Modifier.size(300.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(30.dp))
-
-        // Dynamic Changing Text With Image
-        Text(
-            text = textEntries[currentImageIndex].title,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = Color.Black,
-            fontFamily = mulishFont
-        )
-        Text(
-            text = textEntries[currentImageIndex].description,
-            fontSize = 14.sp,
-            color = Color.Gray,
-            fontFamily = mulishFont
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // Progress Indicator Bar
-        IndicatorBar(currentIndex = currentImageIndex) { index ->
-            currentImageIndex = index
-        }
-        // Moves login/signup Down The Higher dp
-        Spacer(modifier = Modifier.height(70.dp))
-
-        // Login Button & Text
-        Button(
-            onClick = { navController.navigate("login") },
+        Column(
             modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .height(50.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = TealGreen,
-                contentColor = Color.White
-            ),
-            shape = RoundedCornerShape(0.dp)
+                .padding(35.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
+            Spacer(modifier = Modifier.height(110.dp)) // Adjusts the height of image, higher=lower
+
+            // Image & Background To Image (circle)
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+                Image(
+                    painter = painterResource(id = R.drawable.image_background),
+                    contentDescription = "Background",
+                    modifier = Modifier.size(330.dp)
+                )
+                Image(
+                    painter = painterResource(id = images[currentImageIndex]),
+                    contentDescription = "Rotating Image",
+                    modifier = Modifier.size(300.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(30.dp))
+
+            // Dynamic Changing Text With Image
             Text(
-                text = "LOGIN",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
+                text = textEntries[currentImageIndex].title,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color.Black,
                 fontFamily = mulishFont
             )
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // Signup Text
-        Row {
             Text(
-                text = "Don't have an account? ",
-                color = Color.Black,
-                fontSize = 14.sp,
+                text = textEntries[currentImageIndex].description,
+                fontSize = 14.4.sp,
+                color = Color.Gray,
                 fontFamily = mulishFont
             )
-            Text(
-                text = "Sign Up",
-                color = Color.Black,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                fontFamily = mulishFont,
-                modifier = Modifier.clickable { navController.navigate("signup") }
-            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Progress Indicator Bar
+            IndicatorBar(currentIndex = currentImageIndex) { index ->
+                currentImageIndex = index
+            }
+            // Moves login/signup Down The Higher dp
+            Spacer(modifier = Modifier.height(75.dp))
+
+            // Login Button & Text
+            Button(
+                onClick = { navController.navigate("login") },
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = TealGreen,
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(0.dp)
+            ) {
+                Text(
+                    text = "LOGIN",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = mulishFont
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Signup Text
+            Row {
+                Text(
+                    text = "Don't have an account? ",
+                    color = Color.Black,
+                    fontSize = 14.sp,
+                    fontFamily = mulishFont
+                )
+                Text(
+                    text = "Sign Up",
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    fontFamily = mulishFont,
+                    modifier = Modifier.clickable { navController.navigate("signup") }
+                )
+            }
         }
     }
 }
