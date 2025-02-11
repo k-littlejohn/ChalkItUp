@@ -73,7 +73,7 @@ class ProfileViewModel : ViewModel() {
                     }
                 }
             }
-    }
+
 
     // Function to load the academic progress (such as reports) for a student
 //    private fun loadStudentProgress(userId: String) {
@@ -111,6 +111,7 @@ class ProfileViewModel : ViewModel() {
                 _profilePictureUrl.value = document.getString("profilePictureUrl")
             }
     }
+}
 
 
 
