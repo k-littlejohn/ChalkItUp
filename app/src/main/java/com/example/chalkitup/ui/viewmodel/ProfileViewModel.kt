@@ -50,6 +50,7 @@ class ProfileViewModel : ViewModel() {
                 if (user != null) {
                     _userProfile.value = user
                     loadProfilePicture(userId)
+                    loadInterests(userId)
                     
                     _isTutor.value = user.userType == "Tutor"
                     if (user.userType == "Tutor") {
