@@ -267,10 +267,10 @@ fun SignupScreen(
             }
         }
 
-        TextField(value = email, onValueChange = { email = it }, label = { Text("Email") })
-        TextField(value = password, onValueChange = { password = it }, label = { Text("Password") }, visualTransformation = PasswordVisualTransformation())
-        TextField(value = firstName, onValueChange = { firstName = it }, label = { Text("First Name") })
-        TextField(value = lastName, onValueChange = { lastName = it }, label = { Text("Last Name") })
+        //TextField(value = email, onValueChange = { email = it }, label = { Text("Email") })
+        //TextField(value = password, onValueChange = { password = it }, label = { Text("Password") }, visualTransformation = PasswordVisualTransformation())
+        //TextField(value = firstName, onValueChange = { firstName = it }, label = { Text("First Name") })
+        //TextField(value = lastName, onValueChange = { lastName = it }, label = { Text("Last Name") })
         TextField(value = bio, onValueChange = { bio = it }, label = { Text("BIO") })
         TextField(value = location, onValueChange = { location = it }, label = { Text("CITY") })
         //-------------interest selection
@@ -278,11 +278,11 @@ fun SignupScreen(
         Text("Select Interests:")
         Spacer(modifier = Modifier.height(8.dp))
 
-        LazyVerticalGrid(
+        Box(modifier=Modifier.height(200.dp)){LazyVerticalGrid(
             columns = GridCells.Fixed(3),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
         ) {
             items(availableInterests.size) { index ->
                 val Interests = availableInterests[index]
@@ -303,7 +303,7 @@ fun SignupScreen(
                     Text(Interests)
                 }
             }
-        }
+        }}
         Spacer(modifier = Modifier.height(8.dp))
 //-----------------------------------------------
 
