@@ -115,9 +115,9 @@ fun ProfileScreen(
                 Text("Interests:")
 
                 if (interests.isNullOrEmpty()) {
-                    Text("No progress found.")
+                    Text("No interests listed.")
                 } else {
-                    ProgressGrid(interests!!)
+                    InterestsGrid(interests!!)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
