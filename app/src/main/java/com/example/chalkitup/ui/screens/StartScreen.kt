@@ -18,12 +18,11 @@ import androidx.navigation.NavController
 import com.example.chalkitup.R
 import kotlinx.coroutines.delay
 import androidx.compose.foundation.background
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.ButtonDefaults
 import com.example.chalkitup.ui.theme.*
-
-
-
+import androidx.compose.ui.text.font.Font
 
 // Title, then description.
 data class TextEntry(val title: String, val description: String)
@@ -46,7 +45,15 @@ fun StartScreen(navController: NavController) {
         TextEntry("Track Your Progress", "Upload grades, track lessons, view achievements")
     )
 
-    // Auto-Rotate the Images & Text On 4second Delay
+    // Muli/Mulish Font
+    val mulishFont = FontFamily(
+        Font(R.font.mulish_font, FontWeight.Normal),
+        Font(R.font.mulish_bold, FontWeight.Bold),
+        Font(R.font.mulish_extrabold, FontWeight.ExtraBold) // Add this
+    )
+
+
+    // Auto-Rotate the Images & Text On 4-second Delay
     LaunchedEffect(Unit) {
         while (true) {
             delay(4000L)
@@ -56,40 +63,43 @@ fun StartScreen(navController: NavController) {
 
     Column(
         modifier = Modifier
-            .padding(16.dp)
+            .padding(35.dp)
             .fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
+        Spacer(modifier = Modifier.height(110.dp)) // Adjusts the height of image, higher=lower
 
         // Image & Background To Image (circle)
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
             Image(
                 painter = painterResource(id = R.drawable.image_background),
                 contentDescription = "Background",
-                modifier = Modifier.size(340.dp)
+                modifier = Modifier.size(330.dp)
             )
             Image(
                 painter = painterResource(id = images[currentImageIndex]),
                 contentDescription = "Rotating Image",
-                modifier = Modifier.size(310.dp)
+                modifier = Modifier.size(300.dp)
             )
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(30.dp))
 
         // Dynamic Changing Text With Image
         Text(
             text = textEntries[currentImageIndex].title,
-            fontSize = 26.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black
+            fontSize = 24.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = Color.Black,
+            fontFamily = mulishFont
         )
         Text(
             text = textEntries[currentImageIndex].description,
-            fontSize = 16.sp,
-            color = Color.Gray
+            fontSize = 14.sp,
+            color = Color.Gray,
+            fontFamily = mulishFont
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -112,33 +122,34 @@ fun StartScreen(navController: NavController) {
                 contentColor = Color.White
             ),
             shape = RoundedCornerShape(0.dp)
-
         ) {
             Text(
                 text = "LOGIN",
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontFamily = mulishFont
             )
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
-// Signup Text
+        // Signup Text
         Row {
             Text(
                 text = "Don't have an account? ",
-                color = Color.Black, //
-                fontSize = 14.sp
+                color = Color.Black,
+                fontSize = 14.sp,
+                fontFamily = mulishFont
             )
             Text(
                 text = "Sign Up",
                 color = Color.Black,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
+                fontFamily = mulishFont,
                 modifier = Modifier.clickable { navController.navigate("signup") }
             )
         }
-
     }
 }
 
