@@ -7,9 +7,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
+import com.example.chalkitup.ui.viewmodel.SettingsViewModel
 
 @Composable
-fun SettingsScreen(navController: NavController) {
+fun SettingsScreen(navController: NavController, viewModel: SettingsViewModel) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
