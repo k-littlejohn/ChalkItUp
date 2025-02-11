@@ -89,7 +89,11 @@ fun NavGraph(navController: NavHostController) {
 
         // Settings Screen
         composable("settings") {
-            SettingsScreen(navController = navController)
+            val authViewModel: AuthViewModel = viewModel()
+            SettingsScreen(
+                navController = navController,
+                viewModel = authViewModel
+            )
         }
 
         // Check Email Screen
