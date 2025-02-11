@@ -91,7 +91,8 @@ fun NavGraph(navController: NavHostController) {
         // Settings Screen
         composable("settings") {
             val settingsViewModel: SettingsViewModel = viewModel()
-            SettingsScreen(navController = navController,
+            SettingsScreen(
+                navController = navController,
                 viewModel = settingsViewModel)
         }
 
