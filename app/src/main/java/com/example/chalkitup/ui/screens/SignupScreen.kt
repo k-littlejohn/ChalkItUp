@@ -76,6 +76,7 @@ fun SignupScreen(
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -141,21 +142,36 @@ fun SignupScreen(
             }
         }
 
-        TextField(value = email, onValueChange = { email = it }, label = { Text("Email") })
+        TextField(value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") }
+        )
+
         TextField(
             value = password,
             onValueChange = { password = it },
             label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation()
         )
+
+        TextField(
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            label = { Text("Confirm Password") },
+            visualTransformation = PasswordVisualTransformation()
+        )
+
         TextField(
             value = firstName,
             onValueChange = { firstName = it },
-            label = { Text("First Name") })
+            label = { Text("First Name") }
+        )
+
         TextField(
             value = lastName,
             onValueChange = { lastName = it },
-            label = { Text("Last Name") })
+            label = { Text("Last Name") }
+        )
 
         // Subject selection (only visible for Tutors)
         // - Firestore and functionality purposes, change signup UI
@@ -288,6 +304,8 @@ fun SignupScreen(
             // Validate fields before attempting signup
             if (email.isEmpty() || password.isEmpty() || firstName.isEmpty() || lastName.isEmpty()) {
                 errorMessage = "All fields must be filled"
+            } else if (password != confirmPassword) {
+                errorMessage = "Passwords do not match"
             } else if (!hasAgreedToTerms) {
                 errorMessage = "You must agree to the Terms and Conditions"
             } else if (userType == null) {
