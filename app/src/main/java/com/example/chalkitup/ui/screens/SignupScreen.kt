@@ -3,6 +3,7 @@ package com.example.chalkitup.ui.screens
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -80,6 +82,9 @@ fun SignupScreen(
 
     val availableSubjects = listOf("Math", "Science", "English", "History", "Biology", "Physics") // Example subjects
     val availableGradeLevels = (7..12).toList() // Grade levels from 7 to 12
+
+    var hasScrolledToBottom by remember { mutableStateOf(false) }
+    var hasAgreedToTerms by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier
         .fillMaxSize()
@@ -220,6 +225,47 @@ fun SignupScreen(
             }
         }
 
+
+        // Terms and Conditions
+        Text("Terms and Conditions", style = MaterialTheme.typography.titleMedium)
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(150.dp)
+                .border(1.dp, Color.Gray)
+                .padding(8.dp)
+                .verticalScroll(rememberScrollState().apply {
+                    hasScrolledToBottom = value == maxValue
+                })
+        ) {
+            Text(
+                text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
+                        "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. " +
+                        "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. " +
+                        "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. " +
+                        "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(top = 8.dp)
+        ) {
+            Checkbox(
+                checked = hasAgreedToTerms,
+                onCheckedChange = {
+                    if (hasScrolledToBottom) hasAgreedToTerms = it
+                },
+                enabled = hasScrolledToBottom
+            )
+            Text("I have read and agree to the Terms and Conditions")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+
         Button(onClick = {
             errorMessage = ""
             // Validate fields before attempting signup
@@ -230,6 +276,8 @@ fun SignupScreen(
             } else if ((userType == UserType.Tutor) &&
                 (selectedSubjects.isEmpty() || selectedGradeLevels.isEmpty()) ){
                 errorMessage = "You must be able to tutor at least 1 subject and 1 grade level"
+            } else if (!hasAgreedToTerms) {
+                errorMessage = "You must agree to the Terms and Conditions"
             } else {
                 //userType!!.name passes the enum value as a string
                 authViewModel.signupWithEmail(email, password, firstName, lastName,
@@ -241,7 +289,9 @@ fun SignupScreen(
                     onError = { errorMessage = it }
                 )
             }
-        }) {
+        },
+            enabled = hasAgreedToTerms
+        ) {
             Text("Sign Up")
         }
 
@@ -257,6 +307,7 @@ enum class UserType {
     Tutor
 }
 
+// UI for certification items
 @Composable
 fun SelectedFileItem(fileName: String, fileUri: Uri, onRemove: () -> Unit) {
     val context = LocalContext.current
