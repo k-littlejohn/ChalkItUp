@@ -28,11 +28,11 @@ class ProfileViewModel : ViewModel() {
     val academicProgress: LiveData<List<String>> get() = _academicProgress
 
     // Automatically load the user profile when the ViewModel is created
-    private val _interests=MutableLiveData<List<String>>()
-    val interests: LiveData<List<String>> get() = _interests
+//    private val _interests=MutableLiveData<List<String>>()
+//    val interests: LiveData<List<String>> get() = _interests
 
-    private val _certifications=MutableLiveData<List<String>>()
-    val certification:  LiveData<List<String>> get() = _certifications
+    //private val _certifications=MutableLiveData<List<String>>()
+    //val certifications:  LiveData<List<String>> get() = _certifications
 
 
     init {
@@ -63,49 +63,46 @@ class ProfileViewModel : ViewModel() {
                     loadProfilePicture(userId)
 
                     // Check if the user is a tutor or a student
-                    loadInterests(userId)
 
                     _isTutor.value = user.userType == "Tutor"
                     if (user.userType == "Tutor") {
                         // Placeholder for loading tutor specific information
                         // Currently none saved yet
                         // Certification loading is handled by the CertificationViewModel
-                    } else {
-                        // Load academic progress for students
-                        loadStudentProgress(userId)
+                    }
                     }
                 }
             }
     }
 
     // Function to load the academic progress (such as reports) for a student
-    private fun loadStudentProgress(userId: String) {
-        FirebaseFirestore.getInstance().collection("users").document(userId)
-            .collection("academicProgress")
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                // Extract the file URLs for academic progress documents
-                val ProgressList = querySnapshot.documents.mapNotNull { document ->
-                    document.getString("fileUrl") // Get the file path stored in Firestore
-                }
-                // Update the academic progress LiveData
-                _academicProgress.value = ProgressList
-            }
-
-    }
-    private fun loadInterests(userId: String){
-        FirebaseFirestore.getInstance().collection("users").document(userId)
-            .collection("Interests")
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                val InterestsList = querySnapshot.documents.mapNotNull { document ->
-                    document.getString("fileUrl") // Get file path stored in Firestore
-                }
-                _academicProgress.value = InterestsList
-            }
+//    private fun loadStudentProgress(userId: String) {
+//        FirebaseFirestore.getInstance().collection("users").document(userId)
+//            .collection("academicProgress")
+//            .get()
+//            .addOnSuccessListener { querySnapshot ->
+//                // Extract the file URLs for academic progress documents
+//                val ProgressList = querySnapshot.documents.mapNotNull { document ->
+//                    document.getString("fileUrl") // Get the file path stored in Firestore
+//                }
+//                // Update the academic progress LiveData
+//                _academicProgress.value = ProgressList
+//            }
+//
+//    }
+    //private fun loadInterests(userId: String){
+       // FirebaseFirestore.getInstance().collection("users").document(userId)
+           // .collection("Interests")
+            //.get()
+           // .addOnSuccessListener { querySnapshot ->
+            //    val InterestsList = querySnapshot.documents.mapNotNull { document ->
+             //       document.getString("fileUrl") // Get file path stored in Firestore
+              //  }
+               // _academicProgress.value = InterestsList
+          //  }
 
     // Function to load the profile picture URL from Firestore
-    }
+    //}
     private fun loadProfilePicture(userId: String) {
         FirebaseFirestore.getInstance().collection("users").document(userId)
             .get()
@@ -115,7 +112,7 @@ class ProfileViewModel : ViewModel() {
             }
     }
 
-}
+
 
 // Data class to represent the user profile data
 data class UserProfile(

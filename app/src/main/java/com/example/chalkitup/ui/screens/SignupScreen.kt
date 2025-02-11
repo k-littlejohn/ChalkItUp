@@ -84,7 +84,7 @@ fun SignupScreen(
     var selectedSubjects by remember { mutableStateOf<Set<String>>(emptySet()) } // To store selected subjects
     var selectedGradeLevels by remember { mutableStateOf<Set<Int>>(emptySet()) } // To store selected grade levels
     var selectedInterests by remember { mutableStateOf<Set<String>>(emptySet()) }
-    var quote by remember { mutableStateOf("") }
+    var bio by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
     val availableSubjects = listOf("Math", "Science", "English", "History", "Biology", "Physics") // Example subjects
     val availableGradeLevels = (7..12).toList() // Grade levels from 7 to 12
@@ -271,7 +271,7 @@ fun SignupScreen(
         TextField(value = password, onValueChange = { password = it }, label = { Text("Password") }, visualTransformation = PasswordVisualTransformation())
         TextField(value = firstName, onValueChange = { firstName = it }, label = { Text("First Name") })
         TextField(value = lastName, onValueChange = { lastName = it }, label = { Text("Last Name") })
-        TextField(value = quote, onValueChange = { quote = it }, label = { Text("Quote/BIO") })
+        TextField(value = bio, onValueChange = { bio = it }, label = { Text("BIO") })
         TextField(value = location, onValueChange = { location = it }, label = { Text("CITY") })
         //-------------interest selection
         Spacer(modifier = Modifier.width(16.dp))

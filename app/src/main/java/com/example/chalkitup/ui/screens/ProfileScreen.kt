@@ -54,9 +54,9 @@ fun ProfileScreen(
     val userProfile by profileViewModel.userProfile.observeAsState()
     val isTutor by profileViewModel.isTutor.observeAsState()
     val certifications by certificationViewModel.certifications.collectAsState()
-    val academicProgress by profileViewModel.academicProgress.observeAsState()
+    //val academicProgress by profileViewModel.academicProgress.observeAsState()
     val profilePictureUrl by profileViewModel.profilePictureUrl.observeAsState()
-    val interests by profileViewModel.interests.observeAsState()
+    //val interests by profileViewModel.interests.observeAsState()
     val scrollState = rememberScrollState()
 
     LaunchedEffect(Unit) {
@@ -122,32 +122,26 @@ fun ProfileScreen(
                 //----------------STUDENT PROFILE---------------------------------
 
                 Text("Academic Performance:")
-
-                if (academicProgress.isNullOrEmpty()) {
-                    Text("No progress found.")
-                } else {
-                    Text("progress found.")
-                }
-                    //----------------------------------------------------------------
-                }
-                //list interests
+                //ItemGrid(it.pr, columns = 4)
+//                } else {
+                Text("progress found.")
+                //----------------------------------------------------------------
+            }
+            //list interests
+            userProfile?.let {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Interests:")
+                ItemGrid(it.interests, columns = 4)
+            }
 
-                if (interests.isNullOrEmpty()) {
-                    Text("No interests listed.")
-                } else {
-                    Text("No interests listed.")
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-                // Edit Profile Button
-                Button(onClick = { navController.navigate("editProfile") }) {
-                    Text("Edit Profile")
-                }
+            Spacer(modifier = Modifier.height(16.dp))
+            // Edit Profile Button
+            Button(onClick = { navController.navigate("editProfile") }) {
+                Text("Edit Profile")
             }
         }
     }
+}
 
 // Grid layout for certifications (3 items per row)
 @Composable
