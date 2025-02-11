@@ -24,8 +24,6 @@ fun HomeScreen(navController: NavController) {
         ) {
 
 
-
-
         }
     }
 }
