@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
-// Top app bar UI
+// Top app bar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,7 +40,7 @@ fun MyTopBar(
                     "settings" -> "Settings"
                     "booking" -> "Book a Session"
                     "messages" -> "Messages"
-                    else -> "Chalk It Up"
+                    else -> "ChalkItUp Tutors"
                 }
             )
         },

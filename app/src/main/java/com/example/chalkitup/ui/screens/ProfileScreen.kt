@@ -15,28 +15,40 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.chalkitup.R
+import com.example.chalkitup.ui.viewmodel.Certification
+import com.example.chalkitup.ui.viewmodel.CertificationViewModel
 import com.example.chalkitup.ui.viewmodel.ProfileViewModel
 
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel,
+    profileViewModel: ProfileViewModel,
+    certificationViewModel: CertificationViewModel,
     navController: NavController
 ) {
     val userProfile by viewModel.userProfile.observeAsState()
@@ -45,10 +57,16 @@ fun ProfileScreen(
     val academicProgress by viewModel.academicProgress.observeAsState()
     val profilePictureUrl by viewModel.profilePictureUrl.observeAsState()
     val interests by viewModel.interests.observeAsState()
+    val scrollState = rememberScrollState()
+
+    LaunchedEffect(Unit) {
+        profileViewModel.loadUserProfile() // Reload data when returning to profile screen
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
@@ -68,9 +86,11 @@ fun ProfileScreen(
         userProfile?.let {
             Text("${it.firstName} ${it.lastName}")
             Text(it.email)
-            Text(it.location)
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(it.quote)
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text("Location: ${it.location.ifEmpty { "Not specified" }}")
+            Text("Bio: ${it.bio.ifEmpty { "No bio available" }}")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -83,10 +103,10 @@ fun ProfileScreen(
                 // Tutor-specific information
                 Text("Certifications:")
 
-                if (certifications.isNullOrEmpty()) {
+                if (certifications.isEmpty()) {
                     Text("No certifications found.")
                 } else {
-                    CertificationGrid(certifications!!)
+                    CertificationGrid(certifications)
                 }
 
                 userProfile?.let {
@@ -129,24 +149,26 @@ fun ProfileScreen(
         }
     }
 
-
-    // Grid layout for certifications (3 items per row)
-    @Composable
-    fun CertificationGrid(certifications: List<String>) {
+// Grid layout for certifications (3 items per row)
+@Composable
+fun CertificationGrid(certifications: List<Certification>) {
+    Box(modifier = Modifier.height(100.dp)) {
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()
         ) {
-            items(certifications) { fileUrl ->
-                CertificationItem(fileUrl)
+            items(certifications) { certification ->
+                CertificationItem(certification)
             }
         }
     }
+}
 
-    // Grid layout for grades & subjects (4 items per row)
-    @Composable
-    fun ItemGrid(items: List<String>, columns: Int) {
+// Grid layout for grades & subjects (4 items per row)
+@Composable
+fun ItemGrid(items: List<String>, columns: Int) {
+    Box(modifier = Modifier.height(100.dp)) {
         LazyVerticalGrid(
             columns = GridCells.Fixed(columns),
             horizontalArrangement = Arrangement.Center,
@@ -164,22 +186,58 @@ fun ProfileScreen(
             }
         }
     }
+}
 
-    // Display individual certification images
-    @Composable
-    fun CertificationItem(fileUrl: String) {
-        Image(
-            painter = rememberAsyncImagePainter(fileUrl),
-            contentDescription = null,
-            modifier = Modifier
-                .size(100.dp)
-                .padding(4.dp)
-        )
+// Display individual certification images
+@Composable
+fun CertificationItem(certification: Certification) {
+    val fileName = certification.fileName
+    val fileExtension = fileName.substringAfterLast('.', "").lowercase()
+
+    Box(
+        modifier = Modifier
+            .size(100.dp)
+            .padding(4.dp)
+            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
+            .background(Color.LightGray, shape = RoundedCornerShape(8.dp)),
+        contentAlignment = Alignment.Center
+    ) {
+        if (fileExtension in listOf("jpg", "jpeg", "png", "gif", "bmp")) {
+            // Display image if the file is an image type
+            AsyncImage(
+                model = certification.fileUrl,
+                contentDescription = "Certification Image",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            // Show file icon & filename for non-image files
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Done,
+                    contentDescription = "File Icon",
+                    modifier = Modifier.size(40.dp)
+                )
+                Text(
+                    text = fileName,
+                    textAlign = TextAlign.Center,
+                    fontSize = 12.sp,
+                    color = Color.Black,
+                    modifier = Modifier.padding(4.dp)
+                )
+            }
+        }
     }
 
-    //Grid layout for progress (1 items per row)
-    @Composable
-    fun ProgressGrid(academicProgress: List<String>) {
+//Grid layout for progress (1 items per row)
+@Composable
+fun ProgressGrid(academicProgress: List<String>) {
+    Box(modifier = Modifier.height(100.dp)) {
         LazyVerticalGrid(
             columns = GridCells.Fixed(1),
             horizontalArrangement = Arrangement.Center,

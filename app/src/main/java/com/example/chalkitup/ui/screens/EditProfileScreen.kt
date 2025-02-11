@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
@@ -40,6 +42,8 @@ import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
 
 @Composable
 fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewModel) {
+    val scrollState = rememberScrollState()
+
     val userProfile by viewModel.userProfile.observeAsState()
     val profilePictureUrl by viewModel.profilePictureUrl.observeAsState()
     val isTutor by remember(userProfile) {
@@ -51,6 +55,10 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
     var email by remember { mutableStateOf("") }
     var selectedSubjects by remember { mutableStateOf(listOf<String>()) }
     var selectedGrades by remember { mutableStateOf(listOf<Int>()) }
+    var bio by remember { mutableStateOf("") }
+    var location by remember { mutableStateOf("") }
+
+    var originalProfilePictureUrl by remember { mutableStateOf<String?>(null) }
 
     // Profile picture
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -64,10 +72,16 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
             email = it.email
             selectedSubjects = it.subjects
             selectedGrades = it.grades
+            bio = it.bio
+            location = it.location
+            originalProfilePictureUrl = profilePictureUrl // Save original profile picture
         }
     }
 
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(modifier = Modifier
+        .padding(16.dp)
+        .verticalScroll(scrollState)) {
+
         Text("Edit Profile")
 
         // Circular profile picture that acts as a button
@@ -102,6 +116,18 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
             enabled = false // Prevent email from being edited
         )
 
+        OutlinedTextField(
+            value = location,
+            onValueChange = { location = it },
+            label = { Text("Location") }
+        )
+
+        OutlinedTextField(
+            value = bio,
+            onValueChange = { bio = it },
+            label = { Text("Bio") }
+        )
+
         // Tutor-Specific Fields
         if (isTutor) {
             Spacer(modifier = Modifier.height(16.dp))
@@ -117,7 +143,7 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
             Text("Grade Levels")
 
             MultiSelectDropdown(
-                availableOptions = (1..12).map { it.toString() },
+                availableOptions = (7..12).map { it.toString() },
                 selectedOptions = selectedGrades.map { it.toString() },
                 onSelectionChange = { selectedGrades = it.map { it.toInt() } }
             )
@@ -130,7 +156,7 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
 
         Row {
             Button(onClick = {
-                viewModel.updateProfile(firstName, lastName, selectedSubjects, selectedGrades)
+                viewModel.updateProfile(firstName, lastName, selectedSubjects, selectedGrades, bio, location)
                 navController.popBackStack() // Navigate back
             }) {
                 Text("Save Changes")
@@ -138,7 +164,9 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            Button(onClick = { navController.popBackStack() }) {
+            Button(onClick = {
+                viewModel._profilePictureUrl.value = originalProfilePictureUrl // Restore old picture
+                navController.popBackStack() }) {
                 Text("Cancel")
             }
         }
@@ -192,6 +220,3 @@ fun MultiSelectDropdown(
         }
     }
 }
-
-
-
