@@ -24,8 +24,8 @@ class ProfileViewModel : ViewModel() {
     val profilePictureUrl: LiveData<String?> get() = _profilePictureUrl
 
     // LiveData to hold and observe the academic progress for students
-    private val _academicProgress = MutableLiveData<List<String>>()
-    val academicProgress: LiveData<List<String>> get() = _academicProgress
+//    private val _academicProgress = MutableLiveData<List<String>>()
+//    val academicProgress: LiveData<List<String>> get() = _academicProgress
 
     // Automatically load the user profile when the ViewModel is created
 //    private val _interests=MutableLiveData<List<String>>()
@@ -126,4 +126,5 @@ data class UserProfile(
     val bio: String = "",        // User's bio
     val location: String = "",   // User's location
     val interests: List<String> = emptyList(),
+    val progress: List<String> = emptyList(),
 )

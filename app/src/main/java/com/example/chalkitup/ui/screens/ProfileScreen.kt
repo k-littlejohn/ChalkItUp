@@ -122,16 +122,22 @@ fun ProfileScreen(
                 //----------------STUDENT PROFILE---------------------------------
 
                 Text("Academic Performance:")
-                //ItemGrid(it.pr, columns = 4)
-//                } else {
-                Text("progress found.")
+                userProfile?.let {
+                    if (it.progress.isEmpty()){
+                        Text("NO PROGRESS LISTED")}
+                    else{
+                    ItemGrid(it.progress, columns = 4)}
+                }
                 //----------------------------------------------------------------
             }
             //list interests
             userProfile?.let {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Interests:")
-                ItemGrid(it.interests, columns = 4)
+                if(it.interests.isEmpty()){
+                    Text("NO INTERESTS LISTED")}
+                else{
+                    ItemGrid(it.interests, columns = 4)}
             }
 
             Spacer(modifier = Modifier.height(16.dp))
