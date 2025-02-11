@@ -31,6 +31,9 @@ class ProfileViewModel : ViewModel() {
     private val _interests=MutableLiveData<List<String>>()
     val interests: LiveData<List<String>> get() = _interests
 
+    private val _certifications=MutableLiveData<List<String>>()
+    val certification:  LiveData<List<String>> get() = _certifications
+
 
     init {
         // Automatically load user profile when ViewModel is created
@@ -123,6 +126,6 @@ data class UserProfile(
     val subjects: List<String> = emptyList(), // List of subjects the user is associated with (e.g., for tutors)
     val grades: List<Int> = emptyList(),      // List of grades associated with the user (e.g., for tutors)
     val bio: String = "",        // User's bio
-    val location: String = ""    // User's location
+    val location: String = "",   // User's location
     val interests: List<String> = emptyList(),
 )

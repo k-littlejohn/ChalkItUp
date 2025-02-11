@@ -83,16 +83,12 @@ fun SignupScreen(
     var userType by remember { mutableStateOf<UserType?>(null) } // Track user type: Student or Tutor
     var selectedSubjects by remember { mutableStateOf<Set<String>>(emptySet()) } // To store selected subjects
     var selectedGradeLevels by remember { mutableStateOf<Set<Int>>(emptySet()) } // To store selected grade levels
-
-    val availableSubjects =
-        listOf("Math", "Science", "English", "History", "Biology", "Physics") // Example subjects
     var selectedInterests by remember { mutableStateOf<Set<String>>(emptySet()) }
     var quote by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
     val availableSubjects = listOf("Math", "Science", "English", "History", "Biology", "Physics") // Example subjects
     val availableGradeLevels = (7..12).toList() // Grade levels from 7 to 12
     val availableInterests = listOf("Art History", "Genetics", "Animals", "Astronomy", "Environment", "Health Science")
-
     var hasScrolledToBottom by remember { mutableStateOf(false) }
     var hasAgreedToTerms by remember { mutableStateOf(false) }
 
