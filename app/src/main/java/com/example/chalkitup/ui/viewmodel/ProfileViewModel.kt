@@ -115,6 +115,7 @@ data class UserProfile(
     val email: String = "",
     val subjects: List<String> = emptyList(),
     val grades: List<Int> = emptyList(),
-    val quote: String ="QUOTE HERE OR BLANK",
-    val location: String="Edmonton"
+    val quote: String ="",
+    val location: String="",
+    val interests: List<String> = emptyList(),
 )
