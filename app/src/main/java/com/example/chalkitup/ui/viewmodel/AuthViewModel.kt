@@ -90,7 +90,6 @@ class AuthViewModel : ViewModel() {
             }
     }
 
-
     fun resendVerificationEmail(onSuccess: (String) -> Unit, onError: (String) -> Unit) {
         val user = FirebaseAuth.getInstance().currentUser
         user?.sendEmailVerification()

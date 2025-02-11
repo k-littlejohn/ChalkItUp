@@ -19,6 +19,7 @@ import com.example.chalkitup.ui.viewmodel.AuthViewModel
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
 import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
 import com.example.chalkitup.ui.viewmodel.ProfileViewModel
+import com.example.chalkitup.ui.viewmodel.SettingsViewModel
 
 // Navigation Center, NavHost with navController
 // On app launch, opens startScreen
@@ -89,11 +90,9 @@ fun NavGraph(navController: NavHostController) {
 
         // Settings Screen
         composable("settings") {
-            val authViewModel: AuthViewModel = viewModel()
-            SettingsScreen(
-                navController = navController,
-                viewModel = authViewModel
-            )
+            val settingsViewModel: SettingsViewModel = viewModel()
+            SettingsScreen(navController = navController,
+                viewModel = settingsViewModel)
         }
 
         // Check Email Screen
