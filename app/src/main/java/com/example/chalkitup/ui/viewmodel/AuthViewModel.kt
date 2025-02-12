@@ -11,6 +11,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 // - login
 // - logout
 // - email confirmation
+// - forgot password
 
 class AuthViewModel : ViewModel() {
 
@@ -131,6 +132,23 @@ class AuthViewModel : ViewModel() {
     // Function to sign out the current user
     fun signout() {
         auth.signOut() // Logs out the user from FirebaseAuth
+    }
+
+    fun resetPassword(email: String,
+                      onSuccess: (String) -> Unit,
+                      onError: (String) -> Unit)
+    {
+        // add: check if email is verified? can only reset password if the email is verified?
+        auth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onSuccess("Reset email sent")
+                } else {
+                    onError(
+                        task.exception ?.message ?:"Reset failed"
+                    )
+                }
+            }
     }
 
 }

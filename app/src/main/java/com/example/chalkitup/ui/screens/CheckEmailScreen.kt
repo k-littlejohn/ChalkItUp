@@ -22,11 +22,11 @@ import com.example.chalkitup.ui.viewmodel.AuthViewModel
 @Composable
 fun CheckEmailScreen(
     viewModel: AuthViewModel,
+    checkType: String,  // "verify" or "reset"
     navController: NavController) {
 
     var successMessage by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
-
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -34,36 +34,48 @@ fun CheckEmailScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text("Check your email")
-        Text("We sent you a verification link!")
 
-        Text("Didn't receive an email?")
-        TextButton(onClick = {
-            successMessage = ""
-            errorMessage = ""
-            viewModel.resendVerificationEmail(
-                onSuccess = { successMessage = it },
-                onError = { errorMessage = it }
-            )
-        }
-        ) {
-            Text("Send another email")
-        }
+        if (checkType == "verify") { // The following is shown if it is email verification
+            Text("We sent you a verification link!")
 
-        Button(onClick = {
-            // signout the user bc they are not verified!
-            viewModel.signout()
-            navController.navigate("start")
-        }) {
-            Text("Done")
-        }
+            Text("Didn't receive an email?")
+            TextButton(onClick = {
+                successMessage = ""
+                errorMessage = ""
+                viewModel.resendVerificationEmail(
+                    onSuccess = { successMessage = it },
+                    onError = { errorMessage = it }
+                )
+            }
+            ) {
+                Text("Send another email")
+            }
 
+            Button(onClick = {
+                // signout the user bc they are not verified!
+                viewModel.signout()
+                navController.navigate("start")
+            }) {
+                Text("Done")
+            }
 
-        if (successMessage.isNotEmpty()) {
-            Text(successMessage)
-        }
+            if (successMessage.isNotEmpty()) {
+                Text(successMessage)
+            }
 
-        if (errorMessage.isNotEmpty()) {
-            Text(errorMessage, color = Color.Red)
+            if (errorMessage.isNotEmpty()) {
+                Text(errorMessage, color = Color.Red)
+            }
+
+        } else { // The following is shown if it is forgot password
+            Text("We sent you a forgot password link!")
+
+            Button(onClick = {
+                navController.navigate("start")
+            }) {
+                Text("Done")
+            }
+
         }
 
     }
