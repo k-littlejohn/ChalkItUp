@@ -63,7 +63,7 @@ fun MyTopBar(
                 // On the login and signup page currently,
                 // there is a back button in the top left
                 "login","signup" -> {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = { navController.navigate("start") }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }

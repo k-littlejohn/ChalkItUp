@@ -54,9 +54,7 @@ fun ProfileScreen(
     val userProfile by profileViewModel.userProfile.observeAsState()
     val isTutor by profileViewModel.isTutor.observeAsState()
     val certifications by certificationViewModel.certifications.collectAsState()
-    //val academicProgress by profileViewModel.academicProgress.observeAsState()
     val profilePictureUrl by profileViewModel.profilePictureUrl.observeAsState()
-    //val interests by profileViewModel.interests.observeAsState()
     val scrollState = rememberScrollState()
 
     LaunchedEffect(Unit) {
@@ -148,26 +146,6 @@ fun ProfileScreen(
         }
     }
 }
-                    //----------------------------------------------------------------
-                }
-                //list interests
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("Interests:")
-
-                if (interests.isNullOrEmpty()) {
-                    Text("No progress found.")
-                } else {
-                    ProgressGrid(interests!!)
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-                // Edit Profile Button
-                Button(onClick = { navController.navigate("editProfile") }) {
-                    Text("Edit Profile")
-                }
-            }
-        }
-    }
 
 // Grid layout for certifications (3 items per row)
 @Composable
@@ -252,54 +230,5 @@ fun CertificationItem(certification: Certification) {
                 )
             }
         }
-    }}
-
-////Grid layout for progress (1 items per row)
-//@Composable
-//fun ProgressGrid(academicProgress: List<String>) {
-//    Box(modifier = Modifier.height(100.dp)) {
-//        LazyVerticalGrid(
-//            columns = GridCells.Fixed(1),
-//            horizontalArrangement = Arrangement.Center,
-//            modifier = Modifier.fillMaxWidth()
-//        ) {
-//            items(academicProgress) { fileUrl ->
-//                ProgressItem(fileUrl)
-//            }
-//        }
-//    }
-//    // Display individual progress images
-//    @Composable
-//    fun ProgressItem(fileUrl: String) {
-//        Image(
-//            painter = rememberAsyncImagePainter(fileUrl),
-//            contentDescription = null,
-//            modifier = Modifier
-//                .size(100.dp)
-//                .padding(4.dp)
-//        )
-//    }
-//    @Composable
-//    fun InterestsGrid(interests: List<String>) {
-//        LazyVerticalGrid(
-//            columns = GridCells.Fixed(1),
-//            horizontalArrangement = Arrangement.Center,
-//            modifier = Modifier.fillMaxWidth()
-//        ) {
-//            items(interests) { fileUrl ->
-//                interestsItem(fileUrl)
-//            }
-//        }
-//    }
-//    @Composable
-//    fun interestsItem(fileUrl: String) {
-//        Image(
-//            painter = rememberAsyncImagePainter(fileUrl),
-//            contentDescription = null,
-//            modifier = Modifier
-//                .size(100.dp)
-//                .padding(4.dp)
-//        )
-//    }
-
-
+    }
+}

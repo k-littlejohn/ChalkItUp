@@ -267,10 +267,10 @@ fun SignupScreen(
             }
         }
 
-        //TextField(value = email, onValueChange = { email = it }, label = { Text("Email") })
-        //TextField(value = password, onValueChange = { password = it }, label = { Text("Password") }, visualTransformation = PasswordVisualTransformation())
-        //TextField(value = firstName, onValueChange = { firstName = it }, label = { Text("First Name") })
-        //TextField(value = lastName, onValueChange = { lastName = it }, label = { Text("Last Name") })
+        TextField(value = email, onValueChange = { email = it }, label = { Text("Email") })
+        TextField(value = password, onValueChange = { password = it }, label = { Text("Password") }, visualTransformation = PasswordVisualTransformation())
+        TextField(value = firstName, onValueChange = { firstName = it }, label = { Text("First Name") })
+        TextField(value = lastName, onValueChange = { lastName = it }, label = { Text("Last Name") })
         TextField(value = bio, onValueChange = { bio = it }, label = { Text("BIO") })
         TextField(value = location, onValueChange = { location = it }, label = { Text("CITY") })
         //-------------interest selection
@@ -361,7 +361,7 @@ fun SignupScreen(
                     userType!!.name, selectedSubjects.toList(), selectedGradeLevels.toList(),
                     onUserReady = { user ->
                         certificationViewModel.uploadFiles(context, user)
-                        navController.navigate("checkEmail")
+                        navController.navigate("checkEmail/verify")
                     },
                     onError = { errorMessage = it }
                 )
