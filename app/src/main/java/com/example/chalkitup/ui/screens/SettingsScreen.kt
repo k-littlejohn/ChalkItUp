@@ -57,7 +57,11 @@ fun SettingsScreen(
                                     showDialog = false
                                     navController.navigate("start")
                                 },
-                                onError = { errorMessage = it }
+                                onError = {
+                                    errorMessage = "Failed to delete Account"
+                                    showDialog = false
+                                    navController.navigate("home")
+                                }
                             )
                         }
                     ) {
@@ -68,13 +72,21 @@ fun SettingsScreen(
                     OutlinedButton(onClick = { showDialog = false }) {
                         Text("Cancel")
                     }
-                }            )
+                }
+            )
         }
     }
     // Show toast message when account deleted
     LaunchedEffect(successMessage) {
         if (successMessage.isNotEmpty()) {
             Toast.makeText(context, successMessage, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Show toast message when account deletion failed
+    LaunchedEffect(errorMessage) {
+        if (errorMessage.isNotEmpty()) {
+            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
         }
     }
 }
