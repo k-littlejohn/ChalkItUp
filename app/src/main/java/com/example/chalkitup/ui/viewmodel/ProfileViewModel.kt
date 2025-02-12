@@ -57,6 +57,9 @@ class ProfileViewModel : ViewModel() {
                         // Placeholder for loading tutor specific information
                         // Currently none saved yet
                         // Certification loading is handled by the CertificationViewModel
+                    } else {
+                        // Placeholder for loading student specific information
+                        // Currently none saved yet
                     }
                 }
             }
