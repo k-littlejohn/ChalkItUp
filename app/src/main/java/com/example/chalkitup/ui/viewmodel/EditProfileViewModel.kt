@@ -101,7 +101,7 @@ class EditProfileViewModel : ViewModel() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         // Create a reference to Firebase Storage to store the profile picture
         val storageRef =
-            FirebaseStorage.getInstance().reference.child("profile_pictures/$userId.jpg")
+            FirebaseStorage.getInstance().reference.child("$userId/profilePicture.jpg")
 
         // Upload the image to Firebase Storage
         storageRef.putFile(imageUri).continueWithTask {
