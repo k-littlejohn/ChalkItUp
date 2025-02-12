@@ -1,6 +1,5 @@
 package com.example.chalkitup.ui.screens
 
-import android.util.Log
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
@@ -39,6 +38,8 @@ fun MainScreen() {
     val showBottomBar = currentRoute !in hideBottomBarRoutes
 
     val hideTopBarRoutes = listOf("start","login","signup","checkEmail","forgotPassword")
+
+
     val showTopBar = currentRoute !in hideTopBarRoutes
 
     ModalNavigationDrawer(
