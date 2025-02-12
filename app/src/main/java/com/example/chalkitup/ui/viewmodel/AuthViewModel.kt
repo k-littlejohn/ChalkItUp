@@ -56,6 +56,9 @@ class AuthViewModel : ViewModel() {
         userType: String,
         subjects: List<String> = emptyList(),
         grades: List<Int> = emptyList(),
+        bio: String,
+        location: String,
+        interests: List<String> = emptyList(),
         onUserReady: (FirebaseUser) -> Unit, // Callback with the user for file upload
         onError: (String) -> Unit // Callback for errors during signup
     ) {
@@ -76,6 +79,9 @@ class AuthViewModel : ViewModel() {
                                 "email" to email,
                                 "subjects" to subjects,
                                 "grades" to grades,
+                                "bio" to bio,
+                                "location" to location,
+                                "interests" to interests
                             )
 
                             // Save the user data in Firestore under their UID

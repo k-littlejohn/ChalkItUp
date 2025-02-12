@@ -86,9 +86,11 @@ fun SignupScreen(
     var selectedInterests by remember { mutableStateOf<Set<String>>(emptySet()) }
     var bio by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
+
     val availableSubjects = listOf("Math", "Science", "English", "History", "Biology", "Physics") // Example subjects
     val availableGradeLevels = (7..12).toList() // Grade levels from 7 to 12
     val availableInterests = listOf("Art History", "Genetics", "Animals", "Astronomy", "Environment", "Health Science")
+
     var hasScrolledToBottom by remember { mutableStateOf(false) }
     var hasAgreedToTerms by remember { mutableStateOf(false) }
 
@@ -273,6 +275,7 @@ fun SignupScreen(
         TextField(value = lastName, onValueChange = { lastName = it }, label = { Text("Last Name") })
         TextField(value = bio, onValueChange = { bio = it }, label = { Text("BIO") })
         TextField(value = location, onValueChange = { location = it }, label = { Text("CITY") })
+
         //-------------interest selection
         Spacer(modifier = Modifier.width(16.dp))
         Text("Select Interests:")
@@ -359,6 +362,7 @@ fun SignupScreen(
                 //userType!!.name passes the enum value as a string
                 authViewModel.signupWithEmail(email, password, firstName, lastName,
                     userType!!.name, selectedSubjects.toList(), selectedGradeLevels.toList(),
+                    bio, location, selectedInterests.toList(),
                     onUserReady = { user ->
                         certificationViewModel.uploadFiles(context, user)
                         navController.navigate("checkEmail/verify")
