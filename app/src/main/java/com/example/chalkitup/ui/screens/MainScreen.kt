@@ -1,6 +1,5 @@
 package com.example.chalkitup.ui.screens
 
-import android.util.Log
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
@@ -31,14 +30,16 @@ fun MainScreen() {
     // Observe route changes
     LaunchedEffect(navController) {
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            currentRoute = destination.route?.substringBefore("/")
+            currentRoute = destination.route
         }
     }
 
-    val hideBottomBarRoutes = listOf("start","login", "signup","checkEmail","forgotPassword")
+    val hideBottomBarRoutes = listOf("start","login", "signup","checkEmail")
     val showBottomBar = currentRoute !in hideBottomBarRoutes
 
-    val hideTopBarRoutes = listOf("start","login","signup","checkEmail","forgotPassword")
+    val hideTopBarRoutes = listOf("start","login","signup","checkEmail","uploadCertification")
+
+
     val showTopBar = currentRoute !in hideTopBarRoutes
 
     ModalNavigationDrawer(

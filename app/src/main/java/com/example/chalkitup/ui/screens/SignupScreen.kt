@@ -176,6 +176,15 @@ fun SignupScreen(
             label = { Text("Last Name") }
         )
 
+
+       /*
+       Didnt feel it was necessary so i removed for now
+       TextField(value = bio, onValueChange = { bio = it }, label = { Text("BIO") })
+        */
+
+        TextField(value = location, onValueChange = { location = it }, label = { Text("City") })
+
+
         // Subject selection (only visible for Tutors)
         // - Firestore and functionality purposes, change signup UI
         if (userType == UserType.Tutor) {
@@ -269,12 +278,9 @@ fun SignupScreen(
             }
         }
 
-        TextField(value = email, onValueChange = { email = it }, label = { Text("Email") })
-        TextField(value = password, onValueChange = { password = it }, label = { Text("Password") }, visualTransformation = PasswordVisualTransformation())
-        TextField(value = firstName, onValueChange = { firstName = it }, label = { Text("First Name") })
-        TextField(value = lastName, onValueChange = { lastName = it }, label = { Text("Last Name") })
-        TextField(value = bio, onValueChange = { bio = it }, label = { Text("BIO") })
-        TextField(value = location, onValueChange = { location = it }, label = { Text("CITY") })
+
+        //TextField(value = bio, onValueChange = { bio = it }, label = { Text("BIO") })
+        //TextField(value = location, onValueChange = { location = it }, label = { Text("CITY") })
 
         //-------------interest selection
         Spacer(modifier = Modifier.width(16.dp))

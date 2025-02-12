@@ -176,7 +176,7 @@ fun LoginScreen(
                 ) {
                     HorizontalDivider(modifier = Modifier.weight(1f), color = Color.Gray)
                     Text(
-                        text = " or sign up with ",
+                        text = " or sign in with ",
                         color = Color.Gray,
                         fontSize = 14.sp,
                         modifier = Modifier.padding(horizontal = 8.dp)
