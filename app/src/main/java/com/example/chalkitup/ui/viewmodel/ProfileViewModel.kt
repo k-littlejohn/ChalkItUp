@@ -24,11 +24,19 @@ class ProfileViewModel : ViewModel() {
     val profilePictureUrl: LiveData<String?> get() = _profilePictureUrl
 
     // LiveData to hold and observe the academic progress for students
-    private val _academicProgress = MutableLiveData<List<String>>()
-    val academicProgress: LiveData<List<String>> get() = _academicProgress
+//    private val _academicProgress = MutableLiveData<List<String>>()
+//    val academicProgress: LiveData<List<String>> get() = _academicProgress
 
     // Automatically load the user profile when the ViewModel is created
+//    private val _interests=MutableLiveData<List<String>>()
+//    val interests: LiveData<List<String>> get() = _interests
+
+    //private val _certifications=MutableLiveData<List<String>>()
+    //val certifications:  LiveData<List<String>> get() = _certifications
+
+
     init {
+        // Automatically load user profile when ViewModel is created
         loadUserProfile()
     }
 
@@ -55,36 +63,47 @@ class ProfileViewModel : ViewModel() {
                     loadProfilePicture(userId)
 
                     // Check if the user is a tutor or a student
+
                     _isTutor.value = user.userType == "Tutor"
                     if (user.userType == "Tutor") {
                         // Placeholder for loading tutor specific information
                         // Currently none saved yet
                         // Certification loading is handled by the CertificationViewModel
-                    } else {
-                        // Load academic progress for students
-                        loadStudentProgress(userId)
+                    }
                     }
                 }
             }
-    }
+
 
     // Function to load the academic progress (such as reports) for a student
-    private fun loadStudentProgress(userId: String) {
-        FirebaseFirestore.getInstance().collection("users").document(userId)
-            .collection("academicProgress")
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                // Extract the file URLs for academic progress documents
-                val ProgressList = querySnapshot.documents.mapNotNull { document ->
-                    document.getString("fileUrl") // Get the file path stored in Firestore
-                }
-                // Update the academic progress LiveData
-                _academicProgress.value = ProgressList
-            }
-
-    }
+//    private fun loadStudentProgress(userId: String) {
+//        FirebaseFirestore.getInstance().collection("users").document(userId)
+//            .collection("academicProgress")
+//            .get()
+//            .addOnSuccessListener { querySnapshot ->
+//                // Extract the file URLs for academic progress documents
+//                val ProgressList = querySnapshot.documents.mapNotNull { document ->
+//                    document.getString("fileUrl") // Get the file path stored in Firestore
+//                }
+//                // Update the academic progress LiveData
+//                _academicProgress.value = ProgressList
+//            }
+//
+//    }
+    //private fun loadInterests(userId: String){
+       // FirebaseFirestore.getInstance().collection("users").document(userId)
+           // .collection("Interests")
+            //.get()
+           // .addOnSuccessListener { querySnapshot ->
+            //    val InterestsList = querySnapshot.documents.mapNotNull { document ->
+             //       document.getString("fileUrl") // Get file path stored in Firestore
+              //  }
+               // _academicProgress.value = InterestsList
+          //  }
 
     // Function to load the profile picture URL from Firestore
+    //}
+    }
     private fun loadProfilePicture(userId: String) {
         FirebaseFirestore.getInstance().collection("users").document(userId)
             .get()
@@ -93,8 +112,9 @@ class ProfileViewModel : ViewModel() {
                 _profilePictureUrl.value = document.getString("profilePictureUrl")
             }
     }
-
 }
+
+
 
 // Data class to represent the user profile data
 data class UserProfile(
@@ -105,5 +125,7 @@ data class UserProfile(
     val subjects: List<String> = emptyList(), // List of subjects the user is associated with (e.g., for tutors)
     val grades: List<Int> = emptyList(),      // List of grades associated with the user (e.g., for tutors)
     val bio: String = "",        // User's bio
-    val location: String = ""    // User's location
+    val location: String = "",   // User's location
+    val interests: List<String> = emptyList(),
+    val progress: List<String> = emptyList(),
 )

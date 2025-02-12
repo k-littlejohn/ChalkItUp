@@ -83,11 +83,12 @@ fun SignupScreen(
     var userType by remember { mutableStateOf<UserType?>(null) } // Track user type: Student or Tutor
     var selectedSubjects by remember { mutableStateOf<Set<String>>(emptySet()) } // To store selected subjects
     var selectedGradeLevels by remember { mutableStateOf<Set<Int>>(emptySet()) } // To store selected grade levels
-
-    val availableSubjects =
-        listOf("Math", "Science", "English", "History", "Biology", "Physics") // Example subjects
+    var selectedInterests by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var bio by remember { mutableStateOf("") }
+    var location by remember { mutableStateOf("") }
+    val availableSubjects = listOf("Math", "Science", "English", "History", "Biology", "Physics") // Example subjects
     val availableGradeLevels = (7..12).toList() // Grade levels from 7 to 12
-
+    val availableInterests = listOf("Art History", "Genetics", "Animals", "Astronomy", "Environment", "Health Science")
     var hasScrolledToBottom by remember { mutableStateOf(false) }
     var hasAgreedToTerms by remember { mutableStateOf(false) }
 
@@ -176,7 +177,6 @@ fun SignupScreen(
         // Subject selection (only visible for Tutors)
         // - Firestore and functionality purposes, change signup UI
         if (userType == UserType.Tutor) {
-
             Text("Select Subjects:")
             Spacer(modifier = Modifier.height(8.dp))
             Box(modifier = Modifier.height(200.dp)) {
@@ -267,6 +267,45 @@ fun SignupScreen(
             }
         }
 
+        //TextField(value = email, onValueChange = { email = it }, label = { Text("Email") })
+        //TextField(value = password, onValueChange = { password = it }, label = { Text("Password") }, visualTransformation = PasswordVisualTransformation())
+        //TextField(value = firstName, onValueChange = { firstName = it }, label = { Text("First Name") })
+        //TextField(value = lastName, onValueChange = { lastName = it }, label = { Text("Last Name") })
+        TextField(value = bio, onValueChange = { bio = it }, label = { Text("BIO") })
+        TextField(value = location, onValueChange = { location = it }, label = { Text("CITY") })
+        //-------------interest selection
+        Spacer(modifier = Modifier.width(16.dp))
+        Text("Select Interests:")
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Box(modifier=Modifier.height(200.dp)){LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+        ) {
+            items(availableInterests.size) { index ->
+                val Interests = availableInterests[index]
+                val isSelected = selectedInterests.contains(Interests)
+                Button(
+                    onClick = {
+                        selectedInterests = if (isSelected) {
+                            selectedInterests - Interests // Remove subject from selection
+                        } else {
+                            selectedInterests + Interests // Add subject to selection
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isSelected) Color.Green else Color.Gray
+                    ),
+                    modifier = Modifier.padding(2.dp)
+                ) {
+                    Text(Interests)
+                }
+            }
+        }}
+        Spacer(modifier = Modifier.height(8.dp))
+//-----------------------------------------------
 
         // Terms and Conditions
         Text("Terms and Conditions", style = MaterialTheme.typography.titleMedium)
