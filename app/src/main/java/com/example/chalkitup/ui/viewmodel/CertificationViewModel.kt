@@ -65,7 +65,7 @@ class CertificationViewModel : ViewModel() {
     fun uploadFiles(context: Context, user: FirebaseUser) {
         val userId = user.uid  // Use the passed user object
         val storageRef =
-            storage.reference.child("certifications/$userId")  // Reference to the storage path for the user
+            storage.reference.child("$userId/certifications")  // Reference to the storage path for the user
 
         // Iterate over each selected file URI
         _selectedFiles.value.forEach { uri ->
