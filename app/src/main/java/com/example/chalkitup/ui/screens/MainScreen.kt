@@ -30,7 +30,7 @@ fun MainScreen() {
     // Observe route changes
     LaunchedEffect(navController) {
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            currentRoute = destination.route.substringBefore("/")
+            currentRoute = destination.route?.substringBefore("/")
         }
     }
 
