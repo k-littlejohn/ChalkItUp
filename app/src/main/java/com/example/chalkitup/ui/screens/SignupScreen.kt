@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Face
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -63,6 +62,7 @@ import androidx.compose.material3.IconButtonColors
 import androidx.compose.ui.draw.shadow
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import com.example.chalkitup.R
@@ -114,7 +114,7 @@ fun SignupScreen(
     )
 
 
-    var location by remember { mutableStateOf("") }
+//    var location by remember { mutableStateOf("") }
 
     val availableSubjects =
         listOf("Math",
@@ -243,12 +243,12 @@ fun SignupScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            OutlinedTextField(
-                value = location,
-                onValueChange = { location = it },
-                label = { Text("City") },
-                modifier = Modifier.fillMaxWidth()
-            )
+//            OutlinedTextField(
+//                value = location,
+//                onValueChange = { location = it },
+//                label = { Text("City") },
+//                modifier = Modifier.fillMaxWidth()
+//            )
 
             // want to remove
             //TextField(value = bio, onValueChange = { bio = it }, label = { Text("BIO") })
@@ -447,6 +447,8 @@ enum class UserType {
     Tutor
 }
 
+// need to add
+// - make it so that chem/bio/phys cant be selected for grades <10
 @Composable
 fun SubjectGradeItem(
     subject: String,
@@ -679,31 +681,18 @@ fun SelectedFileItem(fileName: String, fileUri: Uri, onRemove: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .height(200.dp)
             .padding(vertical = 4.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Show image preview if the file is an image
-            if (mimeType?.startsWith("image/") == true) {
-                AsyncImage(
-                    model = fileUri,
-                    contentDescription = "Selected Image",
-                    modifier = Modifier
-                        .size(100.dp) // Adjust the size as needed
-                        .clip(RoundedCornerShape(8.dp))
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-            }
 
             Row(
+                modifier = Modifier.padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(imageVector = Icons.Default.Face, contentDescription = "File Icon")
-
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Text(
@@ -717,6 +706,22 @@ fun SelectedFileItem(fileName: String, fileUri: Uri, onRemove: () -> Unit) {
                     Icon(imageVector = Icons.Default.Delete, contentDescription = "Remove File")
                 }
             }
+
+            // Show image preview if the file is an image
+            if (mimeType?.startsWith("image/") == true) {
+                AsyncImage(
+                    model = fileUri,
+                    contentDescription = "Selected Image",
+                    modifier = Modifier
+                        .fillMaxWidth()  // Ensures the image takes up the full width
+                        //.height(200.dp)  // Adjust height as needed
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop // Ensures the image fills width and crops exces
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
         }
     }
 }
@@ -767,5 +772,5 @@ val termsAndConditions = """
     |**9. Changes to These Terms**
     |We may update these Terms and Conditions from time to time. Users will be notified of significant changes, and continued use of the app implies acceptance of the updated terms.
     |
-    |**10. Contact Us**
+    |
 """.trimMargin()
