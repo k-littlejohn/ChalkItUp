@@ -3,8 +3,10 @@ package com.example.chalkitup.ui.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.storage
 
 // Handles logic for ProfileScreen
 // - fetches user information from firebase and loads it
@@ -51,28 +53,19 @@ class ProfileViewModel : ViewModel() {
                     loadProfilePicture(userId)
 
                     // Check if the user is a tutor or a student
-
                     _isTutor.value = user.userType == "Tutor"
-                    if (user.userType == "Tutor") {
-                        // Placeholder for loading tutor specific information
-                        // Currently none saved yet
-                        // Certification loading is handled by the CertificationViewModel
-                    } else {
-                        // Placeholder for loading student specific information
-                        // Currently none saved yet
-                    }
                 }
             }
     }
 
-    // Function to load the profile picture URL from Firestore
+    // Function to load the profile picture from storage
     private fun loadProfilePicture(userId: String) {
-        FirebaseFirestore.getInstance().collection("users").document(userId)
-            .get()
-            .addOnSuccessListener { document ->
-                // Set the profile picture URL in the LiveData
-                _profilePictureUrl.value = document.getString("profilePictureUrl")
-            }
+        val storageRef = Firebase.storage.reference.child("$userId/profilePicture.jpg")
+        storageRef.downloadUrl.addOnSuccessListener { uri ->
+            _profilePictureUrl.value = uri.toString()
+        }.addOnFailureListener {
+            _profilePictureUrl.value = null // Set to null if no profile picture exists
+        }
     }
 }
 

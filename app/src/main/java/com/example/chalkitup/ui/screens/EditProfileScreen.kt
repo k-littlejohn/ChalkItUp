@@ -45,7 +45,9 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
     val scrollState = rememberScrollState()
 
     val userProfile by viewModel.userProfile.observeAsState()
+
     val profilePictureUrl by viewModel.profilePictureUrl.observeAsState()
+
     val isTutor by remember(userProfile) {
         derivedStateOf { userProfile?.userType == "Tutor" }
     }

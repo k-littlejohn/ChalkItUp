@@ -1,6 +1,5 @@
 package com.example.chalkitup.ui.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -39,7 +38,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import com.example.chalkitup.R
 import com.example.chalkitup.ui.viewmodel.Certification
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
@@ -54,7 +52,9 @@ fun ProfileScreen(
     val userProfile by profileViewModel.userProfile.observeAsState()
     val isTutor by profileViewModel.isTutor.observeAsState()
     val certifications by certificationViewModel.certifications.collectAsState()
+
     val profilePictureUrl by profileViewModel.profilePictureUrl.observeAsState()
+
     val scrollState = rememberScrollState()
 
     LaunchedEffect(Unit) {

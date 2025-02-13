@@ -38,8 +38,6 @@ fun MainScreen() {
     val showBottomBar = currentRoute !in hideBottomBarRoutes
 
     val hideTopBarRoutes = listOf("start","login","signup","checkEmail","forgotPassword")
-
-
     val showTopBar = currentRoute !in hideTopBarRoutes
 
     ModalNavigationDrawer(
