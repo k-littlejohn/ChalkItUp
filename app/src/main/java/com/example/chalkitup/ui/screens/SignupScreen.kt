@@ -172,7 +172,7 @@ fun SignupScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(170.dp))
-            Text("Sign Up", fontFamily = MontserratFont, fontWeight = FontWeight.SemiBold, fontSize = 36.sp, color = Color.Black)
+            Text("Sign Up", fontSize = 36.sp, fontWeight = FontWeight.Bold,  color = Color.Black) // Not using rn : fontFamily = MontserratFont,
             Spacer(modifier = Modifier.height(75.dp))
 
             Text("Select account type to get started", fontFamily = MontserratFont, fontSize = 14.sp, color = Color.Gray)
