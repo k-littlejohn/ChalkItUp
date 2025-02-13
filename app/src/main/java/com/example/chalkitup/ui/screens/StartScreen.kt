@@ -48,18 +48,27 @@ fun StartScreen(navController: NavController) {
     )
 
     val textEntries = listOf(
-        TextEntry("Choose Your Learning Style", "1-on-1 tutoring sessions (online or in-person)"),
+        TextEntry("Choose Learning Style", "1-on-1 tutoring sessions (online or in-person)"),
         TextEntry("Flexible Scheduling", "Choose dates and times that fit your schedule"),
         TextEntry("Stay Connected", "Communicate effortlessly with your tutor"),
-        TextEntry("Track Your Progress", "Upload grades, track lessons, view achievements")
+        TextEntry("Track Your Progress", "Upload grades, view lessons and achievements")
     )
 
+    val AtkinsonFont = FontFamily(
+        Font(R.font.atkinson_regular, FontWeight.Normal),
+        Font(R.font.atkinson_light, FontWeight.Light),
+        Font(R.font.atkinson_bold, FontWeight.Bold),
+        Font(R.font.atkinson_extrabold, FontWeight.ExtraBold)
+    )
+/*
     // Muli/Mulish Font
     val mulishFont = FontFamily(
         Font(R.font.mulish_font, FontWeight.Normal),
         Font(R.font.mulish_bold, FontWeight.Bold),
         Font(R.font.mulish_extrabold, FontWeight.ExtraBold)
     )
+
+ */
 
     // Auto-Rotate the Images & Text On 4-second Delay
     LaunchedEffect(Unit) {
@@ -91,7 +100,7 @@ fun StartScreen(navController: NavController) {
                 Image(
                     painter = painterResource(id = R.drawable.image_background),
                     contentDescription = "Background",
-                    modifier = Modifier.size(330.dp)
+                    modifier = Modifier.size(320.dp)
                 )
                 Image(
                     painter = painterResource(id = images[currentImageIndex]),
@@ -105,16 +114,16 @@ fun StartScreen(navController: NavController) {
             // Dynamic Changing Text With Image
             Text(
                 text = textEntries[currentImageIndex].title,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.ExtraBold,
+                fontSize = 29.4.sp,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black,
-                fontFamily = mulishFont
+                fontFamily = AtkinsonFont
             )
             Text(
                 text = textEntries[currentImageIndex].description,
-                fontSize = 14.4.sp,
+                fontSize = 15.sp,
                 color = Color.Gray,
-                fontFamily = mulishFont
+                fontFamily = AtkinsonFont
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -141,8 +150,7 @@ fun StartScreen(navController: NavController) {
                 Text(
                     text = "LOGIN",
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = mulishFont
+
                 )
             }
 
@@ -153,15 +161,15 @@ fun StartScreen(navController: NavController) {
                 Text(
                     text = "Don't have an account? ",
                     color = Color.Black,
-                    fontSize = 14.sp,
-                    fontFamily = mulishFont
+                    fontSize = 15.sp,
+                    fontFamily = AtkinsonFont
                 )
                 Text(
                     text = "Sign Up",
                     color = Color.Black,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    fontFamily = mulishFont,
+                    fontSize = 15.sp,
+                    fontFamily = AtkinsonFont,
                     modifier = Modifier.clickable { navController.navigate("signup") }
                 )
             }
