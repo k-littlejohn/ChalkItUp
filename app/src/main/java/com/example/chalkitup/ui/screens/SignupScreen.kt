@@ -61,9 +61,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.ui.draw.shadow
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.ui.text.font.Font
@@ -331,15 +328,7 @@ fun SignupScreen(
                                     tutorSubjects =
                                         tutorSubjects.toMutableList().apply { removeAt(index) }
                                 }
-
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isSelected) Color(0xFF06C59C) else Color.LightGray
-                            ),
-                            modifier = Modifier.padding(2.dp),
-                            shape = RoundedCornerShape(corner = CornerSize(7.dp))
-                        ) {
-                            Text(gradeLevel.toString())
+                            )
 
                         }
                     }
@@ -476,7 +465,7 @@ fun SubjectGradeItem(
     var expandedGrade by remember { mutableStateOf(false) }
     var expandedSpec by remember { mutableStateOf(false) }
 
-    val selectedButtonColor = Color(0xFF06C59C) // Green when selected
+    val selectedButtonColor = Color(0xFF54A4FF) // Green when selected
     val defaultButtonColor = Color.LightGray // Gray when not selected
 
     Row(
@@ -497,7 +486,7 @@ fun SubjectGradeItem(
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text(text = subject.ifEmpty { "Subject" })
+                Text(text = subject.ifEmpty { "Subject" }, fontSize = 14.sp)
             }
 
             DropdownMenu(
@@ -532,7 +521,7 @@ fun SubjectGradeItem(
 
         // Grade Level Selection Button
         Box(modifier = Modifier
-            .weight(2f)
+            .weight(1.8f)
             .background(Color.Transparent)) {
             Button(
                 onClick = { expandedGrade = true },
@@ -542,7 +531,9 @@ fun SubjectGradeItem(
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text(text = gradeLevel.ifEmpty { "Grade" })
+                Text(text = gradeLevel.ifEmpty { "Gr" },
+                    fontSize = 14.sp
+                )
             }
 
             DropdownMenu(
@@ -579,7 +570,7 @@ fun SubjectGradeItem(
         if (gradeLevel == "10") {
             // Spec Selection Button
             Box(modifier = Modifier
-                .weight(2.5f)
+                .weight(2.9f)
                 .background(Color.Transparent)) {
                 Button(
                     onClick = { expandedSpec = true },
@@ -589,7 +580,7 @@ fun SubjectGradeItem(
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text(text = gradeSpec.ifEmpty { "Level" })
+                    Text(text = gradeSpec.ifEmpty { "Level" },fontSize = 14.sp)
                 }
 
                 DropdownMenu(
@@ -624,7 +615,7 @@ fun SubjectGradeItem(
         } else if (gradeLevel == "11" || gradeLevel == "12") {
             // Spec Selection Button
             Box(modifier = Modifier
-                .weight(2.5f)
+                .weight(2.9f)
                 .background(Color.Transparent)) {
                 Button(
                     onClick = { expandedSpec = true },
@@ -634,7 +625,7 @@ fun SubjectGradeItem(
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text(text = gradeSpec.ifEmpty { "Level" })
+                    Text(text = gradeSpec.ifEmpty { "Level" },fontSize = 14.sp)
                 }
 
                 DropdownMenu(
@@ -667,7 +658,7 @@ fun SubjectGradeItem(
             Spacer(modifier = Modifier.width(8.dp))
         } else {
             Box(modifier = Modifier
-                .weight(2.5f)
+                .weight(2.9f)
                 .background(Color.Transparent))
             onSpecChange("")
         }
