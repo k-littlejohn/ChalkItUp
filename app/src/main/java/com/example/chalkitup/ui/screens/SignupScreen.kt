@@ -52,6 +52,11 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.chalkitup.ui.viewmodel.AuthViewModel
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.background
+
 
 // UI of signup screen
 
@@ -74,6 +79,7 @@ fun SignupScreen(
             }
         }
 
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -87,12 +93,21 @@ fun SignupScreen(
     var bio by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
 
-    val availableSubjects = listOf("Math", "Science", "English", "History", "Biology", "Physics") // Example subjects
+    val availableSubjects =
+        listOf("Math", "Science", "English", "History", "Biology", "Physics") // Example subjects
     val availableGradeLevels = (7..12).toList() // Grade levels from 7 to 12
-    val availableInterests = listOf("Art History", "Genetics", "Animals", "Astronomy", "Environment", "Health Science")
+    val availableInterests =
+        listOf("Art History", "Genetics", "Animals", "Astronomy", "Environment", "Health Science")
 
     var hasScrolledToBottom by remember { mutableStateOf(false) }
     var hasAgreedToTerms by remember { mutableStateOf(false) }
+
+    val gradientBrush = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF54A4FF), // 5% Blue
+            Color.White, Color.White, Color.White, Color.White //95% white
+        )
+    )
 
     // Track scrolling for Terms & Conditions ONLY
     LaunchedEffect(termsScrollState.value) {
@@ -101,112 +116,216 @@ fun SignupScreen(
         }
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .fillMaxSize()
-            .verticalScroll(scrollState),  // Main form scroll
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(gradientBrush)
     ) {
-
-        Text("Sign Up")
-
-        // User type selection (Student / Tutor)
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+                .fillMaxSize()
+                .padding(24.dp)
+                .verticalScroll(scrollState),
+            verticalArrangement = Arrangement.spacedBy(16.dp), //
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Button(
-                onClick = {
-                    userType = UserType.Student
-                    selectedSubjects = emptySet() // Clear subjects list when switching to Student
-                    selectedGradeLevels = emptySet() // Clear grade levels when switching to Student
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (userType == UserType.Student) Color.Blue else Color.Gray
-                )
+            Spacer(modifier = Modifier.height(140.dp))
+            Text("Sign Up", fontWeight = FontWeight.Bold, fontSize = 40.sp, color = Color.Black)
+            Spacer(modifier = Modifier.height(65.dp))
+
+            Text("Select account type to get started", fontSize = 16.sp, color = Color.Gray)
+            //Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Text("Student")
+                Button(
+                    onClick = { userType = UserType.Student },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (userType == UserType.Student) Color(0xFF0066CC) else Color.LightGray
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) { Text("Student", color = Color.White, fontSize = 16.sp) }
+
+                Button(
+                    onClick = { userType = UserType.Tutor },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (userType == UserType.Tutor) Color(0xFF0066CC) else Color.LightGray
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) { Text("Tutor", color = Color.White, fontSize = 16.sp) }
             }
 
+            //Spacer(modifier = Modifier.height(1.dp)) // Space between buttons and fields
+
+            TextField(
+                value = firstName,
+                onValueChange = { firstName = it },
+                label = { Text("First Name") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(.1.dp))
+
+            TextField(
+                value = lastName,
+                onValueChange = { lastName = it },
+                label = { Text("Last Name") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(.1.dp))
+
+            TextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(.5.dp))
+
+            TextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(.5.dp))
+
+            TextField(
+                value = confirmPassword,
+                onValueChange = { confirmPassword = it },
+                label = { Text("Confirm Password") },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(.5.dp))
+
+            TextField(
+                value = location,
+                onValueChange = { location = it },
+                label = { Text("City") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+
+            // Subject selection (only visible for Tutors)
+            // - Firestore and functionality purposes, change signup UI
+            if (userType == UserType.Tutor) {
+                Text("Select Subjects")
+                //Spacer(modifier = Modifier.height(8.dp))
+                Box(modifier = Modifier.height(200.dp)) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(3),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        userScrollEnabled = false
+                    ) {
+                        items(availableSubjects.size) { index ->
+                            val subject = availableSubjects[index]
+                            val isSelected = selectedSubjects.contains(subject)
+                            Button(
+                                onClick = {
+                                    selectedSubjects = if (isSelected) {
+                                        selectedSubjects - subject // Remove subject from selection
+                                    } else {
+                                        selectedSubjects + subject // Add subject to selection
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (isSelected) Color(0xFF06C59C) else Color.Gray
+                                ),
+                                modifier = Modifier.padding(2.dp)
+                            ) {
+                                Text(subject)
+                            }
+                        }
+                    }
+                }
+
+               // Spacer(modifier = Modifier.height(8.dp))
+
+                // Grade level selection (only visible for Tutors)
+                // - Firestore and functionality purposes, change signup UI
+                Text("Select Grade Levels")
+                //Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    availableGradeLevels.forEach { gradeLevel ->
+                        val isSelected = selectedGradeLevels.contains(gradeLevel)
+                        Button(
+                            onClick = {
+                                selectedGradeLevels = if (isSelected) {
+                                    selectedGradeLevels - gradeLevel // Remove grade level from selection
+                                } else {
+                                    selectedGradeLevels + gradeLevel // Add grade level to selection
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isSelected) Color(0xFF06C59C) else Color.Gray
+                            ),
+                            modifier = Modifier.padding(4.dp)
+                        ) {
+                            Text(gradeLevel.toString())
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+
+
+                Button(onClick = { launcher.launch("//*/*") }) {
+                    Text("Select Certifications")
+                }
+
+                if (selectedFiles.isNotEmpty()) {
+                    Text(text = "Selected Files:", style = MaterialTheme.typography.titleMedium)
+                    Column( // Use Column instead of LazyColumn
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        selectedFiles.forEach { uri ->
+                            val fileName = certificationViewModel.getFileNameFromUri(context, uri)
+                            SelectedFileItem(
+                                fileName = fileName,
+                                fileUri = uri,
+                                onRemove = { certificationViewModel.removeSelectedFile(uri) }
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                } else {
+                    Text(text = "No files selected.", color = Color.Gray)
+                }
+            }
+
+
+
+/* i think interests should be edited through account, its making signup look overwhelming.
+
+            //-------------interest selection
             Spacer(modifier = Modifier.width(16.dp))
-
-            Button(
-                onClick = { userType = UserType.Tutor },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (userType == UserType.Tutor) Color.Blue else Color.Gray
-                )
-            ) {
-                Text("Tutor")
-            }
-        }
-
-        TextField(value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") }
-        )
-
-        TextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            visualTransformation = PasswordVisualTransformation()
-        )
-
-        TextField(
-            value = confirmPassword,
-            onValueChange = { confirmPassword = it },
-            label = { Text("Confirm Password") },
-            visualTransformation = PasswordVisualTransformation()
-        )
-
-        TextField(
-            value = firstName,
-            onValueChange = { firstName = it },
-            label = { Text("First Name") }
-        )
-
-        TextField(
-            value = lastName,
-            onValueChange = { lastName = it },
-            label = { Text("Last Name") }
-        )
-
-
-       /*
-       Didnt feel it was necessary so i removed for now
-       TextField(value = bio, onValueChange = { bio = it }, label = { Text("BIO") })
-        */
-
-        TextField(value = location, onValueChange = { location = it }, label = { Text("City") })
-
-
-        // Subject selection (only visible for Tutors)
-        // - Firestore and functionality purposes, change signup UI
-        if (userType == UserType.Tutor) {
-            Text("Select Subjects:")
+            Text("Select Interests:")
             Spacer(modifier = Modifier.height(8.dp))
+
             Box(modifier = Modifier.height(200.dp)) {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(3),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    userScrollEnabled = false
                 ) {
-                    items(availableSubjects.size) { index ->
-                        val subject = availableSubjects[index]
-                        val isSelected = selectedSubjects.contains(subject)
+                    items(availableInterests.size) { index ->
+                        val Interests = availableInterests[index]
+                        val isSelected = selectedInterests.contains(Interests)
                         Button(
                             onClick = {
-                                selectedSubjects = if (isSelected) {
-                                    selectedSubjects - subject // Remove subject from selection
+                                selectedInterests = if (isSelected) {
+                                    selectedInterests - Interests // Remove subject from selection
                                 } else {
-                                    selectedSubjects + subject // Add subject to selection
+                                    selectedInterests + Interests // Add subject to selection
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(
@@ -214,236 +333,148 @@ fun SignupScreen(
                             ),
                             modifier = Modifier.padding(2.dp)
                         ) {
-                            Text(subject)
+                            Text(Interests)
                         }
                     }
                 }
             }
-
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Grade level selection (only visible for Tutors)
-            // - Firestore and functionality purposes, change signup UI
-            Text("Select Grade Levels:")
+ */
+//-----------------------------------------------
             Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth()
+
+            // Terms and Conditions
+            Text("Terms and Conditions", style = MaterialTheme.typography.titleMedium)
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(70.dp)
+                    .border(1.dp, Color.Gray)
+                    .padding(8.dp)
+                    .verticalScroll(termsScrollState) // Separate scroll state
             ) {
-                availableGradeLevels.forEach { gradeLevel ->
-                    val isSelected = selectedGradeLevels.contains(gradeLevel)
-                    Button(
-                        onClick = {
-                            selectedGradeLevels = if (isSelected) {
-                                selectedGradeLevels - gradeLevel // Remove grade level from selection
-                            } else {
-                                selectedGradeLevels + gradeLevel // Add grade level to selection
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isSelected) Color.Green else Color.Gray
-                        ),
-                        modifier = Modifier.padding(4.dp)
-                    ) {
-                        Text(gradeLevel.toString())
-                    }
-                }
+                Text(
+                    text = termsAndConditions,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
+                Checkbox(
+                    checked = hasAgreedToTerms,
+                    onCheckedChange = { hasAgreedToTerms = it },
+                    enabled = hasScrolledToBottom
+                )
+                Text("I have read and agree to the Terms and Conditions")
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
-
-            Button(onClick = { launcher.launch("*/*") }) {
-                Text("Select Certifications")
+            Button(onClick = {
+                errorMessage = ""
+                // Validate fields before attempting signup
+                if (email.isEmpty() || password.isEmpty() || firstName.isEmpty() || lastName.isEmpty()) {
+                    errorMessage = "All fields must be filled"
+                } else if (password != confirmPassword) {
+                    errorMessage = "Passwords do not match"
+                } else if (!hasAgreedToTerms) {
+                    errorMessage = "You must agree to the Terms and Conditions"
+                } else if (userType == null) {
+                    errorMessage = "Please select a user type"
+                } else if ((userType == UserType.Tutor) &&
+                    (selectedSubjects.isEmpty() || selectedGradeLevels.isEmpty())
+                ) {
+                    errorMessage = "You must be able to tutor at least 1 subject and 1 grade level"
+                } else if (!hasAgreedToTerms) {
+                    errorMessage = "You must agree to the Terms and Conditions"
+                } else {
+                    //userType!!.name passes the enum value as a string
+                    authViewModel.signupWithEmail(email, password, firstName, lastName,
+                        userType!!.name, selectedSubjects.toList(), selectedGradeLevels.toList(),
+                        bio, location, selectedInterests.toList(),
+                        onUserReady = { user ->
+                            certificationViewModel.uploadFiles(context, user)
+                            navController.navigate("checkEmail/verify")
+                        },
+                        onError = { errorMessage = it }
+                    )
+                }
+            }
+            ) {
+                Text("Sign Up")
             }
 
-            if (selectedFiles.isNotEmpty()) {
-                Text(text = "Selected Files:", style = MaterialTheme.typography.titleMedium)
-                Column( // Use Column instead of LazyColumn
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+            if (errorMessage.isNotEmpty()) {
+                Text(errorMessage, color = Color.Red)
+            }
+        }
+    }
+}
+
+
+    // Enum to represent user types
+    enum class UserType {
+        Student,
+        Tutor
+    }
+
+    // UI for certification items
+    @Composable
+    fun SelectedFileItem(fileName: String, fileUri: Uri, onRemove: () -> Unit) {
+        val context = LocalContext.current
+        val contentResolver = context.contentResolver
+        val mimeType = contentResolver.getType(fileUri)
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Show image preview if the file is an image
+                if (mimeType?.startsWith("image/") == true) {
+                    AsyncImage(
+                        model = fileUri,
+                        contentDescription = "Selected Image",
+                        modifier = Modifier
+                            .size(100.dp) // Adjust the size as needed
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    selectedFiles.forEach { uri ->
-                        val fileName = certificationViewModel.getFileNameFromUri(context, uri)
-                        SelectedFileItem(
-                            fileName = fileName,
-                            fileUri = uri,
-                            onRemove = { certificationViewModel.removeSelectedFile(uri) }
-                        )
+                    Icon(imageVector = Icons.Default.Face, contentDescription = "File Icon")
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text(
+                        text = fileName,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    IconButton(onClick = { onRemove() }) {
+                        Icon(imageVector = Icons.Default.Delete, contentDescription = "Remove File")
                     }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-            } else {
-                Text(text = "No files selected.", color = Color.Gray)
-            }
-        }
-
-
-        //TextField(value = bio, onValueChange = { bio = it }, label = { Text("BIO") })
-        //TextField(value = location, onValueChange = { location = it }, label = { Text("CITY") })
-
-        //-------------interest selection
-        Spacer(modifier = Modifier.width(16.dp))
-        Text("Select Interests:")
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Box(modifier=Modifier.height(200.dp)){LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-        ) {
-            items(availableInterests.size) { index ->
-                val Interests = availableInterests[index]
-                val isSelected = selectedInterests.contains(Interests)
-                Button(
-                    onClick = {
-                        selectedInterests = if (isSelected) {
-                            selectedInterests - Interests // Remove subject from selection
-                        } else {
-                            selectedInterests + Interests // Add subject to selection
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isSelected) Color.Green else Color.Gray
-                    ),
-                    modifier = Modifier.padding(2.dp)
-                ) {
-                    Text(Interests)
-                }
-            }
-        }}
-        Spacer(modifier = Modifier.height(8.dp))
-//-----------------------------------------------
-
-        // Terms and Conditions
-        Text("Terms and Conditions", style = MaterialTheme.typography.titleMedium)
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(150.dp)
-                .border(1.dp, Color.Gray)
-                .padding(8.dp)
-                .verticalScroll(termsScrollState) // Separate scroll state
-        ) {
-            Text(
-                text = termsAndConditions,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(top = 8.dp)
-        ) {
-            Checkbox(
-                checked = hasAgreedToTerms,
-                onCheckedChange = { hasAgreedToTerms = it },
-                enabled = hasScrolledToBottom
-            )
-            Text("I have read and agree to the Terms and Conditions")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(onClick = {
-            errorMessage = ""
-            // Validate fields before attempting signup
-            if (email.isEmpty() || password.isEmpty() || firstName.isEmpty() || lastName.isEmpty()) {
-                errorMessage = "All fields must be filled"
-            } else if (password != confirmPassword) {
-                errorMessage = "Passwords do not match"
-            } else if (!hasAgreedToTerms) {
-                errorMessage = "You must agree to the Terms and Conditions"
-            } else if (userType == null) {
-                errorMessage = "Please select a user type"
-            } else if ((userType == UserType.Tutor) &&
-                (selectedSubjects.isEmpty() || selectedGradeLevels.isEmpty())
-            ) {
-                errorMessage = "You must be able to tutor at least 1 subject and 1 grade level"
-            } else if (!hasAgreedToTerms) {
-                errorMessage = "You must agree to the Terms and Conditions"
-            } else {
-                //userType!!.name passes the enum value as a string
-                authViewModel.signupWithEmail(email, password, firstName, lastName,
-                    userType!!.name, selectedSubjects.toList(), selectedGradeLevels.toList(),
-                    bio, location, selectedInterests.toList(),
-                    onUserReady = { user ->
-                        certificationViewModel.uploadFiles(context, user)
-                        navController.navigate("checkEmail/verify")
-                    },
-                    onError = { errorMessage = it }
-                )
-            }
-        }
-        ) {
-            Text("Sign Up")
-        }
-
-        if (errorMessage.isNotEmpty()) {
-            Text(errorMessage, color = Color.Red)
-        }
-    }
-}
-
-// Enum to represent user types
-enum class UserType {
-    Student,
-    Tutor
-}
-
-// UI for certification items
-@Composable
-fun SelectedFileItem(fileName: String, fileUri: Uri, onRemove: () -> Unit) {
-    val context = LocalContext.current
-    val contentResolver = context.contentResolver
-    val mimeType = contentResolver.getType(fileUri)
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Show image preview if the file is an image
-            if (mimeType?.startsWith("image/") == true) {
-                AsyncImage(
-                    model = fileUri,
-                    contentDescription = "Selected Image",
-                    modifier = Modifier
-                        .size(100.dp) // Adjust the size as needed
-                        .clip(RoundedCornerShape(8.dp))
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(imageVector = Icons.Default.Face, contentDescription = "File Icon")
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Text(
-                    text = fileName,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-
-                IconButton(onClick = { onRemove() }) {
-                    Icon(imageVector = Icons.Default.Delete, contentDescription = "Remove File")
-                }
             }
         }
     }
-}
+
 
 val termsAndConditions = """
     |**Terms and Conditions**
