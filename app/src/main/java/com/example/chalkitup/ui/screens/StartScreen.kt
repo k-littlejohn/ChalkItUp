@@ -150,8 +150,7 @@ fun StartScreen(navController: NavController) {
                 Text(
                     text = "LOGIN",
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = AtkinsonFont
+
                 )
             }
 

@@ -81,7 +81,7 @@ fun ForgotPasswordScreen(
             // Subtitle
             Text(
                 text = "No worries, we'll send you reset instructions.",
-                fontSize = 14.sp,
+                fontSize = 16.sp,
                 fontFamily = AtkinsonFont,
                 fontWeight = FontWeight.Normal,
                 color = Color.Gray
@@ -158,7 +158,7 @@ fun ForgotPasswordScreen(
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E88E5))
             ) {
-                Text("Reset Password", color = Color.White, fontFamily = AtkinsonFont)
+                Text("Reset Password", color = Color.White, fontSize = 16.sp)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -174,9 +174,6 @@ fun ForgotPasswordScreen(
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "Back to log in",
-                    fontSize = 14.sp,
-                    fontFamily = AtkinsonFont,
-                    color = Color.Gray
                 )
             }
         }
