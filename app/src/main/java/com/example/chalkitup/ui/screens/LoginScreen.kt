@@ -1,5 +1,7 @@
 package com.example.chalkitup.ui.screens
 
+import androidx.compose.foundation.layout.windowInsetsPadding // newly added
+import androidx.compose.foundation.layout.WindowInsets // newly added
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -22,7 +24,8 @@ import com.example.chalkitup.R
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 
-val atkinsonFont = FontFamily(
+
+val AtkinsonFont = FontFamily(
     Font(R.font.atkinson_regular, FontWeight.Normal),
     Font(R.font.atkinson_light, FontWeight.Light),
     Font(R.font.atkinson_bold, FontWeight.Bold),
@@ -49,7 +52,10 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(gradientBrush),
+            .background(gradientBrush)
+            .windowInsetsPadding(WindowInsets.statusBars) // New, Push content below status bar
+            .windowInsetsPadding(WindowInsets.navigationBars) //New,  Avoid overlap with navigation bar
+            .windowInsetsPadding(WindowInsets.ime), // New, Avoid overlap with keyboard when typing
         contentAlignment = Alignment.TopCenter
     ) {
         Column(
@@ -121,7 +127,7 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Forgot Password *** not done
+                // Forgot Password
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
