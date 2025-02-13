@@ -41,7 +41,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -66,6 +65,6 @@ dependencies {
     implementation(libs.androidx.navigation.compose.v275)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.compose.foundation)
-    testImplementation("junit:junit:4.13.2")
+    testImplementation(libs.junit)
     implementation(libs.coil.compose)
 }

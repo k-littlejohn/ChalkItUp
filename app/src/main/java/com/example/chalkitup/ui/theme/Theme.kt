@@ -1,6 +1,5 @@
 package com.example.chalkitup.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -32,8 +31,6 @@ private val LightColorScheme = lightColorScheme(
     onBackground = DarkGray,
     onSurface = DarkGray
 )
-
-
 
 /*
 private val DarkColorScheme = darkColorScheme(

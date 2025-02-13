@@ -1,23 +1,24 @@
 [versions]
 agp = "8.8.0"
 coilCompose = "2.2.2"
+junit = "4.13.2"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.0"
-composeBom = "2025.01.01"
+composeBom = "2025.02.00"
 googleGmsGoogleServices = "4.4.2"
 firebaseAuth = "23.2.0"
 firebaseFirestore = "25.1.2"
-navigationComposeVersion = "2.8.6"
-navigationRuntimeAndroid = "2.9.0-alpha05"
-navigationCompose = "2.8.6"
+navigationComposeVersion = "2.8.7"
+navigationRuntimeAndroid = "2.9.0-alpha06"
+navigationCompose = "2.8.7"
 firebaseStorage = "21.0.1"
-composeFoundation = "1.5.0"
+composeFoundation = "1.7.8"
 testng = "6.9.6"
-runtimeLivedata = "1.7.7"
+runtimeLivedata = "1.7.8"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -42,6 +43,7 @@ androidx-navigation-runtime-android = { group = "androidx.navigation", name = "n
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "composeFoundation" }
+junit = { module = "junit:junit", version.ref = "junit" }
 testng = { group = "org.testng", name = "testng", version.ref = "testng" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 
