@@ -54,13 +54,12 @@ class AuthViewModel : ViewModel() {
         firstName: String,
         lastName: String,
         userType: String,
-        subjects: List<String> = emptyList(),
-        grades: List<Int> = emptyList(),
+        subjects: List<Triple<String, String, String>> = emptyList(),
+
+        //grades: List<Int> = emptyList(),
 
         //bio: String,
-
-        location: String,
-
+        //location: String,
         //interests: List<String> = emptyList(),
 
         onUserReady: (FirebaseUser) -> Unit, // Callback with the user for file upload
@@ -82,12 +81,11 @@ class AuthViewModel : ViewModel() {
                                 "lastName" to lastName,
                                 "email" to email,
                                 "subjects" to subjects,
-                                "grades" to grades,
+
+                                //"grades" to grades,
 
                                 //"bio" to bio,
-
-                                "location" to location,
-
+                                //"location" to location,
                                 //"interests" to interests
 
                             )
