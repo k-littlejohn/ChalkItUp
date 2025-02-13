@@ -2,10 +2,12 @@ package com.example.chalkitup.ui.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 
 // Handles SettingScreen logic
 // - delete user's account
@@ -46,31 +48,42 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
-
     // Helper function to delete user's files from Firebase Storage
     private fun deleteStorageFiles(
         userId: String,
         onSuccess: () -> Unit,
-        onError: () -> Unit) {
-        // reference to storage
+        onError: () -> Unit
+    ) {
         val storageRef = storage.reference.child("$userId/")
 
-        storageRef.listAll()
-            .addOnSuccessListener { listResult ->
-                val deleteTasks = listResult.items.map { it.delete() }
-                Tasks.whenAllComplete(deleteTasks)  // Wait for all files to delete
-                    .addOnSuccessListener {
-                        Log.d("Storage", "Successfully deleted user's files from storage")
-                        onSuccess()
+        fun deleteDirectory(ref: StorageReference, onComplete: () -> Unit) {
+            ref.listAll()
+                .addOnSuccessListener { listResult ->
+                    val deleteTasks = mutableListOf<Task<Void>>()
+
+                    // Delete all files in the directory
+                    deleteTasks.addAll(listResult.items.map { it.delete() })
+
+                    // Recursively delete all files in subdirectories
+                    listResult.prefixes.forEach { subDir ->
+                        deleteDirectory(subDir) {}  // Recursively delete subdirectories
                     }
-                    .addOnFailureListener {
-                        Log.e("Storage", "Failed to delete user's files from storage")
-                        onError()
-                    }
-            }
-            .addOnFailureListener {
-                Log.e("Storage", "Failed to list files in storage")
-            }
+
+                    // Wait for all deletions to complete
+                    Tasks.whenAllComplete(deleteTasks)
+                        .addOnSuccessListener { onComplete() }
+                        .addOnFailureListener { onError() }
+                }
+                .addOnFailureListener {
+                    Log.e("Storage", "Failed to list files in storage: ${it.message}")
+                    onError()
+                }
+        }
+
+        deleteDirectory(storageRef) {
+            Log.d("Storage", "Successfully deleted all files for user: $userId")
+            onSuccess()
+        }
     }
 
     // Helper function to delete user from Firebase Authentication
@@ -87,6 +100,5 @@ class SettingsViewModel : ViewModel() {
                 onError()
             }
     }
-
 
 }
