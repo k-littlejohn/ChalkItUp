@@ -30,7 +30,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -62,6 +61,14 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.ui.draw.shadow
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import com.example.chalkitup.R
 
 // UI of signup screen
 
@@ -92,6 +99,23 @@ fun SignupScreen(
     var errorMessage by remember { mutableStateOf("") }
     var userType by remember { mutableStateOf<UserType?>(null) } // Track user type: Student or Tutor
     var tutorSubjects by remember { mutableStateOf(emptyList<Triple<String, String, String>>()) } // To store selected subjects
+
+
+    /* didnt like.
+    val AtkinsonFont = FontFamily(
+        Font(R.font.atkinson_regular, FontWeight.Normal),
+        Font(R.font.atkinson_light, FontWeight.Light),
+        Font(R.font.atkinson_bold, FontWeight.Bold),
+        Font(R.font.atkinson_extrabold, FontWeight.ExtraBold)
+    )
+    */
+
+    val MontserratFont = FontFamily(
+        Font(R.font.montserrat_regular, FontWeight.Normal),
+        Font(R.font.montserrat_semibold, FontWeight.SemiBold),
+        Font(R.font.montserrat_bold, FontWeight.Bold)
+    )
+
 
     var location by remember { mutableStateOf("") }
 
@@ -134,7 +158,22 @@ fun SignupScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(gradientBrush)
-    ) {
+    ){
+        // Back Button . couldnt get it to look like the login page one.. will reattempt soon
+        IconButton(
+            onClick = { navController.popBackStack() },
+            modifier = Modifier
+                .size(58.dp)
+                .padding(16.dp)
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
+                tint = Color.Black,
+                modifier = Modifier.size(106.dp)
+            )
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -143,12 +182,12 @@ fun SignupScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp), //
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(140.dp))
-            Text("Sign Up", fontWeight = FontWeight.Bold, fontSize = 40.sp, color = Color.Black)
-            Spacer(modifier = Modifier.height(65.dp))
+            Spacer(modifier = Modifier.height(170.dp))
+            Text("Sign Up", fontFamily = MontserratFont, fontWeight = FontWeight.SemiBold, fontSize = 36.sp, color = Color.Black)
+            Spacer(modifier = Modifier.height(75.dp))
 
-            Text("Select account type to get started", fontSize = 16.sp, color = Color.Gray)
-            //Spacer(modifier = Modifier.height(10.dp))
+            Text("Select account type to get started", fontFamily = MontserratFont, fontSize = 14.sp, color = Color.Gray)
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -156,65 +195,58 @@ fun SignupScreen(
                 Button(
                     onClick = { userType = UserType.Student },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (userType == UserType.Student) Color(0xFF0066CC) else Color.LightGray
+                        containerColor = if (userType == UserType.Student) Color(0xFF06C59C) else Color.LightGray
                     ),
                     shape = RoundedCornerShape(12.dp)
-                ) { Text("Student", color = Color.White, fontSize = 16.sp) }
+                ) { Text("Student", color = Color.DarkGray, fontSize = 16.sp) }
 
                 Button(
                     onClick = { userType = UserType.Tutor },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (userType == UserType.Tutor) Color(0xFF0066CC) else Color.LightGray
+                        containerColor = if (userType == UserType.Tutor) Color(0xFF54A4FF) else Color.LightGray
                     ),
                     shape = RoundedCornerShape(12.dp)
-                ) { Text("Tutor", color = Color.White, fontSize = 16.sp) }
+                ) { Text("Tutor", color = Color.DarkGray, fontSize = 16.sp) }
             }
 
-            //Spacer(modifier = Modifier.height(1.dp)) // Space between buttons and fields
-
-            TextField(
+            OutlinedTextField(
                 value = firstName,
                 onValueChange = { firstName = it },
                 label = { Text("First Name") },
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(.1.dp))
 
-            TextField(
+            OutlinedTextField(
                 value = lastName,
                 onValueChange = { lastName = it },
                 label = { Text("Last Name") },
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(.1.dp))
 
-            TextField(
+            OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(.5.dp))
 
-            TextField(
+            OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
                 label = { Text("Password") },
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(.5.dp))
 
-            TextField(
+            OutlinedTextField(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
                 label = { Text("Confirm Password") },
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(.5.dp))
 
-            TextField(
+            OutlinedTextField(
                 value = location,
                 onValueChange = { location = it },
                 label = { Text("City") },
@@ -223,9 +255,13 @@ fun SignupScreen(
 
             // want to remove
             //TextField(value = bio, onValueChange = { bio = it }, label = { Text("BIO") })
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             // Subject selection (only visible for Tutors)
             if (userType == UserType.Tutor) {
                 Text("Select Subjects")
+
 
                 // Add Subject Button
                 Row (
@@ -295,7 +331,16 @@ fun SignupScreen(
                                     tutorSubjects =
                                         tutorSubjects.toMutableList().apply { removeAt(index) }
                                 }
-                            )
+
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isSelected) Color(0xFF06C59C) else Color.LightGray
+                            ),
+                            modifier = Modifier.padding(2.dp),
+                            shape = RoundedCornerShape(corner = CornerSize(7.dp))
+                        ) {
+                            Text(gradeLevel.toString())
+
                         }
                     }
                 }
@@ -392,9 +437,12 @@ fun SignupScreen(
                         onError = { errorMessage = it }
                     )
                 }
-            }
+            },
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
+                shape = RoundedCornerShape(4.dp)
             ) {
-                Text("Sign Up")
+                Text("SIGN UP", color = Color.White, fontSize = 16.sp)
             }
 
             if (errorMessage.isNotEmpty()) {
