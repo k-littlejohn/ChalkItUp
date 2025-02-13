@@ -7,7 +7,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,82 +31,64 @@ class CertificationViewModel : ViewModel() {
     // Firebase instances for Authentication, Storage, and Firestore
     private val auth = FirebaseAuth.getInstance()
     private val storage = FirebaseStorage.getInstance()
-    private val firestore = FirebaseFirestore.getInstance()
+    //private val firestore = FirebaseFirestore.getInstance()
 
     // Initialize and fetch the certifications when the ViewModel is created
     init {
         getCertifications()
     }
 
-    // Function to get the list of certifications from Firestore
+    // Function to get the list of certifications directly from Firebase Storage
     private fun getCertifications() {
-        // Get the current user's UID from FirebaseAuth
-        val userId = auth.currentUser?.uid
-        userId?.let {
-            // Query the user's certifications collection in Firestore
-            FirebaseFirestore.getInstance().collection("users")
-                .document(it)
-                .collection("certifications")
-                .get()
-                .addOnSuccessListener { result ->
-                    // Map the Firestore documents to a list of Certification objects
-                    _certifications.value = result.documents.map { document ->
-                        Certification(
-                            fileName = document.getString("fileName") ?: "Unknown",
-                            fileUrl = document.getString("fileUrl") ?: ""
+        val userId = auth.currentUser?.uid ?: return
+        val storageRef = storage.reference.child("$userId/certifications")
+
+        storageRef.listAll()
+            .addOnSuccessListener { listResult ->
+                val certificationList = mutableListOf<Certification>()
+
+                if (listResult.items.isEmpty()) {
+                    _certifications.value = emptyList() // No files found
+                    return@addOnSuccessListener
+                }
+
+                // Fetch URLs for each file
+                listResult.items.forEach { fileRef ->
+                    fileRef.downloadUrl.addOnSuccessListener { uri ->
+                        certificationList.add(
+                            Certification(fileName = fileRef.name, fileUrl = uri.toString())
                         )
+
+                        // Ensure we update StateFlow only after collecting all URLs
+                        if (certificationList.size == listResult.items.size) {
+                            _certifications.value = certificationList
+                        }
                     }
                 }
-        }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("Storage", "Failed to list certifications: ${exception.message}")
+            }
     }
 
-    // Function to upload selected files to Firebase Storage and save their metadata in Firestore
+    // Function to upload selected files to Firebase Storage
     fun uploadFiles(context: Context, user: FirebaseUser) {
         val userId = user.uid  // Use the passed user object
-        val storageRef =
-            storage.reference.child("$userId/certifications")  // Reference to the storage path for the user
+        val storageRef = storage.reference.child("$userId/certifications")
 
-        // Iterate over each selected file URI
         _selectedFiles.value.forEach { uri ->
-            val fileName = getFileNameFromUri(context, uri)  // Get the file name from the URI
-            val fileRef =
-                storageRef.child(fileName)  // Create a reference for the file in Firebase Storage
+            val fileName = getFileNameFromUri(context, uri)
+            val fileRef = storageRef.child(fileName)
 
-            // Upload the file to Firebase Storage
             fileRef.putFile(uri)
                 .addOnSuccessListener {
                     Log.d("Upload", "Storage file uploaded successfully: $fileName")
 
-                    // Get the download URL of the uploaded file
-                    fileRef.downloadUrl.addOnSuccessListener { downloadUrl ->
-                        // Prepare the certification data to be saved in Firestore
-                        val certificationData = mapOf(
-                            "fileName" to fileName,
-                            "fileUrl" to downloadUrl.toString()
-                        )
-
-                        // Save the certification data in Firestore
-                        firestore.collection("users")
-                            .document(userId)
-                            .collection("certifications")
-                            .add(certificationData)
-                            .addOnSuccessListener {
-                                // After successful upload, refresh the list of certifications and clear selected files
-                                getCertifications()
-                                _selectedFiles.value = emptyList()
-                                Log.d("Upload", "Firestore file uploaded successfully: $fileName")
-                            }
-                            .addOnFailureListener { exception ->
-                                // Handle errors when saving to Firestore
-                                Log.e(
-                                    "Upload",
-                                    "Firestore file upload failed: ${exception.message}"
-                                )
-                            }
-                    }
+                    // Refresh the list after upload
+                    getCertifications()
+                    _selectedFiles.value = emptyList()
                 }
                 .addOnFailureListener { exception ->
-                    // Handle errors during the file upload to Firebase Storage
                     Log.e("Upload", "Storage file upload failed: ${exception.message}")
                 }
         }
@@ -136,6 +117,22 @@ class CertificationViewModel : ViewModel() {
         // Fallback in case the URI doesn't contain the expected metadata
         return uri.path?.substringAfterLast("/") ?: "Unknown File"
     }
+
+    // Function to delete a certification file from Storage
+//    fun deleteCertification(fileName: String) {
+//        val userId = auth.currentUser?.uid ?: return
+//        val fileRef = storage.reference.child("$userId/certifications/$fileName")
+//
+//        fileRef.delete()
+//            .addOnSuccessListener {
+//                Log.d("Delete", "Deleted file: $fileName")
+//                getCertifications() // Refresh list after deletion
+//            }
+//            .addOnFailureListener { exception ->
+//                Log.e("Delete", "Failed to delete file: ${exception.message}")
+//            }
+//    }
+
 }
 
 // Data class to represent the structure of a certification

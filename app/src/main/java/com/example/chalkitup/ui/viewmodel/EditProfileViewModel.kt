@@ -5,9 +5,11 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.storage
 
 // EditProfileViewModel
 // Handles EditProfileScreen logic:
@@ -51,7 +53,7 @@ class EditProfileViewModel : ViewModel() {
         }
     }
 
-    // Function to update the user's profile with the provided data
+    // Function to update the user's profile with the provided data to firestore
     fun updateProfile(
         firstName: String,
         lastName: String,
@@ -81,9 +83,9 @@ class EditProfileViewModel : ViewModel() {
         }
 
         // If there is a new profile picture URL, add it to the update data
-        tempProfilePictureUrl?.let {
-            updateData["profilePictureUrl"] = it
-        }
+//        tempProfilePictureUrl?.let {
+//            updateData["profilePictureUrl"] = it
+//        }
 
         // Update the user's profile in Firestore
         userRef.update(updateData)
@@ -118,12 +120,12 @@ class EditProfileViewModel : ViewModel() {
 
     // Function to load the user's profile picture URL from Firestore
     private fun loadProfilePicture(userId: String) {
-        FirebaseFirestore.getInstance().collection("users").document(userId)
-            .get()
-            .addOnSuccessListener { document ->
-                // Set the profile picture URL in the LiveData if it exists in Firestore
-                _profilePictureUrl.value = document.getString("profilePictureUrl")
-            }
+        val storageRef = Firebase.storage.reference.child("$userId/profilePicture.jpg")
+        storageRef.downloadUrl.addOnSuccessListener { uri ->
+            _profilePictureUrl.value = uri.toString()
+        }.addOnFailureListener {
+            _profilePictureUrl.value = null
+        }
     }
 
 }
