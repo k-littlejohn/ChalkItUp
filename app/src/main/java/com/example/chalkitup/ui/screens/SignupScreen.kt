@@ -89,8 +89,8 @@ fun SignupScreen(
     var userType by remember { mutableStateOf<UserType?>(null) } // Track user type: Student or Tutor
     var selectedSubjects by remember { mutableStateOf<Set<String>>(emptySet()) } // To store selected subjects
     var selectedGradeLevels by remember { mutableStateOf<Set<Int>>(emptySet()) } // To store selected grade levels
-    var selectedInterests by remember { mutableStateOf<Set<String>>(emptySet()) }
-    var bio by remember { mutableStateOf("") }
+    var selectedInterests by remember { mutableStateOf<Set<String>>(emptySet()) } //remove
+    var bio by remember { mutableStateOf("") } // remove 
     var location by remember { mutableStateOf("") }
 
     val availableSubjects =
@@ -207,6 +207,9 @@ fun SignupScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            // want to remove
+            TextField(value = bio, onValueChange = { bio = it }, label = { Text("BIO") })
+
 
             // Subject selection (only visible for Tutors)
             // - Firestore and functionality purposes, change signup UI
@@ -303,7 +306,7 @@ fun SignupScreen(
 
 
 
-/* i think interests should be edited through account, its making signup look overwhelming.
+// i think interests should be edited through account, its making signup look overwhelming.
 
             //-------------interest selection
             Spacer(modifier = Modifier.width(16.dp))
@@ -340,7 +343,7 @@ fun SignupScreen(
             }
             Spacer(modifier = Modifier.height(8.dp))
 
- */
+
 //-----------------------------------------------
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -396,7 +399,7 @@ fun SignupScreen(
                     //userType!!.name passes the enum value as a string
                     authViewModel.signupWithEmail(email, password, firstName, lastName,
                         userType!!.name, selectedSubjects.toList(), selectedGradeLevels.toList(),
-                        bio, location, selectedInterests.toList(),
+                        location, bio, selectedInterests.toList(),
                         onUserReady = { user ->
                             certificationViewModel.uploadFiles(context, user)
                             navController.navigate("checkEmail/verify")
