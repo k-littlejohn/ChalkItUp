@@ -11,6 +11,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 // - login
 // - logout
 // - email confirmation
+// - forgot password
 
 class AuthViewModel : ViewModel() {
 
@@ -53,8 +54,14 @@ class AuthViewModel : ViewModel() {
         firstName: String,
         lastName: String,
         userType: String,
-        subjects: List<String> = emptyList(),
-        grades: List<Int> = emptyList(),
+        subjects: List<Triple<String, String, String>> = emptyList(),
+
+        //grades: List<Int> = emptyList(),
+
+        //bio: String,
+        //location: String,
+        //interests: List<String> = emptyList(),
+
         onUserReady: (FirebaseUser) -> Unit, // Callback with the user for file upload
         onError: (String) -> Unit // Callback for errors during signup
     ) {
@@ -74,7 +81,13 @@ class AuthViewModel : ViewModel() {
                                 "lastName" to lastName,
                                 "email" to email,
                                 "subjects" to subjects,
-                                "grades" to grades,
+
+                                //"grades" to grades,
+
+                                //"bio" to bio,
+                                //"location" to location,
+                                //"interests" to interests
+
                             )
 
                             // Save the user data in Firestore under their UID
@@ -131,6 +144,23 @@ class AuthViewModel : ViewModel() {
     // Function to sign out the current user
     fun signout() {
         auth.signOut() // Logs out the user from FirebaseAuth
+    }
+
+    fun resetPassword(email: String,
+                      onSuccess: (String) -> Unit,
+                      onError: (String) -> Unit)
+    {
+        // add: check if email is verified? can only reset password if the email is verified?
+        auth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onSuccess("Reset email sent")
+                } else {
+                    onError(
+                        task.exception ?.message ?:"Reset failed"
+                    )
+                }
+            }
     }
 
 }

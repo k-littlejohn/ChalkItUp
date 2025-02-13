@@ -1,5 +1,6 @@
 package com.example.chalkitup.ui.nav
 
+import ForgotPasswordScreen
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -97,9 +98,20 @@ fun NavGraph(navController: NavHostController) {
         }
 
         // Check Email Screen
-        composable("checkEmail") {
+        composable("checkEmail/{checkType}") { backStackEntry ->
+            val checkType = backStackEntry.arguments?.getString("checkType") ?: "verify"
             val authViewModel: AuthViewModel = viewModel()
             CheckEmailScreen(
+                navController = navController,
+                checkType = checkType,
+                viewModel = authViewModel
+            )
+        }
+
+        // Forgot Password Screen
+        composable("forgotPassword") {
+            val authViewModel: AuthViewModel = viewModel()
+            ForgotPasswordScreen(
                 navController = navController,
                 viewModel = authViewModel
             )

@@ -3,8 +3,10 @@ package com.example.chalkitup.ui.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.storage
 
 // Handles logic for ProfileScreen
 // - fetches user information from firebase and loads it
@@ -22,18 +24,6 @@ class ProfileViewModel : ViewModel() {
     // LiveData to hold and observe the user's profile picture URL
     private val _profilePictureUrl = MutableLiveData<String?>()
     val profilePictureUrl: LiveData<String?> get() = _profilePictureUrl
-
-    // LiveData to hold and observe the academic progress for students
-//    private val _academicProgress = MutableLiveData<List<String>>()
-//    val academicProgress: LiveData<List<String>> get() = _academicProgress
-
-    // Automatically load the user profile when the ViewModel is created
-//    private val _interests=MutableLiveData<List<String>>()
-//    val interests: LiveData<List<String>> get() = _interests
-
-    //private val _certifications=MutableLiveData<List<String>>()
-    //val certifications:  LiveData<List<String>> get() = _certifications
-
 
     init {
         // Automatically load user profile when ViewModel is created
@@ -63,58 +53,21 @@ class ProfileViewModel : ViewModel() {
                     loadProfilePicture(userId)
 
                     // Check if the user is a tutor or a student
-
                     _isTutor.value = user.userType == "Tutor"
-                    if (user.userType == "Tutor") {
-                        // Placeholder for loading tutor specific information
-                        // Currently none saved yet
-                        // Certification loading is handled by the CertificationViewModel
-                    }
-                    }
                 }
             }
-
-
-    // Function to load the academic progress (such as reports) for a student
-//    private fun loadStudentProgress(userId: String) {
-//        FirebaseFirestore.getInstance().collection("users").document(userId)
-//            .collection("academicProgress")
-//            .get()
-//            .addOnSuccessListener { querySnapshot ->
-//                // Extract the file URLs for academic progress documents
-//                val ProgressList = querySnapshot.documents.mapNotNull { document ->
-//                    document.getString("fileUrl") // Get the file path stored in Firestore
-//                }
-//                // Update the academic progress LiveData
-//                _academicProgress.value = ProgressList
-//            }
-//
-//    }
-    //private fun loadInterests(userId: String){
-       // FirebaseFirestore.getInstance().collection("users").document(userId)
-           // .collection("Interests")
-            //.get()
-           // .addOnSuccessListener { querySnapshot ->
-            //    val InterestsList = querySnapshot.documents.mapNotNull { document ->
-             //       document.getString("fileUrl") // Get file path stored in Firestore
-              //  }
-               // _academicProgress.value = InterestsList
-          //  }
-
-    // Function to load the profile picture URL from Firestore
-    //}
     }
+
+    // Function to load the profile picture from storage
     private fun loadProfilePicture(userId: String) {
-        FirebaseFirestore.getInstance().collection("users").document(userId)
-            .get()
-            .addOnSuccessListener { document ->
-                // Set the profile picture URL in the LiveData
-                _profilePictureUrl.value = document.getString("profilePictureUrl")
-            }
+        val storageRef = Firebase.storage.reference.child("$userId/profilePicture.jpg")
+        storageRef.downloadUrl.addOnSuccessListener { uri ->
+            _profilePictureUrl.value = uri.toString()
+        }.addOnFailureListener {
+            _profilePictureUrl.value = null // Set to null if no profile picture exists
+        }
     }
 }
-
-
 
 // Data class to represent the user profile data
 data class UserProfile(

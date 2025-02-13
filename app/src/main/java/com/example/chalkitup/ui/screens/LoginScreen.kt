@@ -61,7 +61,7 @@ fun LoginScreen(
         ) {
             // Back Button
             IconButton(
-                onClick = { navController.popBackStack() },
+                onClick = { navController.navigate("start") },
                 modifier = Modifier.size(36.dp)
             ) {
                 Icon(
@@ -131,7 +131,7 @@ fun LoginScreen(
                         color = Color.Blue,
                         fontWeight = FontWeight.Normal,
                         fontSize = 14.sp,
-                        modifier = Modifier.clickable { /* Add forgot password functionality */ }
+                        modifier = Modifier.clickable { navController.navigate("forgotPassword") }
                     )
                 }
 
@@ -148,7 +148,7 @@ fun LoginScreen(
                             viewModel.loginWithEmail(
                                 email, password,
                                 onSuccess = { navController.navigate("home") },
-                                onEmailError = { navController.navigate("checkEmail") },
+                                onEmailError = { navController.navigate("checkEmail/verify") },
                                 onError = { errorMessage = it }
                             )
                         }
@@ -176,7 +176,7 @@ fun LoginScreen(
                 ) {
                     HorizontalDivider(modifier = Modifier.weight(1f), color = Color.Gray)
                     Text(
-                        text = " or sign up with ",
+                        text = " or sign in with ",
                         color = Color.Gray,
                         fontSize = 14.sp,
                         modifier = Modifier.padding(horizontal = 8.dp)
