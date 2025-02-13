@@ -56,6 +56,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.background
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CornerSize
 
 
 // UI of signup screen
@@ -89,15 +92,18 @@ fun SignupScreen(
     var userType by remember { mutableStateOf<UserType?>(null) } // Track user type: Student or Tutor
     var selectedSubjects by remember { mutableStateOf<Set<String>>(emptySet()) } // To store selected subjects
     var selectedGradeLevels by remember { mutableStateOf<Set<Int>>(emptySet()) } // To store selected grade levels
-    var selectedInterests by remember { mutableStateOf<Set<String>>(emptySet()) } //remove
-    var bio by remember { mutableStateOf("") } // remove 
+
+    //var selectedInterests by remember { mutableStateOf<Set<String>>(emptySet()) } //remove
+    //var bio by remember { mutableStateOf("") } // remove
+
     var location by remember { mutableStateOf("") }
 
     val availableSubjects =
         listOf("Math", "Science", "English", "History", "Biology", "Physics") // Example subjects
     val availableGradeLevels = (7..12).toList() // Grade levels from 7 to 12
-    val availableInterests =
-        listOf("Art History", "Genetics", "Animals", "Astronomy", "Environment", "Health Science")
+
+    //val availableInterests =
+    //    listOf("Art History", "Genetics", "Animals", "Astronomy", "Environment", "Health Science")
 
     var hasScrolledToBottom by remember { mutableStateOf(false) }
     var hasAgreedToTerms by remember { mutableStateOf(false) }
@@ -208,7 +214,7 @@ fun SignupScreen(
             )
 
             // want to remove
-            TextField(value = bio, onValueChange = { bio = it }, label = { Text("BIO") })
+            //TextField(value = bio, onValueChange = { bio = it }, label = { Text("BIO") })
 
 
             // Subject selection (only visible for Tutors)
@@ -252,29 +258,32 @@ fun SignupScreen(
                 // - Firestore and functionality purposes, change signup UI
                 Text("Select Grade Levels")
                 //Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    horizontalArrangement = Arrangement.SpaceEvenly,
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    availableGradeLevels.forEach { gradeLevel ->
+                    items(availableGradeLevels) { gradeLevel ->
                         val isSelected = selectedGradeLevels.contains(gradeLevel)
+
                         Button(
                             onClick = {
                                 selectedGradeLevels = if (isSelected) {
-                                    selectedGradeLevels - gradeLevel // Remove grade level from selection
+                                    selectedGradeLevels - gradeLevel // Remove grade level
                                 } else {
-                                    selectedGradeLevels + gradeLevel // Add grade level to selection
+                                    selectedGradeLevels + gradeLevel // Add grade level
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = if (isSelected) Color(0xFF06C59C) else Color.Gray
                             ),
-                            modifier = Modifier.padding(4.dp)
+                            modifier = Modifier.padding(2.dp),
+                            shape = RoundedCornerShape(corner = CornerSize(7.dp))
                         ) {
                             Text(gradeLevel.toString())
                         }
                     }
                 }
+
                 Spacer(modifier = Modifier.height(16.dp))
 
 
@@ -309,42 +318,41 @@ fun SignupScreen(
 // i think interests should be edited through account, its making signup look overwhelming.
 
             //-------------interest selection
-            Spacer(modifier = Modifier.width(16.dp))
-            Text("Select Interests:")
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Box(modifier = Modifier.height(200.dp)) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                ) {
-                    items(availableInterests.size) { index ->
-                        val Interests = availableInterests[index]
-                        val isSelected = selectedInterests.contains(Interests)
-                        Button(
-                            onClick = {
-                                selectedInterests = if (isSelected) {
-                                    selectedInterests - Interests // Remove subject from selection
-                                } else {
-                                    selectedInterests + Interests // Add subject to selection
-                                }
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isSelected) Color.Green else Color.Gray
-                            ),
-                            modifier = Modifier.padding(2.dp)
-                        ) {
-                            Text(Interests)
-                        }
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-
-
+//            Spacer(modifier = Modifier.width(16.dp))
+//            Text("Select Interests:")
+//            Spacer(modifier = Modifier.height(8.dp))
+//
+//            Box(modifier = Modifier.height(200.dp)) {
+//                LazyVerticalGrid(
+//                    columns = GridCells.Fixed(3),
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(16.dp),
+//                ) {
+//                    items(availableInterests.size) { index ->
+//                        val Interests = availableInterests[index]
+//                        val isSelected = selectedInterests.contains(Interests)
+//                        Button(
+//                            onClick = {
+//                                selectedInterests = if (isSelected) {
+//                                    selectedInterests - Interests // Remove subject from selection
+//                                } else {
+//                                    selectedInterests + Interests // Add subject to selection
+//                                }
+//                            },
+//                            colors = ButtonDefaults.buttonColors(
+//                                containerColor = if (isSelected) Color.Green else Color.Gray
+//                            ),
+//                            modifier = Modifier.padding(2.dp)
+//                        ) {
+//                            Text(Interests)
+//                        }
+//                    }
+//                }
+//            }
+//            Spacer(modifier = Modifier.height(8.dp))
 //-----------------------------------------------
+
             Spacer(modifier = Modifier.height(8.dp))
 
             // Terms and Conditions
@@ -399,7 +407,7 @@ fun SignupScreen(
                     //userType!!.name passes the enum value as a string
                     authViewModel.signupWithEmail(email, password, firstName, lastName,
                         userType!!.name, selectedSubjects.toList(), selectedGradeLevels.toList(),
-                        location, bio, selectedInterests.toList(),
+                        location,
                         onUserReady = { user ->
                             certificationViewModel.uploadFiles(context, user)
                             navController.navigate("checkEmail/verify")
