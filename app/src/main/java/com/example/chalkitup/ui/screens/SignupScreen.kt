@@ -15,8 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -55,6 +53,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
@@ -63,7 +69,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import com.example.chalkitup.R
-
 
 // UI of signup screen
 
@@ -86,7 +91,6 @@ fun SignupScreen(
             }
         }
 
-
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -94,11 +98,7 @@ fun SignupScreen(
     var lastName by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var userType by remember { mutableStateOf<UserType?>(null) } // Track user type: Student or Tutor
-    var selectedSubjects by remember { mutableStateOf<Set<String>>(emptySet()) } // To store selected subjects
-    var selectedGradeLevels by remember { mutableStateOf<Set<Int>>(emptySet()) } // To store selected grade levels
-
-    //var selectedInterests by remember { mutableStateOf<Set<String>>(emptySet()) } //remove
-    //var bio by remember { mutableStateOf("") } // remove
+    var tutorSubjects by remember { mutableStateOf(emptyList<Triple<String, String, String>>()) } // To store selected subjects
 
 
     /* didnt like.
@@ -120,8 +120,19 @@ fun SignupScreen(
     var location by remember { mutableStateOf("") }
 
     val availableSubjects =
-        listOf("Math", "Science", "English", "History", "Biology", "Physics") // Example subjects
-    val availableGradeLevels = (7..12).toList() // Grade levels from 7 to 12
+        listOf("Math",
+            "Science",
+            "English",
+            "Social",
+            "Biology",
+            "Physics",
+            "Chemistry") // Example subjects
+    val availableGradeLevels =
+        listOf("7","8","9","10","11","12")
+    val grade10Specs =
+        listOf("- 1","- 2","Honours")
+    val grade1112Specs =
+        listOf("- 1","- 2","AP","IB")
 
     //val availableInterests =
     //    listOf("Art History", "Genetics", "Animals", "Astronomy", "Environment", "Health Science")
@@ -246,59 +257,81 @@ fun SignupScreen(
             //TextField(value = bio, onValueChange = { bio = it }, label = { Text("BIO") })
 
             Spacer(modifier = Modifier.height(8.dp))
+
             // Subject selection (only visible for Tutors)
-            // - Firestore and functionality purposes, change signup UI
             if (userType == UserType.Tutor) {
                 Text("Select Subjects")
-                Box(modifier = Modifier.height(150.dp)) {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(3),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        userScrollEnabled = false
+
+
+                // Add Subject Button
+                Row (
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Tap the  +  to add a subject",
+                        color = Color.Gray)
+
+                    Spacer(modifier = Modifier.width(50.dp))
+
+                    IconButton(
+                        onClick = {
+                            tutorSubjects = tutorSubjects + Triple("", "", "") // Add empty entry
+                        },
+                        modifier = Modifier.size(36.dp),
+                        colors = IconButtonColors(
+                            Color.LightGray,
+                            contentColor = Color.DarkGray,
+                            disabledContainerColor = Color.DarkGray,
+                            disabledContentColor = Color.DarkGray
+                        )
                     ) {
-                        items(availableSubjects.size) { index ->
-                            val subject = availableSubjects[index]
-                            val isSelected = selectedSubjects.contains(subject)
-                            Button(
-                                onClick = {
-                                    selectedSubjects = if (isSelected) {
-                                        selectedSubjects - subject // Remove subject from selection
-                                    } else {
-                                        selectedSubjects + subject // Add subject to selection
-                                    }
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (isSelected) Color(0xFF06C59C) else Color.LightGray
-                                ),
-                                modifier = Modifier.padding(2.dp)
-                            ) {
-                                Text(subject)
-                            }
-                        }
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add Subject",
+                            tint = Color.DarkGray
+                        )
                     }
                 }
 
+                // Default text if no subjects added
+                if (tutorSubjects.isEmpty()) {
+                    Text(
+                        text = "No subjects added",
+                        color = Color.Gray
+                    )
+                }
 
-                // Grade level selection (only visible for Tutors)
-                // - Firestore and functionality purposes, change signup UI
-                Text("Select Grade Levels")
-                //Spacer(modifier = Modifier.height(8.dp))
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    items(availableGradeLevels) { gradeLevel ->
-                        val isSelected = selectedGradeLevels.contains(gradeLevel)
-
-                        Button(
-                            onClick = {
-                                selectedGradeLevels = if (isSelected) {
-                                    selectedGradeLevels - gradeLevel // Remove grade level
-                                } else {
-                                    selectedGradeLevels + gradeLevel // Add grade level
+                // List of subject-grade level pairs
+                Box (modifier = Modifier.heightIn(20.dp,500.dp)) {
+                    LazyColumn {
+                        itemsIndexed(tutorSubjects) { index, (subject, grade, spec) ->
+                            SubjectGradeItem(
+                                subject = subject,
+                                gradeLevel = grade,
+                                gradeSpec = spec,
+                                availableSubjects = availableSubjects,
+                                availableGradeLevels = availableGradeLevels,
+                                grade10Specs = grade10Specs,
+                                grade1112Specs = grade1112Specs,
+                                onSubjectChange = { newSubject ->
+                                    tutorSubjects = tutorSubjects.toMutableList().apply {
+                                        this[index] = Triple(newSubject, this[index].second, this[index].third)
+                                    }
+                                },
+                                onGradeChange = { newGrade ->
+                                    tutorSubjects = tutorSubjects.toMutableList().apply {
+                                        this[index] = Triple(this[index].first, newGrade, this[index].third)
+                                    }
+                                },
+                                onSpecChange = { newSpec ->
+                                    tutorSubjects = tutorSubjects.toMutableList().apply {
+                                        this[index] = Triple(this[index].first, this[index].second, newSpec)
+                                    }
+                                },
+                                onRemove = {
+                                    tutorSubjects =
+                                        tutorSubjects.toMutableList().apply { removeAt(index) }
                                 }
+
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = if (isSelected) Color(0xFF06C59C) else Color.LightGray
@@ -307,14 +340,17 @@ fun SignupScreen(
                             shape = RoundedCornerShape(corner = CornerSize(7.dp))
                         ) {
                             Text(gradeLevel.toString())
+
                         }
                     }
                 }
 
+                Spacer(modifier = Modifier.height(12.dp))
+
                 Spacer(modifier = Modifier.height(16.dp))
 
 
-                Button(onClick = { launcher.launch("//*/*") }) {
+                Button(onClick = { launcher.launch("*/*") }) {
                     Text("Select Certifications")
                 }
 
@@ -339,46 +375,6 @@ fun SignupScreen(
                     Text(text = "No files selected.", color = Color.Gray)
                 }
             }
-
-
-
-// i think interests should be edited through account, its making signup look overwhelming.
-
-            //-------------interest selection
-//            Spacer(modifier = Modifier.width(16.dp))
-//            Text("Select Interests:")
-//            Spacer(modifier = Modifier.height(8.dp))
-//
-//            Box(modifier = Modifier.height(200.dp)) {
-//                LazyVerticalGrid(
-//                    columns = GridCells.Fixed(3),
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(16.dp),
-//                ) {
-//                    items(availableInterests.size) { index ->
-//                        val Interests = availableInterests[index]
-//                        val isSelected = selectedInterests.contains(Interests)
-//                        Button(
-//                            onClick = {
-//                                selectedInterests = if (isSelected) {
-//                                    selectedInterests - Interests // Remove subject from selection
-//                                } else {
-//                                    selectedInterests + Interests // Add subject to selection
-//                                }
-//                            },
-//                            colors = ButtonDefaults.buttonColors(
-//                                containerColor = if (isSelected) Color.Green else Color.Gray
-//                            ),
-//                            modifier = Modifier.padding(2.dp)
-//                        ) {
-//                            Text(Interests)
-//                        }
-//                    }
-//                }
-//            }
-//            Spacer(modifier = Modifier.height(8.dp))
-//-----------------------------------------------
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -425,16 +421,15 @@ fun SignupScreen(
                 } else if (userType == null) {
                     errorMessage = "Please select a user type"
                 } else if ((userType == UserType.Tutor) &&
-                    (selectedSubjects.isEmpty() || selectedGradeLevels.isEmpty())
+                    (tutorSubjects.isEmpty())
                 ) {
-                    errorMessage = "You must be able to tutor at least 1 subject and 1 grade level"
+                    errorMessage = "You must be able to tutor at least 1 subject"
                 } else if (!hasAgreedToTerms) {
                     errorMessage = "You must agree to the Terms and Conditions"
                 } else {
                     //userType!!.name passes the enum value as a string
                     authViewModel.signupWithEmail(email, password, firstName, lastName,
-                        userType!!.name, selectedSubjects.toList(), selectedGradeLevels.toList(),
-                        location,
+                        userType!!.name, tutorSubjects,
                         onUserReady = { user ->
                             certificationViewModel.uploadFiles(context, user)
                             navController.navigate("checkEmail/verify")
@@ -457,65 +452,283 @@ fun SignupScreen(
     }
 }
 
+// Enum to represent user types
+enum class UserType {
+    Student,
+    Tutor
+}
 
-    // Enum to represent user types
-    enum class UserType {
-        Student,
-        Tutor
-    }
+@Composable
+fun SubjectGradeItem(
+    subject: String,
+    gradeLevel: String,
+    gradeSpec: String,
+    availableSubjects: List<String>,
+    availableGradeLevels: List<String>,
+    grade10Specs: List<String>,
+    grade1112Specs: List<String>,
+    onSubjectChange: (String) -> Unit,
+    onGradeChange: (String) -> Unit,
+    onSpecChange: (String) -> Unit,
+    onRemove: () -> Unit
+) {
+    var expandedSubject by remember { mutableStateOf(false) }
+    var expandedGrade by remember { mutableStateOf(false) }
+    var expandedSpec by remember { mutableStateOf(false) }
 
-    // UI for certification items
-    @Composable
-    fun SelectedFileItem(fileName: String, fileUri: Uri, onRemove: () -> Unit) {
-        val context = LocalContext.current
-        val contentResolver = context.contentResolver
-        val mimeType = contentResolver.getType(fileUri)
+    val selectedButtonColor = Color(0xFF06C59C) // Green when selected
+    val defaultButtonColor = Color.LightGray // Gray when not selected
 
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Subject Selection Button
+        Box(modifier = Modifier
+            .weight(3.5f)
+            .background(Color.Transparent)) {
+            Button(
+                onClick = { expandedSubject = true },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (subject.isNotEmpty()) selectedButtonColor else defaultButtonColor
+                ),
+                shape = RoundedCornerShape(8.dp)
             ) {
-                // Show image preview if the file is an image
-                if (mimeType?.startsWith("image/") == true) {
-                    AsyncImage(
-                        model = fileUri,
-                        contentDescription = "Selected Image",
+                Text(text = subject.ifEmpty { "Subject" })
+            }
+
+            DropdownMenu(
+                expanded = expandedSubject,
+                onDismissRequest = { expandedSubject = false },
+                shadowElevation = 0.dp,
+                containerColor = Color.Transparent,
+                modifier = Modifier
+                    .width(150.dp)  // Make dropdown wider
+            ) {
+                availableSubjects.forEach { subj ->
+                    Box(
                         modifier = Modifier
-                            .size(100.dp) // Adjust the size as needed
-                            .clip(RoundedCornerShape(8.dp))
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(imageVector = Icons.Default.Face, contentDescription = "File Icon")
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Text(
-                        text = fileName,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    IconButton(onClick = { onRemove() }) {
-                        Icon(imageVector = Icons.Default.Delete, contentDescription = "Remove File")
+                            .padding(2.dp)
+                            .shadow(6.dp, shape = RoundedCornerShape(8.dp), clip = true) // Apply shadow properly
+                            .background(Color.White, shape = RoundedCornerShape(8.dp))
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text(subj) },
+                            onClick = {
+                                onSubjectChange(subj)
+                                expandedSubject = false
+                            },
+                            modifier = Modifier.padding(horizontal = 3.dp, vertical = 3.dp) // Ensure spacing inside the menu item
+                        )
                     }
                 }
             }
         }
-    }
 
+        Spacer(modifier = Modifier.width(8.dp))
+
+        // Grade Level Selection Button
+        Box(modifier = Modifier
+            .weight(2f)
+            .background(Color.Transparent)) {
+            Button(
+                onClick = { expandedGrade = true },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (gradeLevel.isNotEmpty()) selectedButtonColor else defaultButtonColor
+                ),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(text = gradeLevel.ifEmpty { "Grade" })
+            }
+
+            DropdownMenu(
+                expanded = expandedGrade,
+                onDismissRequest = { expandedGrade = false },
+                shadowElevation = 0.dp,
+                containerColor = Color.Transparent,
+                modifier = Modifier
+                    .width(150.dp)  // Make dropdown wider
+            ) {
+                availableGradeLevels.forEach { grade ->
+                    Box(
+                        modifier = Modifier
+                            .padding(2.dp)
+                            .shadow(6.dp, shape = RoundedCornerShape(8.dp), clip = true) // Apply shadow properly
+                            .background(Color.White, shape = RoundedCornerShape(8.dp))
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text(grade) },
+                            onClick = {
+                                onGradeChange(grade)
+                                onSpecChange("") // Reset specialization when grade level changes
+                                expandedGrade = false
+                            },
+                            modifier = Modifier.padding(horizontal = 3.dp, vertical = 3.dp) // Ensure spacing inside the menu item
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        if (gradeLevel == "10") {
+            // Spec Selection Button
+            Box(modifier = Modifier
+                .weight(2.5f)
+                .background(Color.Transparent)) {
+                Button(
+                    onClick = { expandedSpec = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (gradeSpec.isNotEmpty()) selectedButtonColor else defaultButtonColor
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(text = gradeSpec.ifEmpty { "Level" })
+                }
+
+                DropdownMenu(
+                    expanded = expandedSpec,
+                    onDismissRequest = { expandedSpec = false },
+                    shadowElevation = 0.dp,
+                    containerColor = Color.Transparent,
+                    modifier = Modifier
+                        .width(150.dp)  // Make dropdown wider
+                ) {
+                    grade10Specs.forEach { spec ->
+                        Box(
+                            modifier = Modifier
+                                .padding(2.dp)
+                                .shadow(6.dp, shape = RoundedCornerShape(8.dp), clip = true) // Apply shadow properly
+                                .background(Color.White, shape = RoundedCornerShape(8.dp))
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(spec) },
+                                onClick = {
+                                    onSpecChange(spec)
+                                    expandedSpec = false
+                                },
+                                modifier = Modifier.padding(horizontal = 3.dp, vertical = 3.dp) // Ensure spacing inside the menu item
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+        } else if (gradeLevel == "11" || gradeLevel == "12") {
+            // Spec Selection Button
+            Box(modifier = Modifier
+                .weight(2.5f)
+                .background(Color.Transparent)) {
+                Button(
+                    onClick = { expandedSpec = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (gradeSpec.isNotEmpty()) selectedButtonColor else defaultButtonColor
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(text = gradeSpec.ifEmpty { "Level" })
+                }
+
+                DropdownMenu(
+                    expanded = expandedSpec,
+                    onDismissRequest = { expandedSpec = false },
+                    shadowElevation = 0.dp,
+                    containerColor = Color.Transparent,
+                    modifier = Modifier
+                        .width(150.dp)  // Make dropdown wider
+                ) {
+                    grade1112Specs.forEach { spec ->
+                        Box(
+                            modifier = Modifier
+                                .padding(2.dp)
+                                .shadow(6.dp, shape = RoundedCornerShape(8.dp), clip = true) // Apply shadow properly
+                                .background(Color.White, shape = RoundedCornerShape(8.dp))
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(spec) },
+                                onClick = {
+                                    onSpecChange(spec)
+                                    expandedSpec = false
+                                },
+                                modifier = Modifier.padding(horizontal = 3.dp, vertical = 3.dp) // Ensure spacing inside the menu item
+                            )
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+        } else {
+            Box(modifier = Modifier
+                .weight(2.5f)
+                .background(Color.Transparent))
+            onSpecChange("")
+        }
+        // Remove Button
+        IconButton(onClick = onRemove) {
+            Icon(imageVector = Icons.Default.Delete, contentDescription = "Remove Subject")
+        }
+    }
+}
+
+// UI for certification items
+@Composable
+fun SelectedFileItem(fileName: String, fileUri: Uri, onRemove: () -> Unit) {
+    val context = LocalContext.current
+    val contentResolver = context.contentResolver
+    val mimeType = contentResolver.getType(fileUri)
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Show image preview if the file is an image
+            if (mimeType?.startsWith("image/") == true) {
+                AsyncImage(
+                    model = fileUri,
+                    contentDescription = "Selected Image",
+                    modifier = Modifier
+                        .size(100.dp) // Adjust the size as needed
+                        .clip(RoundedCornerShape(8.dp))
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(imageVector = Icons.Default.Face, contentDescription = "File Icon")
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = fileName,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+
+                IconButton(onClick = { onRemove() }) {
+                    Icon(imageVector = Icons.Default.Delete, contentDescription = "Remove File")
+                }
+            }
+        }
+    }
+}
 
 val termsAndConditions = """
     |**Terms and Conditions**
