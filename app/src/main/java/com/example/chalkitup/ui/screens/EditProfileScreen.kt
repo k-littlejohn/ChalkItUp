@@ -5,21 +5,26 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +44,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.chalkitup.R
 import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
+import com.example.chalkitup.ui.viewmodel.TutorSubject
 
 @Composable
 fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewModel) {
@@ -55,10 +61,24 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
-    var selectedSubjects by remember { mutableStateOf(listOf<String>()) }
-    var selectedGrades by remember { mutableStateOf(listOf<Int>()) }
+    var tutorSubjects by remember { mutableStateOf<List<TutorSubject>>(emptyList()) } // To store selected subjects
     var bio by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
+
+    val availableSubjects =
+        listOf("Math",
+            "Science",
+            "English",
+            "Social",
+            "Biology",
+            "Physics",
+            "Chemistry")
+    val availableGradeLevels =
+        listOf("7","8","9","10","11","12")
+    val grade10Specs =
+        listOf("- 1","- 2","Honours")
+    val grade1112Specs =
+        listOf("- 1","- 2","AP","IB")
 
     var originalProfilePictureUrl by remember { mutableStateOf<String?>(null) }
 
@@ -72,8 +92,7 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
             firstName = it.firstName
             lastName = it.lastName
             email = it.email
-            selectedSubjects = it.subjects
-            selectedGrades = it.grades
+            tutorSubjects = it.subjects
             bio = it.bio
             location = it.location
             originalProfilePictureUrl = profilePictureUrl // Save original profile picture
@@ -135,20 +154,81 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
             Spacer(modifier = Modifier.height(16.dp))
             Text("Subjects You Teach")
 
-            MultiSelectDropdown(
-                availableOptions = listOf("Math", "Science", "English", "History", "Physics"),
-                selectedOptions = selectedSubjects,
-                onSelectionChange = { selectedSubjects = it }
-            )
+            // need to display the subjects in editable form
 
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("Grade Levels")
 
-            MultiSelectDropdown(
-                availableOptions = (7..12).map { it.toString() },
-                selectedOptions = selectedGrades.map { it.toString() },
-                onSelectionChange = { selectedGrades = it.map { it.toInt() } }
-            )
+            //
+            // Add Subject Button
+            Row (
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Tap the  +  to add a subject",
+                    color = Color.Gray)
+
+                Spacer(modifier = Modifier.width(50.dp))
+
+                IconButton(
+                    onClick = {
+                        tutorSubjects = tutorSubjects + TutorSubject("", "", "") // Add empty entry
+                    },
+                    modifier = Modifier.size(36.dp),
+                    colors = IconButtonColors(
+                        Color.LightGray,
+                        contentColor = Color.DarkGray,
+                        disabledContainerColor = Color.DarkGray,
+                        disabledContentColor = Color.DarkGray
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add Subject",
+                        tint = Color.DarkGray
+                    )
+                }
+            }
+
+            // Default text if no subjects added
+            if (tutorSubjects.isEmpty()) {
+                Text(
+                    text = "No subjects added",
+                    color = Color.Gray
+                )
+            }
+
+            // List of subject-grade level pairs
+            Box (modifier = Modifier.heightIn(20.dp,500.dp)) {
+                LazyColumn {
+                    itemsIndexed(tutorSubjects) { index, tutorSubject ->
+                        SubjectGradeItem(
+                            tutorSubject = tutorSubject, // Pass the entire TutorSubject object
+                            availableSubjects = availableSubjects,
+                            availableGradeLevels = availableGradeLevels,
+                            grade10Specs = grade10Specs,
+                            grade1112Specs = grade1112Specs,
+                            onSubjectChange = { newSubject ->
+                                tutorSubjects = tutorSubjects.toMutableList().apply {
+                                    this[index] = this[index].copy(subject = newSubject)
+                                }
+                            },
+                            onGradeChange = { newGrade ->
+                                tutorSubjects = tutorSubjects.toMutableList().apply {
+                                    this[index] = this[index].copy(grade = newGrade)
+                                }
+                            },
+                            onSpecChange = { newSpec ->
+                                tutorSubjects = tutorSubjects.toMutableList().apply {
+                                    this[index] = this[index].copy(specialization = newSpec)
+                                }
+                            },
+                            onRemove = {
+                                tutorSubjects =
+                                    tutorSubjects.toMutableList().apply { removeAt(index) }
+                            }
+                        )
+                    }
+                }
+            }
+
         } else {
             // Student-Specific Fields
 
@@ -158,7 +238,7 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
 
         Row {
             Button(onClick = {
-                viewModel.updateProfile(firstName, lastName, selectedSubjects, selectedGrades, bio, location)
+                viewModel.updateProfile(firstName, lastName, tutorSubjects, bio, location)
                 navController.popBackStack() // Navigate back
             }) {
                 Text("Save Changes")
@@ -167,57 +247,11 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
             Spacer(modifier = Modifier.width(8.dp))
 
             Button(onClick = {
-                viewModel._profilePictureUrl.value = originalProfilePictureUrl // Restore old picture
-                navController.popBackStack() }) {
+                viewModel._profilePictureUrl.value =
+                    originalProfilePictureUrl // Restore old picture
+                navController.popBackStack()
+            }) {
                 Text("Cancel")
-            }
-        }
-    }
-}
-
-@Composable
-fun MultiSelectDropdown(
-    availableOptions: List<String>,
-    selectedOptions: List<String>,
-    onSelectionChange: (List<String>) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val selectedText = selectedOptions.joinToString(", ")
-
-    Column {
-        OutlinedTextField(
-            value = selectedText,
-            onValueChange = {},
-            label = { Text("Select") },
-            readOnly = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { expanded = true }
-        )
-
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            availableOptions.forEach { option ->
-                val isSelected = option in selectedOptions
-                DropdownMenuItem(
-                    text = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(
-                                checked = isSelected,
-                                onCheckedChange = null // Handled by menu item click
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(option)
-                        }
-                    },
-                    onClick = {
-                        val newSelection = if (isSelected) {
-                            selectedOptions - option
-                        } else {
-                            selectedOptions + option
-                        }
-                        onSelectionChange(newSelection)
-                    }
-                )
             }
         }
     }

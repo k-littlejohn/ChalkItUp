@@ -54,7 +54,7 @@ class AuthViewModel : ViewModel() {
         firstName: String,
         lastName: String,
         userType: String,
-        subjects: List<Triple<String, String, String>> = emptyList(),
+        subjects: List<TutorSubject> = emptyList(),
 
         //grades: List<Int> = emptyList(),
 
@@ -164,3 +164,9 @@ class AuthViewModel : ViewModel() {
     }
 
 }
+
+data class TutorSubject(
+    val subject: String = "",
+    val grade: String = "",
+    val specialization: String = ""
+)

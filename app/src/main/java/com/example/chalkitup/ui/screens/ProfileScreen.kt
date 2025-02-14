@@ -9,11 +9,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -107,14 +110,27 @@ fun ProfileScreen(
                     CertificationGrid(certifications)
                 }
 
-                userProfile?.let {
-                    Text("Grades you can tutor:")
-                    ItemGrid(it.grades.map { grade -> grade.toString() }, columns = 4)
-
+                userProfile?.let { profile ->
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text("Subjects you can tutor:")
-                    ItemGrid(it.subjects, columns = 4)
+                    val formattedSubjects = profile.subjects.map { subject ->
+                        listOf(subject.subject, subject.grade, subject.specialization)
+                            .filter { it.isNotEmpty() }
+                            .joinToString(" ")
+                    }
+                    Box(modifier = Modifier.heightIn(20.dp,500.dp)) {
+                        LazyColumn {
+                            items(formattedSubjects) { subject ->
+                                Text(
+                                    text = subject,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp)
+                                )
+                            }
+                        }
+                    }
                 }
             } else {
                 //----------------STUDENT PROFILE---------------------------------
