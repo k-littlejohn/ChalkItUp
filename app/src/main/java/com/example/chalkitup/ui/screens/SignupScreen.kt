@@ -66,6 +66,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import com.example.chalkitup.R
+import com.example.chalkitup.ui.viewmodel.TutorSubject
 
 // UI of signup screen
 
@@ -95,7 +96,7 @@ fun SignupScreen(
     var lastName by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var userType by remember { mutableStateOf<UserType?>(null) } // Track user type: Student or Tutor
-    var tutorSubjects by remember { mutableStateOf(emptyList<Triple<String, String, String>>()) } // To store selected subjects
+    var tutorSubjects by remember { mutableStateOf<List<TutorSubject>>(emptyList()) } // To store selected subjects
 
 
     /* didnt like.
@@ -123,7 +124,7 @@ fun SignupScreen(
             "Social",
             "Biology",
             "Physics",
-            "Chemistry") // Example subjects
+            "Chemistry")
     val availableGradeLevels =
         listOf("7","8","9","10","11","12")
     val grade10Specs =
@@ -257,8 +258,8 @@ fun SignupScreen(
 
             // Subject selection (only visible for Tutors)
             if (userType == UserType.Tutor) {
-                Text("Select Subjects")
 
+                Text("Select Subjects")
 
                 // Add Subject Button
                 Row (
@@ -271,7 +272,7 @@ fun SignupScreen(
 
                     IconButton(
                         onClick = {
-                            tutorSubjects = tutorSubjects + Triple("", "", "") // Add empty entry
+                            tutorSubjects = tutorSubjects + TutorSubject("", "", "") // Add empty entry
                         },
                         modifier = Modifier.size(36.dp),
                         colors = IconButtonColors(
@@ -300,28 +301,26 @@ fun SignupScreen(
                 // List of subject-grade level pairs
                 Box (modifier = Modifier.heightIn(20.dp,500.dp)) {
                     LazyColumn {
-                        itemsIndexed(tutorSubjects) { index, (subject, grade, spec) ->
+                        itemsIndexed(tutorSubjects) { index, tutorSubject ->
                             SubjectGradeItem(
-                                subject = subject,
-                                gradeLevel = grade,
-                                gradeSpec = spec,
+                                tutorSubject = tutorSubject, // Pass the entire TutorSubject object
                                 availableSubjects = availableSubjects,
                                 availableGradeLevels = availableGradeLevels,
                                 grade10Specs = grade10Specs,
                                 grade1112Specs = grade1112Specs,
                                 onSubjectChange = { newSubject ->
                                     tutorSubjects = tutorSubjects.toMutableList().apply {
-                                        this[index] = Triple(newSubject, this[index].second, this[index].third)
+                                        this[index] = this[index].copy(subject = newSubject)
                                     }
                                 },
                                 onGradeChange = { newGrade ->
                                     tutorSubjects = tutorSubjects.toMutableList().apply {
-                                        this[index] = Triple(this[index].first, newGrade, this[index].third)
+                                        this[index] = this[index].copy(grade = newGrade)
                                     }
                                 },
                                 onSpecChange = { newSpec ->
                                     tutorSubjects = tutorSubjects.toMutableList().apply {
-                                        this[index] = Triple(this[index].first, this[index].second, newSpec)
+                                        this[index] = this[index].copy(specialization = newSpec)
                                     }
                                 },
                                 onRemove = {
@@ -329,15 +328,12 @@ fun SignupScreen(
                                         tutorSubjects.toMutableList().apply { removeAt(index) }
                                 }
                             )
-
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
 
                 Spacer(modifier = Modifier.height(16.dp))
-
 
                 Button(onClick = { launcher.launch("*/*") }) {
                     Text("Select Certifications")
@@ -427,7 +423,9 @@ fun SignupScreen(
                     )
                 }
             },
-                modifier = Modifier.fillMaxWidth().height(50.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
                 shape = RoundedCornerShape(4.dp)
             ) {
@@ -451,9 +449,7 @@ enum class UserType {
 // - make it so that chem/bio/phys cant be selected for grades <10
 @Composable
 fun SubjectGradeItem(
-    subject: String,
-    gradeLevel: String,
-    gradeSpec: String,
+    tutorSubject: TutorSubject,
     availableSubjects: List<String>,
     availableGradeLevels: List<String>,
     grade10Specs: List<String>,
@@ -467,8 +463,8 @@ fun SubjectGradeItem(
     var expandedGrade by remember { mutableStateOf(false) }
     var expandedSpec by remember { mutableStateOf(false) }
 
-    val selectedButtonColor = Color(0xFF54A4FF) // Green when selected
-    val defaultButtonColor = Color.LightGray // Gray when not selected
+    val selectedButtonColor = Color(0xFF54A4FF)
+    val defaultButtonColor = Color.LightGray
 
     Row(
         modifier = Modifier
@@ -477,18 +473,16 @@ fun SubjectGradeItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Subject Selection Button
-        Box(modifier = Modifier
-            .weight(3.5f)
-            .background(Color.Transparent)) {
+        Box(modifier = Modifier.weight(3.5f)) {
             Button(
                 onClick = { expandedSubject = true },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (subject.isNotEmpty()) selectedButtonColor else defaultButtonColor
+                    containerColor = if (tutorSubject.subject.isNotEmpty()) selectedButtonColor else defaultButtonColor
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text(text = subject.ifEmpty { "Subject" }, fontSize = 14.sp)
+                Text(text = tutorSubject.subject.ifEmpty { "Subject" }, fontSize = 14.sp)
             }
 
             DropdownMenu(
@@ -496,14 +490,17 @@ fun SubjectGradeItem(
                 onDismissRequest = { expandedSubject = false },
                 shadowElevation = 0.dp,
                 containerColor = Color.Transparent,
-                modifier = Modifier
-                    .width(150.dp)  // Make dropdown wider
+                modifier = Modifier.width(150.dp)
             ) {
                 availableSubjects.forEach { subj ->
                     Box(
                         modifier = Modifier
                             .padding(2.dp)
-                            .shadow(6.dp, shape = RoundedCornerShape(8.dp), clip = true) // Apply shadow properly
+                            .shadow(
+                                6.dp,
+                                shape = RoundedCornerShape(8.dp),
+                                clip = true
+                            ) // Apply shadow properly
                             .background(Color.White, shape = RoundedCornerShape(8.dp))
                     ) {
                         DropdownMenuItem(
@@ -512,7 +509,7 @@ fun SubjectGradeItem(
                                 onSubjectChange(subj)
                                 expandedSubject = false
                             },
-                            modifier = Modifier.padding(horizontal = 3.dp, vertical = 3.dp) // Ensure spacing inside the menu item
+                            modifier = Modifier.padding(horizontal = 3.dp, vertical = 3.dp)
                         )
                     }
                 }
@@ -522,20 +519,16 @@ fun SubjectGradeItem(
         Spacer(modifier = Modifier.width(8.dp))
 
         // Grade Level Selection Button
-        Box(modifier = Modifier
-            .weight(1.8f)
-            .background(Color.Transparent)) {
+        Box(modifier = Modifier.weight(1.8f)) {
             Button(
                 onClick = { expandedGrade = true },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (gradeLevel.isNotEmpty()) selectedButtonColor else defaultButtonColor
+                    containerColor = if (tutorSubject.grade.isNotEmpty()) selectedButtonColor else defaultButtonColor
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text(text = gradeLevel.ifEmpty { "Gr" },
-                    fontSize = 14.sp
-                )
+                Text(text = tutorSubject.grade.ifEmpty { "Gr" }, fontSize = 14.sp)
             }
 
             DropdownMenu(
@@ -543,8 +536,7 @@ fun SubjectGradeItem(
                 onDismissRequest = { expandedGrade = false },
                 shadowElevation = 0.dp,
                 containerColor = Color.Transparent,
-                modifier = Modifier
-                    .width(150.dp)  // Make dropdown wider
+                modifier = Modifier.width(150.dp)
             ) {
                 availableGradeLevels.forEach { grade ->
                     Box(
@@ -553,15 +545,14 @@ fun SubjectGradeItem(
                             .shadow(6.dp, shape = RoundedCornerShape(8.dp), clip = true) // Apply shadow properly
                             .background(Color.White, shape = RoundedCornerShape(8.dp))
                     ) {
-                        DropdownMenuItem(
-                            text = { Text(grade) },
-                            onClick = {
-                                onGradeChange(grade)
-                                onSpecChange("") // Reset specialization when grade level changes
-                                expandedGrade = false
-                            },
-                            modifier = Modifier.padding(horizontal = 3.dp, vertical = 3.dp) // Ensure spacing inside the menu item
-                        )
+                    DropdownMenuItem(
+                        text = { Text(grade) },
+                        onClick = {
+                            onGradeChange(grade)
+                            onSpecChange("") // Reset specialization when grade level changes
+                            expandedGrade = false
+                        }
+                    )
                     }
                 }
             }
@@ -569,20 +560,24 @@ fun SubjectGradeItem(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        if (gradeLevel == "10") {
-            // Spec Selection Button
-            Box(modifier = Modifier
-                .weight(2.9f)
-                .background(Color.Transparent)) {
+        if (tutorSubject.grade == "10" || tutorSubject.grade == "11" || tutorSubject.grade == "12") {
+            // Specialization Selection Button
+            Box(modifier = Modifier.weight(2.9f)) {
                 Button(
                     onClick = { expandedSpec = true },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (gradeSpec.isNotEmpty()) selectedButtonColor else defaultButtonColor
+                        containerColor = if (tutorSubject.specialization.isNotEmpty()) selectedButtonColor else defaultButtonColor
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text(text = gradeSpec.ifEmpty { "Level" },fontSize = 14.sp)
+                    Text(text = tutorSubject.specialization.ifEmpty { "Level" }, fontSize = 14.sp)
+                }
+
+                val specList = when (tutorSubject.grade) {
+                    "10" -> grade10Specs
+                    "11", "12" -> grade1112Specs
+                    else -> emptyList()
                 }
 
                 DropdownMenu(
@@ -590,14 +585,17 @@ fun SubjectGradeItem(
                     onDismissRequest = { expandedSpec = false },
                     shadowElevation = 0.dp,
                     containerColor = Color.Transparent,
-                    modifier = Modifier
-                        .width(150.dp)  // Make dropdown wider
+                    modifier = Modifier.width(150.dp)
                 ) {
-                    grade10Specs.forEach { spec ->
+                    specList.forEach { spec ->
                         Box(
                             modifier = Modifier
                                 .padding(2.dp)
-                                .shadow(6.dp, shape = RoundedCornerShape(8.dp), clip = true) // Apply shadow properly
+                                .shadow(
+                                    6.dp,
+                                    shape = RoundedCornerShape(8.dp),
+                                    clip = true
+                                ) // Apply shadow properly
                                 .background(Color.White, shape = RoundedCornerShape(8.dp))
                         ) {
                             DropdownMenuItem(
@@ -605,53 +603,7 @@ fun SubjectGradeItem(
                                 onClick = {
                                     onSpecChange(spec)
                                     expandedSpec = false
-                                },
-                                modifier = Modifier.padding(horizontal = 3.dp, vertical = 3.dp) // Ensure spacing inside the menu item
-                            )
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-        } else if (gradeLevel == "11" || gradeLevel == "12") {
-            // Spec Selection Button
-            Box(modifier = Modifier
-                .weight(2.9f)
-                .background(Color.Transparent)) {
-                Button(
-                    onClick = { expandedSpec = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (gradeSpec.isNotEmpty()) selectedButtonColor else defaultButtonColor
-                    ),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(text = gradeSpec.ifEmpty { "Level" },fontSize = 14.sp)
-                }
-
-                DropdownMenu(
-                    expanded = expandedSpec,
-                    onDismissRequest = { expandedSpec = false },
-                    shadowElevation = 0.dp,
-                    containerColor = Color.Transparent,
-                    modifier = Modifier
-                        .width(150.dp)  // Make dropdown wider
-                ) {
-                    grade1112Specs.forEach { spec ->
-                        Box(
-                            modifier = Modifier
-                                .padding(2.dp)
-                                .shadow(6.dp, shape = RoundedCornerShape(8.dp), clip = true) // Apply shadow properly
-                                .background(Color.White, shape = RoundedCornerShape(8.dp))
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text(spec) },
-                                onClick = {
-                                    onSpecChange(spec)
-                                    expandedSpec = false
-                                },
-                                modifier = Modifier.padding(horizontal = 3.dp, vertical = 3.dp) // Ensure spacing inside the menu item
+                                }
                             )
                         }
                     }
@@ -659,17 +611,17 @@ fun SubjectGradeItem(
             }
             Spacer(modifier = Modifier.width(8.dp))
         } else {
-            Box(modifier = Modifier
-                .weight(2.9f)
-                .background(Color.Transparent))
+            Box(modifier = Modifier.weight(2.9f)) {}
             onSpecChange("")
         }
+
         // Remove Button
         IconButton(onClick = onRemove) {
             Icon(imageVector = Icons.Default.Delete, contentDescription = "Remove Subject")
         }
     }
 }
+
 
 // UI for certification items
 @Composable
