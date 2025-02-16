@@ -1012,12 +1012,13 @@ fun SelectedFileItem(fileName: String, fileUri: Uri, onRemove: () -> Unit) {
     val contentResolver = context.contentResolver
     // Retrieve the MIME type of the selected file using its URI
     val mimeType = contentResolver.getType(fileUri)
+    val isImage = mimeType?.startsWith("image/") == true
 
     // Card displaying the file information and actions
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(150.dp)
+            .height(if (isImage) 150.dp else 50.dp) // make height smaller if the file is not an image
             .padding(vertical = 3.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardColors(
@@ -1050,7 +1051,7 @@ fun SelectedFileItem(fileName: String, fileUri: Uri, onRemove: () -> Unit) {
             }
 
             // Check if the selected file is an image
-            if (mimeType?.startsWith("image/") == true) {
+            if (isImage) {
                 // Display image preview if the file is an image
                 AsyncImage(
                     model = fileUri, // Load the image from the URI
