@@ -45,9 +45,13 @@ import coil.compose.AsyncImage
 import com.example.chalkitup.R
 import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
 import com.example.chalkitup.ui.viewmodel.TutorSubject
+import com.example.chalkitup.ui.viewmodel.TutorSubjectError
 
 @Composable
 fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewModel) {
+
+    var tutorSubjectErrors by remember { mutableStateOf<List<TutorSubjectError>>(emptyList()) }
+
     val scrollState = rememberScrollState()
 
     val userProfile by viewModel.userProfile.observeAsState()
@@ -75,6 +79,8 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
             "Chemistry")
     val availableGradeLevels =
         listOf("7","8","9","10","11","12")
+    val availableGradeLevelsBPC =
+        listOf("11","12")
     val grade10Specs =
         listOf("- 1","- 2","Honours")
     val grade1112Specs =
@@ -203,6 +209,7 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
                             tutorSubject = tutorSubject, // Pass the entire TutorSubject object
                             availableSubjects = availableSubjects,
                             availableGradeLevels = availableGradeLevels,
+                            availableGradeLevelsBPC = availableGradeLevelsBPC,
                             grade10Specs = grade10Specs,
                             grade1112Specs = grade1112Specs,
                             onSubjectChange = { newSubject ->
@@ -223,7 +230,10 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
                             onRemove = {
                                 tutorSubjects =
                                     tutorSubjects.toMutableList().apply { removeAt(index) }
-                            }
+                            },
+                            subjectError = tutorSubjectErrors.getOrNull(index)?.subjectError ?: false,
+                            gradeError = tutorSubjectErrors.getOrNull(index)?.gradeError ?: false,
+                            specError = tutorSubjectErrors.getOrNull(index)?.specError ?: false
                         )
                     }
                 }
@@ -238,6 +248,8 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
 
         Row {
             Button(onClick = {
+                // Needs field error checking
+
                 viewModel.updateProfile(firstName, lastName, tutorSubjects, bio, location)
                 navController.popBackStack() // Navigate back
             }) {
