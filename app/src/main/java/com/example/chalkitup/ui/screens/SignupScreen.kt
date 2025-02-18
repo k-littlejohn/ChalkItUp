@@ -95,8 +95,7 @@ fun SignupScreen(
 
     // Scroll states for the main form and the Terms & Conditions box.
     val scrollState = rememberScrollState() // Main form scroll state - entire screen
-    val termsScrollState =
-        rememberScrollState() // Terms & Conditions scroll state - inside Terms and Cond. box
+    val termsScrollState = rememberScrollState() // Terms & Conditions scroll state - inside Terms and Cond. box
 
     // State variables for Terms and Conditions agreement.
     var hasScrolledToBottom by remember { mutableStateOf(false) }
@@ -152,8 +151,7 @@ fun SignupScreen(
     var tutorSubjectErrors by remember { mutableStateOf<List<TutorSubjectError>>(emptyList()) }
 
     // Lists for subject and grade level selections.
-    val availableSubjects =
-        listOf("Math", "Science", "English", "Social", "Biology", "Physics", "Chemistry")
+    val availableSubjects = listOf("Math", "Science", "English", "Social", "Biology", "Physics", "Chemistry")
     val availableGradeLevels = listOf("7", "8", "9", "10", "11", "12")
     val availableGradeLevelsBPC = listOf("11", "12")
     val grade10Specs = listOf("- 1", "- 2", "Honours")

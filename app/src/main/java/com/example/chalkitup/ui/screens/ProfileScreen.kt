@@ -24,6 +24,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -62,6 +63,7 @@ fun ProfileScreen(
 
     LaunchedEffect(Unit) {
         profileViewModel.loadUserProfile() // Reload data when returning to profile screen
+        //certificationViewModel.getCertifications()
     }
 
     Column(
@@ -156,7 +158,10 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
             // Edit Profile Button
-            Button(onClick = { navController.navigate("editProfile") }) {
+            Button(onClick = { navController.navigate("editProfile") },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
+                shape = RoundedCornerShape(12.dp)
+            ) {
                 Text("Edit Profile")
             }
         }

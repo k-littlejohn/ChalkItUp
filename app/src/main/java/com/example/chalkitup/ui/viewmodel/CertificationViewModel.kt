@@ -24,8 +24,7 @@ class CertificationViewModel : ViewModel() {
     val certifications: StateFlow<List<Certification>> = _certifications
 
     // StateFlow to hold the selected files for upload
-    private val _selectedFiles =
-        MutableStateFlow<List<Uri>>(emptyList()) // For managing selected files
+    private val _selectedFiles = MutableStateFlow<List<Uri>>(emptyList()) // For managing selected files
     val selectedFiles: StateFlow<List<Uri>> = _selectedFiles
 
     // Firebase instances for Authentication, Storage, and Firestore
@@ -39,16 +38,21 @@ class CertificationViewModel : ViewModel() {
     }
 
     // Function to get the list of certifications directly from Firebase Storage
-    private fun getCertifications() {
+    fun getCertifications() {
+                                                                // actually,,, is it because im not technically logged out???
+                                                                // add lifecycle for authed users if ^^ case
+                                                                // ie. must deliberately logout or app will launch as logged in
         val userId = auth.currentUser?.uid ?: return
         val storageRef = storage.reference.child("$userId/certifications")
 
         storageRef.listAll()
             .addOnSuccessListener { listResult ->
                 val certificationList = mutableListOf<Certification>()
+                val uriList = mutableListOf<Uri>()
 
                 if (listResult.items.isEmpty()) {
                     _certifications.value = emptyList() // No files found
+                    _selectedFiles.value = emptyList()
                     return@addOnSuccessListener
                 }
 
@@ -59,9 +63,13 @@ class CertificationViewModel : ViewModel() {
                             Certification(fileName = fileRef.name, fileUrl = uri.toString())
                         )
 
+                        // Convert URL to Uri and add to selectedFiles for display
+                        uriList.add(uri)
+
                         // Ensure we update StateFlow only after collecting all URLs
                         if (certificationList.size == listResult.items.size) {
                             _certifications.value = certificationList
+                            _selectedFiles.value = uriList
                         }
                     }
                 }
@@ -94,6 +102,51 @@ class CertificationViewModel : ViewModel() {
         }
     }
 
+    fun updateCertifications(context: Context) {
+        val userId = auth.currentUser?.uid ?: return
+        val storageRef = storage.reference.child("$userId/certifications")
+
+        // Get current files in storage
+        storageRef.listAll()
+            .addOnSuccessListener { listResult ->
+                val existingFiles = listResult.items.map { it.name }.toSet()
+                val selectedFileNames = _selectedFiles.value.map { getFileNameFromUri(context, it) }.toSet()
+
+                // Files to delete
+                val filesToDelete = existingFiles - selectedFileNames
+                filesToDelete.forEach { fileName ->
+                    storageRef.child(fileName).delete()
+                        .addOnSuccessListener {
+                            Log.d("Update", "Deleted file: $fileName")
+                        }
+                        .addOnFailureListener { exception ->
+                            Log.e("Update", "Failed to delete file: ${exception.message}")
+                        }
+                }
+
+                // Files to upload
+                _selectedFiles.value.forEach { uri ->
+                    val fileName = getFileNameFromUri(context, uri)
+                    if (!existingFiles.contains(fileName)) {
+                        val fileRef = storageRef.child(fileName)
+
+                        fileRef.putFile(uri)
+                            .addOnSuccessListener {
+                                Log.d("Update", "Uploaded file: $fileName")
+                                getCertifications()
+                                _selectedFiles.value = emptyList()
+                            }
+                            .addOnFailureListener { exception ->
+                                Log.e("Update", "Failed to upload file: ${exception.message}")
+                            }
+                    }
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("Update", "Failed to list certifications: ${exception.message}")
+            }
+    }
+
     // Function to add selected files to the list of selected files
     fun addSelectedFiles(uris: List<Uri>) {
         _selectedFiles.value += uris // Append new files to the current list
@@ -109,29 +162,13 @@ class CertificationViewModel : ViewModel() {
         // Query the content resolver to get the display name of the file
         val cursor = context.contentResolver.query(uri, null, null, null, null)
         cursor?.use {
-            val nameIndex =
-                it.getColumnIndex(OpenableColumns.DISPLAY_NAME)  // Get the column index for the display name
+            val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)  // Get the column index for the display name
             it.moveToFirst()  // Move the cursor to the first row (there should be only one)
             return it.getString(nameIndex)  // Return the file name
         }
         // Fallback in case the URI doesn't contain the expected metadata
         return uri.path?.substringAfterLast("/") ?: "Unknown File"
     }
-
-    // Function to delete a certification file from Storage
-//    fun deleteCertification(fileName: String) {
-//        val userId = auth.currentUser?.uid ?: return
-//        val fileRef = storage.reference.child("$userId/certifications/$fileName")
-//
-//        fileRef.delete()
-//            .addOnSuccessListener {
-//                Log.d("Delete", "Deleted file: $fileName")
-//                getCertifications() // Refresh list after deletion
-//            }
-//            .addOnFailureListener { exception ->
-//                Log.e("Delete", "Failed to delete file: ${exception.message}")
-//            }
-//    }
 
 }
 
