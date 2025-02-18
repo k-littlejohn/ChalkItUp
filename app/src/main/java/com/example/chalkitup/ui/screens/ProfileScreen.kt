@@ -42,6 +42,7 @@ import com.example.chalkitup.R
 import com.example.chalkitup.ui.viewmodel.Certification
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
 import com.example.chalkitup.ui.viewmodel.ProfileViewModel
+import com.google.firebase.firestore.AggregateField.count
 
 @Composable
 fun ProfileScreen(
@@ -120,11 +121,17 @@ fun ProfileScreen(
                 //----------------STUDENT PROFILE---------------------------------
 
                 Text("Academic Performance:")
-                userProfile?.let {
-                    if (it.progress.isEmpty()){
-                        Text("NO PROGRESS LISTED")}
-                    else{
-                    ItemGrid(it.progress, columns = 4)}
+                userProfile?.let { profile ->
+                    if (profile.progress_item.isEmpty()) {
+                        Text("NO PROGRESS LISTED")
+                    } else {
+                        val progress_numb=profile.progress_item.size
+                        for (i in 0 until progress_numb) {
+                            ItemGrid(listOf(profile.progress_item[i]), columns = 1)
+                            ItemGrid(listOf(profile.progress_grade[i]), columns = 1)
+                        }
+
+                    }
                 }
                 //----------------------------------------------------------------
             }
@@ -132,10 +139,13 @@ fun ProfileScreen(
             userProfile?.let {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Interests:")
-                if(it.interests.isEmpty()){
-                    Text("NO INTERESTS LISTED")}
-                else{
-                    ItemGrid(it.interests, columns = 4)}
+                if (it.interests.isEmpty()) {
+                    Text("NO INTERESTS LISTED")
+                } else {
+                    for (i in it.interests.indices) {
+                        ItemGrid(listOf(it.interests[i]), columns = 1)
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -145,6 +155,24 @@ fun ProfileScreen(
             }
         }
     }
+
+
+    //----------------------------------------------------------------
+
+    //list interests
+//                Spacer(modifier = Modifier.height(16.dp))
+//                Text("Interests:")
+//
+//                if (interests.isNullOrEmpty()) {
+//                    Text("No progress found.")
+//                } else {
+//                    ProgressGrid(interests!!)
+//                }
+
+    Spacer(modifier = Modifier.height(16.dp))
+    // Edit Profile Button
+    Button(onClick = { navController.navigate("editProfile") })
+    { Text("Edit Profile") }
 }
 
 // Grid layout for certifications (3 items per row)
@@ -163,7 +191,7 @@ fun CertificationGrid(certifications: List<Certification>) {
     }
 }
 
-// Grid layout for grades & subjects (4 items per row)
+// Grid layout for grades & subjects, interests abd progress item and grade(4 items per row)
 @Composable
 fun ItemGrid(items: List<String>, columns: Int) {
     Box(modifier = Modifier.height(100.dp)) {

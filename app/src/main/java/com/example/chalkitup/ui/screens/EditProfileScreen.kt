@@ -43,15 +43,12 @@ import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
 @Composable
 fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewModel) {
     val scrollState = rememberScrollState()
-
     val userProfile by viewModel.userProfile.observeAsState()
 
     val profilePictureUrl by viewModel.profilePictureUrl.observeAsState()
 
     val isTutor by remember(userProfile) {
-        derivedStateOf { userProfile?.userType == "Tutor" }
-    }
-
+        derivedStateOf { userProfile?.userType == "Tutor" }}
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -59,8 +56,10 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
     var selectedGrades by remember { mutableStateOf(listOf<Int>()) }
     var bio by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
-
     var originalProfilePictureUrl by remember { mutableStateOf<String?>(null) }
+    var progress_item by remember { mutableStateOf(listOf<String>()) }
+    var progress_grade by remember { mutableStateOf(listOf<String>()) }
+    var selectedInterests by remember { mutableStateOf(listOf<Int>()) }
 
     // Profile picture
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -88,7 +87,8 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
 
         // Circular profile picture that acts as a button
         AsyncImage(
-            model = profilePictureUrl ?: R.drawable.baseline_person_24, // Default profile picture if none is set
+            model = profilePictureUrl
+                ?: R.drawable.baseline_person_24, // Default profile picture if none is set
             contentDescription = "Profile Picture",
             modifier = Modifier
                 .size(100.dp)
@@ -150,9 +150,43 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
                 onSelectionChange = { selectedGrades = it.map { it.toInt() } }
             )
         } else {
-            // Student-Specific Fields
+            LaunchedEffect(userProfile) {
+                userProfile?.let {
+                    progress_item = it.progress_item.toMutableList()
+                    progress_grade = it.progress_item.toMutableList()
+                }
+            }
+            Column(modifier = Modifier
+                .padding(16.dp)
+                .verticalScroll(scrollState)) {
 
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Update Progress")
+                for (i in progress_item.indices) {
+                    OutlinedTextField(
+                        value = progress_item[i],
+                        onValueChange = { newValue ->
+                            progress_item = progress_item.toMutableList().also { list ->
+                                list[i] = newValue
+                            }
+                        },
+                        label = { Text("Title of Assessment") })
+                    OutlinedTextField(
+                        value = progress_grade[i],
+                        onValueChange = { newValue ->
+                            progress_grade = progress_grade.toMutableList().also { list ->
+                                list[i] = newValue
+                            }
+                        },
+                        label = { Text("Grade") }
+
+
+
+                    )
+                }
+            }
         }
+    }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -173,7 +207,6 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
             }
         }
     }
-}
 
 @Composable
 fun MultiSelectDropdown(

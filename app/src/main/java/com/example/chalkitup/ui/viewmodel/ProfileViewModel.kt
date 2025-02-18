@@ -55,8 +55,15 @@ class ProfileViewModel : ViewModel() {
                     // Check if the user is a tutor or a student
                     _isTutor.value = user.userType == "Tutor"
                 }
-            }
-    }
+                //if (user.userType == "Tutor") {
+                    // Placeholder for loading tutor specific information
+                    // Currently none saved yet
+                    // Certification loading is handled by the CertificationViewModel
+                }
+        }
+
+
+
 
     // Function to load the profile picture from storage
     private fun loadProfilePicture(userId: String) {
@@ -69,6 +76,9 @@ class ProfileViewModel : ViewModel() {
     }
 }
 
+
+
+
 // Data class to represent the user profile data
 data class UserProfile(
     val userType: String = "",  // Type of user ("Tutor" or "Student")
@@ -80,5 +90,6 @@ data class UserProfile(
     val bio: String = "",        // User's bio
     val location: String = "",   // User's location
     val interests: List<String> = emptyList(),
-    val progress: List<String> = emptyList(),
+    val progress_item: List<String> = emptyList(),
+    val progress_grade: List<String> = emptyList(),
 )
