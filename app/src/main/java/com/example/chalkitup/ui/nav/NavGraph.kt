@@ -83,10 +83,12 @@ fun NavGraph(navController: NavHostController) {
 
         // Edit Profile Screen
         composable("editProfile") {
+            val certificationViewModel: CertificationViewModel = viewModel()
             val editProfileViewModel: EditProfileViewModel = viewModel()
             EditProfileScreen(
                 navController = navController,
-                viewModel = editProfileViewModel)
+                editProfileViewModel = editProfileViewModel,
+                certificationViewModel = certificationViewModel)
         }
 
         // Settings Screen

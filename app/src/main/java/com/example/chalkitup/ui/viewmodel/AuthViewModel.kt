@@ -1,5 +1,7 @@
 package com.example.chalkitup.ui.viewmodel
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -25,6 +27,22 @@ class AuthViewModel : ViewModel() {
 
     // FirebaseFirestore instance for storing user data
     private val firestore = FirebaseFirestore.getInstance()
+
+    // LiveData to track authentication state; reflects whether the user is logged in
+    private val _isUserLoggedIn = MutableLiveData<Boolean>()
+    val isUserLoggedIn: LiveData<Boolean> = _isUserLoggedIn
+
+    // Initializes the ViewModel and checks if a user is already logged in
+    init {
+        checkUserLoggedIn()
+    }
+
+    // Function to check if the user is currently logged in
+    // This is done by checking if the current user is non-null in FirebaseAuth
+    private fun checkUserLoggedIn() {
+        // Set the LiveData value to true if a user is logged in, false otherwise
+        _isUserLoggedIn.value = auth.currentUser != null
+    }
 
     /**
      * Logs in a user using email and password.

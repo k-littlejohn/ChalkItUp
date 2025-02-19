@@ -101,4 +101,13 @@ class SettingsViewModel : ViewModel() {
             }
     }
 
+    /**
+     * Signs out the current user from Firebase.
+     *
+     * This function logs out the currently authenticated user from FirebaseAuth.
+     */
+    fun signout() {
+        auth.signOut() // Logs out the user from FirebaseAuth
+    }
+
 }
