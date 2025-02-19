@@ -29,6 +29,8 @@ android {
         }
     }
     compileOptions {
+        // Enable Java 8+ API desugaring for minSdk < 26
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -50,11 +52,12 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.firebase.auth)
-    implementation(libs.firebase.firestore)
+    //implementation(libs.firebase.firestore)
     implementation(libs.androidx.navigation.runtime.android)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.firebase.storage)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.places)
     testImplementation(libs.testng)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -67,6 +70,12 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     testImplementation(libs.junit)
     implementation(libs.coil.compose)
-    implementation("androidx.compose.material:material-icons-extended:1.5.1")
-    implementation("androidx.compose.foundation:foundation:1.5.1") // New
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.foundation.v151) // New
+    implementation("com.kizitonwose.calendar:compose:2.0.0") // Calendar
+    implementation(libs.firebase.firestore.ktx)
+    // Enable Java 8+ API desugaring (only if minSdk < 26)
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4") // Latest version//
+    implementation("com.google.firebase:firebase-firestore-ktx:25.1.2")
+    implementation(libs.places.compose)
 }

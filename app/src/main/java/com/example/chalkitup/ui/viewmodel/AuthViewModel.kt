@@ -3,6 +3,7 @@ package com.example.chalkitup.ui.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.chalkitup.ui.components.TutorSubject
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
@@ -233,54 +234,5 @@ class AuthViewModel : ViewModel() {
                     )
                 }
             }
-    }
-}
-
-/**
- * Data class representing a subject, grade, and specialization that a tutor can offer.
- *
- * This class holds information about a tutor's subject, grade level, and specialization
- * for a specific grade.
- */
-// consider moving this to a separate file later on -Jeremelle
-data class TutorSubject(
-    val subject: String = "",
-    val grade: String = "",
-    val specialization: String = ""
-)
-
-/**
- * Data class to represent errors in tutor subject details.
- *
- * This class contains flags for errors related to subject, grade, and specialization.
- */
-// consider moving this to a separate file later on -Jeremelle
-data class TutorSubjectError(
-    val subjectError: Boolean,
-    val gradeError: Boolean,
-    val specError: Boolean
-)
-
-/**
- * Validates a list of tutor subjects to check for missing or incorrect information.
- *
- * This function checks if each tutor subject has valid subject, grade, and specialization details.
- * If any of these fields are missing or invalid, an error flag is set.
- *
- * @param tutorSubjects The list of tutor subjects to validate.
- * @return A list of TutorSubjectError objects representing validation errors for each subject.
- */
-// consider moving this to a separate file later on -Jeremelle
-fun validateTutorSubjects(tutorSubjects: List<TutorSubject>): List<TutorSubjectError> {
-    return tutorSubjects.map { subject ->
-        TutorSubjectError(
-            subjectError = subject.subject.isEmpty(),
-            gradeError = subject.grade.isEmpty(),
-            specError = (subject.grade in listOf(
-                "10",
-                "11",
-                "12"
-            ) && subject.specialization.isEmpty())
-        )
     }
 }

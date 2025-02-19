@@ -1,6 +1,5 @@
 package com.example.chalkitup.ui.screens
 
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
@@ -19,11 +18,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,14 +34,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.example.chalkitup.ui.viewmodel.AuthViewModel
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
 import androidx.compose.ui.graphics.Brush
@@ -56,23 +49,23 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButtonColors
-import androidx.compose.ui.draw.shadow
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CheckboxColors
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import com.example.chalkitup.R
-import com.example.chalkitup.ui.viewmodel.TutorSubject
-import com.example.chalkitup.ui.viewmodel.TutorSubjectError
-import com.example.chalkitup.ui.viewmodel.validateTutorSubjects
+import com.example.chalkitup.ui.components.LocationAutocompleteTextField
+import com.example.chalkitup.ui.components.SelectedFileItem
+import com.example.chalkitup.ui.components.SubjectGradeItem
+import com.example.chalkitup.ui.components.TutorSubject
+import com.example.chalkitup.ui.components.TutorSubjectError
+import com.example.chalkitup.ui.components.validateTutorSubjects
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 
 /**
  * Composable function for the Signup Screen.
@@ -122,6 +115,10 @@ fun SignupScreen(
             }
         }
 
+    // Initialize Google Places with the API key.
+    val placesClient = remember { Places.createClient(context) }
+    val sessionToken = remember { AutocompleteSessionToken.newInstance() }
+
     // State variables for user input fields.
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -131,6 +128,7 @@ fun SignupScreen(
     var errorMessage by remember { mutableStateOf("") }
     var userType by remember { mutableStateOf<UserType?>(null) } // Track user type: Student or Tutor
     var tutorSubjects by remember { mutableStateOf<List<TutorSubject>>(emptyList()) } // To store selected subjects
+    var location by remember { mutableStateOf("") }
 
     // State variables to track input field errors.
     var emailError by remember { mutableStateOf(false) }        // Tracks Empty Field
@@ -146,6 +144,7 @@ fun SignupScreen(
     var userTypeError by remember { mutableStateOf(false) }     // Tracks Empty Field
     var subjectError by remember { mutableStateOf(false) }      // Tracks Empty Field
     var termsError by remember { mutableStateOf(false) }        // Tracks Not Checked
+    var locationError by remember { mutableStateOf(false) }     // Tracks Empty Field
 
     // State to track errors in tutor subject selections.
     var tutorSubjectErrors by remember { mutableStateOf<List<TutorSubjectError>>(emptyList()) }
@@ -158,7 +157,6 @@ fun SignupScreen(
     val grade1112Specs = listOf("- 1", "- 2", "AP", "IB")
 
     //val availableInterests = listOf("Art History", "Genetics", "Animals", "Astronomy", "Environment", "Health Science")
-    //var location by remember { mutableStateOf("") }
 
     // Icons for password requirement checks.
     val passCheckIcon = Icons.Default.CheckCircle
@@ -491,8 +489,19 @@ fun SignupScreen(
 //                label = { Text("City") },
 //                modifier = Modifier.fillMaxWidth()
 //            )
-            // want to remove
-            //TextField(value = bio, onValueChange = { bio = it }, label = { Text("BIO") })
+//            want to remove
+//            TextField(value = bio, onValueChange = { bio = it }, label = { Text("BIO") })
+
+            // Location Autocomplete TextField
+            LocationAutocompleteTextField(
+                placesClient = placesClient,
+                sessionToken = sessionToken,
+                location = location,
+                onLocationSelected = { selectedLocation ->
+                    location = selectedLocation
+                },
+                locationError = locationError
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -505,7 +514,8 @@ fun SignupScreen(
                 if (subjectError) {
                     Text(
                         "You must be able to tutor at least 1 subject",
-                        color = Color.Red
+                        color = Color.Red,
+                        fontSize = 15.sp
                     )
                 }
 
@@ -796,6 +806,7 @@ fun SignupScreen(
                     passMatchError = (password != confirmPassword) || password.isEmpty()
                     subjectError = ((userType == UserType.Tutor) && (tutorSubjects.isEmpty()))
                     termsError = !hasAgreedToTerms
+                    locationError = location.isEmpty()
 
                     // Validate tutor subjects.
                     tutorSubjectErrors = validateTutorSubjects(tutorSubjects)
@@ -804,7 +815,8 @@ fun SignupScreen(
                     if (!emailError && !firstNameError && !lastNameError && !userTypeError &&
                         !passwordError && !confirmPasswordError && !subjectError && !termsError &&
                         !passGreaterThan6Error && !passIncludesNumError && !passIncludesLowerError &&
-                        !passMatchError && !(tutorSubjectErrors.any { it.subjectError || it.gradeError || it.specError })
+                        !passMatchError && !(tutorSubjectErrors.any { it.subjectError || it.gradeError || it.specError } &&
+                                !locationError)
                     ) {
                         authViewModel.signupWithEmail(email, password, firstName, lastName,
                             userType!!.name, tutorSubjects,
@@ -834,315 +846,4 @@ fun SignupScreen(
 enum class UserType {
     Student,
     Tutor
-}
-
-/**
- * Composable function for displaying and managing the Subject, Grade, and Specialization selection for a tutor.
- *
- * This component allows a tutor to select their teaching subject, grade level, and specialization (if applicable),
- * and handles the visual state for errors, dropdown menus, and the removal of the selection.
- *
- * @param tutorSubject The current tutor's subject, grade, and specialization details.
- * @param availableSubjects The list of available subjects for the tutor to choose from.
- * @param availableGradeLevels The list of available grade levels for general subjects.
- * @param availableGradeLevelsBPC The list of available grade levels for Biology, Chemistry, and Physics.
- * @param grade10Specs The list of specializations available for grade 10.
- * @param grade1112Specs The list of specializations available for grades 11 and 12.
- * @param onSubjectChange A callback function to handle subject selection change.
- * @param onGradeChange A callback function to handle grade level selection change.
- * @param onSpecChange A callback function to handle specialization selection change.
- * @param onRemove A callback function to handle removal of the subject-grade-specialization selection.
- * @param subjectError A boolean flag indicating if there's an error with the subject selection.
- * @param gradeError A boolean flag indicating if there's an error with the grade level selection.
- * @param specError A boolean flag indicating if there's an error with the specialization selection.
- */
-
-@Composable
-fun SubjectGradeItem(
-    tutorSubject: TutorSubject,
-    availableSubjects: List<String>,
-    availableGradeLevels: List<String>,
-    availableGradeLevelsBPC: List<String>,
-    grade10Specs: List<String>,
-    grade1112Specs: List<String>,
-    onSubjectChange: (String) -> Unit,
-    onGradeChange: (String) -> Unit,
-    onSpecChange: (String) -> Unit,
-    onRemove: () -> Unit,
-    subjectError: Boolean,
-    gradeError: Boolean,
-    specError: Boolean
-) {
-    // State variables to control the visibility of dropdown menus for subject, grade, and specialization
-    var expandedSubject by remember { mutableStateOf(false) }
-    var expandedGrade by remember { mutableStateOf(false) }
-    var expandedSpec by remember { mutableStateOf(false) }
-
-    // Define colors for the buttons based on their state (selected, error, default)
-    val selectedButtonColor = Color(0xFF54A4FF)
-    val defaultButtonColor = Color.LightGray
-    val errorButtonColor = Color.Red
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Subject Selection Button and Dropdown
-        Box(modifier = Modifier.weight(3.5f)) {
-            Button(
-                onClick = { expandedSubject = true }, // Show the subject dropdown when clicked
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = when {
-                        tutorSubject.subject.isNotEmpty() -> selectedButtonColor
-                        subjectError -> errorButtonColor
-                        else -> defaultButtonColor
-                    }
-                ),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(text = tutorSubject.subject.ifEmpty { "Subject" }, fontSize = 14.sp)
-            }
-
-            // Subject dropdown menu
-            DropdownMenu(
-                expanded = expandedSubject,
-                onDismissRequest = { expandedSubject = false },
-                shadowElevation = 0.dp,
-                containerColor = Color.Transparent,
-                modifier = Modifier.width(125.dp)
-            ) {
-                availableSubjects.forEach { subj -> // Iterate through available subjects
-                    Box(
-                        modifier = Modifier
-                            .padding(2.dp)
-                            .shadow(
-                                6.dp,
-                                shape = RoundedCornerShape(8.dp),
-                                clip = true
-                            ) // Apply shadow properly
-                            .background(Color.White, shape = RoundedCornerShape(8.dp))
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text(subj) },
-                            onClick = {
-                                onSubjectChange(subj) // Update the subject when a selection is made
-                                onGradeChange("") // Reset grade and specialization when subject changes
-                                onSpecChange("")
-                                expandedSubject = false // Close the dropdown
-                            },
-                            //modifier = Modifier.padding(horizontal = 3.dp, vertical = 3.dp)
-                        )
-                    }
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        // Grade Level Selection Button and Dropdown
-        Box(modifier = Modifier.weight(1.8f)) {
-            Button(
-                onClick = { expandedGrade = true }, // Show the grade dropdown when clicked
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = when {
-                        tutorSubject.grade.isNotEmpty() -> selectedButtonColor
-                        gradeError -> errorButtonColor
-                        else -> defaultButtonColor
-                    }
-                ),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(text = tutorSubject.grade.ifEmpty { "Gr" }, fontSize = 14.sp)
-            }
-
-            // Determine the list of available grade levels based on the subject
-            val gradeList = when (tutorSubject.subject) {
-                "Biology", "Chemistry", "Physics" -> availableGradeLevelsBPC
-                else -> availableGradeLevels
-            }
-
-            // Grade dropdown menu
-            DropdownMenu(
-                expanded = expandedGrade,
-                onDismissRequest = { expandedGrade = false },
-                shadowElevation = 0.dp,
-                containerColor = Color.Transparent,
-                modifier = Modifier.width(75.dp)
-            ) {
-                gradeList.forEach { grade -> // Iterate through available grade levels
-                    Box(
-                        modifier = Modifier
-                            .padding(2.dp)
-                            .shadow(
-                                6.dp,
-                                shape = RoundedCornerShape(8.dp),
-                                clip = true
-                            ) // Apply shadow properly
-                            .background(Color.White, shape = RoundedCornerShape(8.dp))
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text(grade) },
-                            onClick = {
-                                onGradeChange(grade) // Update the grade when a selection is made
-                                onSpecChange("") // Reset specialization when grade level changes
-                                expandedGrade = false // Close the dropdown
-                            }
-                        )
-                    }
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        // Specialization Selection Button and Dropdown (only for grades 10, 11, or 12)
-        if (tutorSubject.grade == "10" || tutorSubject.grade == "11" || tutorSubject.grade == "12") {
-            // Specialization Selection Button
-            Box(modifier = Modifier.weight(2.9f)) {
-                Button(
-                    onClick = {
-                        expandedSpec = true
-                    }, // Show the specialization dropdown when clicked
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = when {
-                            tutorSubject.specialization.isNotEmpty() -> selectedButtonColor
-                            specError -> errorButtonColor
-                            else -> defaultButtonColor
-                        }
-                    ),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(text = tutorSubject.specialization.ifEmpty { "Level" }, fontSize = 14.sp)
-                }
-
-                // Determine the list of available specializations based on the grade
-                val specList = when (tutorSubject.grade) {
-                    "10" -> grade10Specs
-                    "11", "12" -> grade1112Specs
-                    else -> emptyList() // No specializations for non-grade 10-12
-                }
-
-                // Specialization dropdown menu
-                DropdownMenu(
-                    expanded = expandedSpec,
-                    onDismissRequest = { expandedSpec = false },
-                    shadowElevation = 0.dp,
-                    containerColor = Color.Transparent,
-                    modifier = Modifier.width(120.dp)
-                ) {
-                    specList.forEach { spec -> // Iterate through available specializations
-                        Box(
-                            modifier = Modifier
-                                .padding(2.dp)
-                                .shadow(
-                                    6.dp,
-                                    shape = RoundedCornerShape(8.dp),
-                                    clip = true
-                                ) // Apply shadow properly
-                                .background(Color.White, shape = RoundedCornerShape(8.dp))
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text(spec) },
-                                onClick = {
-                                    onSpecChange(spec) // Update the specialization when a selection is made
-                                    expandedSpec = false // Close the dropdown
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-        } else {
-            Box(modifier = Modifier.weight(2.9f)) {} // Empty box when no specialization is available
-            onSpecChange("") // Reset specialization if not applicable
-        }
-
-        // Remove Button to delete the subject-grade-specialization item
-        IconButton(onClick = onRemove) {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = "Remove Subject",
-                tint = Color.Gray
-            )
-        }
-    }
-}
-
-/**
- * Composable function to display a selected file in a card view with an optional image preview.
- *
- * This function displays the file name and an optional image preview if the selected file is an image.
- * It also includes a delete button to remove the selected file.
- *
- * @param fileName The name of the selected file to display.
- * @param fileUri The URI of the selected file used to load the file or image.
- * @param onRemove A callback function that is triggered when the delete button is pressed to remove the selected file.
- */
-
-@Composable
-fun SelectedFileItem(fileName: String, fileUri: Uri, onRemove: () -> Unit) {
-    // Get the current context and content resolver to retrieve file metadata
-    val context = LocalContext.current
-    val contentResolver = context.contentResolver
-    // Retrieve the MIME type of the selected file using its URI
-    val mimeType = contentResolver.getType(fileUri)
-    val isImage = mimeType?.startsWith("image/") == true
-
-    // Card displaying the file information and actions
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(if (isImage) 150.dp else 50.dp) // make height smaller if the file is not an image
-            .padding(vertical = 3.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardColors(
-            containerColor = Color(0xFF54A4FF),
-            contentColor = Color.White,
-            disabledContainerColor = Color(0xFF54A4FF),
-            disabledContentColor = Color.White
-        )
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row(
-                modifier = Modifier.padding(4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Text(
-                    text = fileName,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-
-                // IconButton for removing the file
-                IconButton(onClick = { onRemove() }) {
-                    Icon(imageVector = Icons.Default.Delete, contentDescription = "Remove File")
-                }
-            }
-
-            // Check if the selected file is an image
-            if (isImage) {
-                // Display image preview if the file is an image
-                AsyncImage(
-                    model = fileUri, // Load the image from the URI
-                    contentDescription = "Selected Image", // Description for the image
-                    modifier = Modifier
-                        .fillMaxWidth()  // Ensures the image takes up the full width
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop // Ensures the image fills width and crops excess
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-        }
-    }
 }
