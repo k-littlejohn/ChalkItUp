@@ -45,7 +45,7 @@ fun HomeScreen(navController: NavController) {
     }
 }
 
-
+//
 @Composable
 fun CalendarScreen() {
     var bookedDates by remember { mutableStateOf(emptyList<String>()) }

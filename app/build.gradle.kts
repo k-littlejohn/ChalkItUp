@@ -74,6 +74,6 @@ dependencies {
     implementation("com.kizitonwose.calendar:compose:2.0.0") // Calendar
     implementation(libs.firebase.firestore.ktx)
     // Enable Java 8+ API desugaring (only if minSdk < 26)
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4") // Latest version
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4") // Latest version//
     implementation("com.google.firebase:firebase-firestore-ktx:25.1.2")
 }
