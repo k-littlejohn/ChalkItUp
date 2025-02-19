@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
-
+import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,6 +38,14 @@ fun SettingsScreen(
             .fillMaxSize()
             .padding(24.dp)
     ) {
+        // temp logout button
+        Button(onClick = {
+            viewModel.signout()
+            navController.navigate("start")}
+        ) {
+            Text("Logout")
+        }
+
         // Show alert dialog on button click
         OutlinedButton(onClick = { showDialog = true })
         {
