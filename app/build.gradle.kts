@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.firebase.storage)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.places)
     testImplementation(libs.testng)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -76,4 +77,5 @@ dependencies {
     // Enable Java 8+ API desugaring (only if minSdk < 26)
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4") // Latest version//
     implementation("com.google.firebase:firebase-firestore-ktx:25.1.2")
+    implementation(libs.places.compose)
 }

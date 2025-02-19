@@ -145,12 +145,11 @@ fun StartScreen(navController: NavController) {
                     containerColor = TealGreen,
                     contentColor = Color.White
                 ),
-                shape = RoundedCornerShape(0.dp)
+                shape = RoundedCornerShape(4.dp)
             ) {
                 Text(
                     text = "LOGIN",
                     fontSize = 16.sp,
-
                 )
             }
 

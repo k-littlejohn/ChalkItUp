@@ -103,7 +103,8 @@ fun CheckEmailScreen(
                     // signout the user bc they are not verified!
                     viewModel.signout()
                     navController.navigate("start")
-                }) {
+                }
+                ) {
                     Icon(
                         imageVector = Icons.Outlined.ArrowBack,
                         contentDescription = "Back to Home"

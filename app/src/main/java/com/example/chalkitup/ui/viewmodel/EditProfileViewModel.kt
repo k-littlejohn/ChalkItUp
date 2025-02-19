@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.chalkitup.ui.components.TutorSubject
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -57,8 +58,7 @@ class EditProfileViewModel : ViewModel() {
     fun updateProfile(
         firstName: String,
         lastName: String,
-        subjects: List<String>,
-        grades: List<Int>,
+        subjects: List<TutorSubject>,
         bio: String,
         location: String
     ) {
@@ -78,14 +78,8 @@ class EditProfileViewModel : ViewModel() {
         userProfile.value?.let {
             if (it.userType == "Tutor") {
                 updateData["subjects"] = subjects
-                updateData["grades"] = grades
             }
         }
-
-        // If there is a new profile picture URL, add it to the update data
-//        tempProfilePictureUrl?.let {
-//            updateData["profilePictureUrl"] = it
-//        }
 
         // Update the user's profile in Firestore
         userRef.update(updateData)

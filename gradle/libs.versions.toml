@@ -22,6 +22,8 @@ firebaseStorage = "21.0.1"
 composeFoundation = "1.5.0"
 testng = "6.9.6"
 runtimeLivedata = "1.7.7"
+placesCompose = "0.1.2"
+places = "4.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -51,8 +53,10 @@ firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx"
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "composeFoundation" }
 junit = { module = "junit:junit", version.ref = "junit" }
+places-compose = { module = "com.google.maps.android:places-compose", version.ref = "placesCompose" }
 testng = { group = "org.testng", name = "testng", version.ref = "testng" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
+places = { group = "com.google.android.libraries.places", name = "places", version.ref = "places" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
