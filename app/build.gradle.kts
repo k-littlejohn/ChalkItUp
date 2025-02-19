@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.firebase.storage)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.places)
     testImplementation(libs.testng)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -69,4 +70,5 @@ dependencies {
     implementation(libs.coil.compose)
     implementation("androidx.compose.material:material-icons-extended:1.5.1")
     implementation("androidx.compose.foundation:foundation:1.5.1") // New
+    implementation(libs.places.compose)
 }

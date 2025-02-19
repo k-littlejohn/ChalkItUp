@@ -33,8 +33,8 @@ class AppLifecycleObserver(
     /**
      * Called when the app goes into the background (onPause).
      *
-     * Optionally, you can add logic here if needed to handle events when the app is paused,
-     * such as saving data or stopping background tasks. In this case, no specific action is taken.
+     * Optional: add logic here if needed to handle events when the app is paused,
+     * such as saving data or stopping background tasks. Currently, no specific action is taken.
      *
      * @param owner The LifecycleOwner that this observer is observing (usually an activity or fragment).
      */

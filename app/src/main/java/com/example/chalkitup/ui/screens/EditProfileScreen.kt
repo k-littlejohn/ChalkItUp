@@ -50,12 +50,29 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.chalkitup.R
+import com.example.chalkitup.ui.components.LocationAutocompleteTextField
+import com.example.chalkitup.ui.components.SelectedFileItem
+import com.example.chalkitup.ui.components.SubjectGradeItem
+import com.example.chalkitup.ui.components.TutorSubject
+import com.example.chalkitup.ui.components.TutorSubjectError
+import com.example.chalkitup.ui.components.validateTutorSubjects
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
 import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
-import com.example.chalkitup.ui.viewmodel.TutorSubject
-import com.example.chalkitup.ui.viewmodel.TutorSubjectError
-import com.example.chalkitup.ui.viewmodel.validateTutorSubjects
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 
+/**
+ * EditProfileScreen
+ *
+ * This composable function displays the Edit Profile screen, allowing users to
+ * update their profile information, including name, bio, location, subjects
+ * (for tutors), and certifications. Users can also change their profile
+ * picture. Form validation ensures required fields are filled before saving.
+ *
+ * @param navController - The NavController for navigation between screens.
+ * @param editProfileViewModel - ViewModel handling user profile data and profile picture upload.
+ * @param certificationViewModel - ViewModel managing certification file selection, upload, and removal.
+ */
 @Composable
 fun EditProfileScreen(
     navController: NavController,
@@ -64,16 +81,29 @@ fun EditProfileScreen(
 ) {
     //------------------------------VARIABLES----------------------------------------------
 
+    // Scroll state for vertical scrolling.
     val scrollState = rememberScrollState()
 
+    // Observing the user's profile data from the ViewModel.
     val userProfile by editProfileViewModel.userProfile.observeAsState()
 
-    val profilePictureUrl by editProfileViewModel.profilePictureUrl.observeAsState()
-
+    // Determines if the user is a tutor based on their profile information.
     val isTutor by remember(userProfile) {
         derivedStateOf { userProfile?.userType == "Tutor" }
     }
 
+    // Observing the profile picture URL from the ViewModel.
+    val profilePictureUrl by editProfileViewModel.profilePictureUrl.observeAsState()
+
+    // Store the original profile picture URL to allow restoration.
+    var originalProfilePictureUrl by remember { mutableStateOf<String?>(null) }
+
+    // Profile picture selection launcher.
+    val launcherPFP = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let { editProfileViewModel.uploadProfilePicture(it) }
+    }
+
+    // State variables for profile fields.
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -81,26 +111,21 @@ fun EditProfileScreen(
     var bio by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
 
+    // Lists for available subjects and grade levels.
     val availableSubjects = listOf("Math", "Science", "English", "Social", "Biology", "Physics", "Chemistry")
     val availableGradeLevels = listOf("7","8","9","10","11","12")
     val availableGradeLevelsBPC = listOf("11","12")
     val grade10Specs = listOf("- 1","- 2","Honours")
     val grade1112Specs = listOf("- 1","- 2","AP","IB")
 
+    // Error states for form validation. -> all check only for empty fields
     var tutorSubjectErrors by remember { mutableStateOf<List<TutorSubjectError>>(emptyList()) }
-
-
     var firstNameError by remember { mutableStateOf(false) }
     var lastNameError by remember { mutableStateOf(false) }
     var subjectError by remember { mutableStateOf(false) }
+    var locationError by remember { mutableStateOf(false) }
 
-    var originalProfilePictureUrl by remember { mutableStateOf<String?>(null) }
-
-    // Profile picture
-    val launcherPFP = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let { editProfileViewModel.uploadProfilePicture(it) }
-    }
-
+    // Initialize profile fields when the user profile data changes.
     LaunchedEffect(userProfile) {
         userProfile?.let {
             firstName = it.firstName
@@ -112,7 +137,6 @@ fun EditProfileScreen(
             originalProfilePictureUrl = profilePictureUrl // Save original profile picture
         }
     }
-
 
     // Context for accessing resources and system services.
     val context = LocalContext.current
@@ -128,8 +152,13 @@ fun EditProfileScreen(
             }
         }
 
+    // Google Places API client for location autocomplete.
+    val placesClient = remember { Places.createClient(context) }
+    val sessionToken = remember { AutocompleteSessionToken.newInstance() }
+
     //------------------------------VARIABLES-END----------------------------------------------
 
+    // Main layout.
     Column(modifier = Modifier
         .padding(24.dp)
         .verticalScroll(scrollState)
@@ -140,7 +169,7 @@ fun EditProfileScreen(
 
         Text("Edit Profile")
 
-        // Circular profile picture that acts as a button
+        // Circular profile picture with a click to change.
         AsyncImage(
             model = profilePictureUrl ?: R.drawable.baseline_person_24, // Default profile picture if none is set
             contentDescription = "Profile Picture",
@@ -151,6 +180,7 @@ fun EditProfileScreen(
                 .clickable { launcherPFP.launch("image/*") } // When clicked, allow the user to select a new image
         )
 
+        // First Name input field.
         OutlinedTextField(
             value = firstName,
             modifier = Modifier.fillMaxWidth(),
@@ -164,6 +194,7 @@ fun EditProfileScreen(
             isError = firstNameError // Indicates that there's an error if firstNameError is true.
         )
 
+        // Last Name input field.
         OutlinedTextField(
             value = lastName,
             modifier = Modifier.fillMaxWidth(),
@@ -184,13 +215,18 @@ fun EditProfileScreen(
 //            enabled = false // Prevent email from being edited
 //        )
 
-        OutlinedTextField(
-            value = location,
-            modifier = Modifier.fillMaxWidth(),
-            onValueChange = { location = it },
-            label = { Text("Location") }
+        // Location Autocomplete TextField.
+        LocationAutocompleteTextField(
+            placesClient = placesClient,
+            sessionToken = sessionToken,
+            location = location,
+            onLocationSelected = { selectedLocation ->
+                location = selectedLocation
+            },
+            locationError = locationError
         )
 
+        // Bio input field.
         OutlinedTextField(
             value = bio,
             modifier = Modifier.fillMaxWidth(),
@@ -198,7 +234,7 @@ fun EditProfileScreen(
             label = { Text("Bio") }
         )
 
-        // Tutor-Specific Fields
+        // Tutor-Specific Fields.
         if (isTutor) {
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -209,7 +245,6 @@ fun EditProfileScreen(
 
             Text("Subjects You Teach")
 
-            // Add Subject Button
             Row (
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -218,6 +253,7 @@ fun EditProfileScreen(
 
                 Spacer(modifier = Modifier.width(50.dp))
 
+                // Add Subject button.
                 IconButton(
                     onClick = {
                         tutorSubjects = tutorSubjects + TutorSubject("", "", "") // Add empty entry
@@ -246,7 +282,7 @@ fun EditProfileScreen(
                 )
             }
 
-            // List of subject-grade level pairs
+            // Display list of subjects the tutor teaches.
             Box (modifier = Modifier.heightIn(20.dp,500.dp)) {
                 LazyColumn {
                     itemsIndexed(tutorSubjects) { index, tutorSubject ->
@@ -284,7 +320,7 @@ fun EditProfileScreen(
                 }
             }
 
-            // Section for uploading certifications.
+            // Certification file upload section.
             Text("Your Certifications", style = MaterialTheme.typography.titleMedium)
 
             // Button to trigger file upload.
@@ -298,7 +334,6 @@ fun EditProfileScreen(
 
             // Display selected files if any.
             if (selectedFiles.isNotEmpty()) {
-                //Text(text = "Selected Files:", style = MaterialTheme.typography.titleMedium)
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -325,6 +360,7 @@ fun EditProfileScreen(
 
         }
 
+        // Save and Cancel buttons.
         Row {
             Button(onClick = {
                 // Error checks
@@ -333,9 +369,10 @@ fun EditProfileScreen(
                 subjectError = ((isTutor) && (tutorSubjects.isEmpty()))
                 firstNameError = firstName.isEmpty()
                 lastNameError = lastName.isEmpty()
+                locationError = location.isEmpty()
 
                 if (!(tutorSubjectErrors.any { it.subjectError || it.gradeError || it.specError }) &&
-                        !subjectError && !firstNameError && !lastNameError
+                        !subjectError && !firstNameError && !lastNameError && !locationError
                     ) {
                     editProfileViewModel.updateProfile(firstName, lastName, tutorSubjects, bio, location)
                     certificationViewModel.updateCertifications(context)

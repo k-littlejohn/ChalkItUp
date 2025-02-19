@@ -14,7 +14,10 @@ import kotlinx.coroutines.launch
 // Navigation drawer
 
 @Composable
-fun NavigationDrawer(navController: NavController, drawerState: DrawerState) {
+fun NavigationDrawer(
+    navController: NavController,
+    drawerState: DrawerState
+) {
     // Create a coroutine scope to manage state changes asynchronously
     val coroutineScope = rememberCoroutineScope()
 
