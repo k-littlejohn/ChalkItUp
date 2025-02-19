@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -81,112 +82,123 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
 
     Column(modifier = Modifier
         .padding(16.dp)
-        .verticalScroll(scrollState)) {
-
-        Text("Edit Profile")
-
-        // Circular profile picture that acts as a button
-        AsyncImage(
-            model = profilePictureUrl
-                ?: R.drawable.baseline_person_24, // Default profile picture if none is set
-            contentDescription = "Profile Picture",
-            modifier = Modifier
-                .size(100.dp)
-                .clip(CircleShape)
-                .border(2.dp, Color.Gray, CircleShape)
-                .clickable { launcher.launch("image/*") } // When clicked, allow the user to select a new image
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = firstName,
-            onValueChange = { firstName = it },
-            label = { Text("First Name") }
-        )
-
-        OutlinedTextField(
-            value = lastName,
-            onValueChange = { lastName = it },
-            label = { Text("Last Name") }
-        )
-
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            enabled = false // Prevent email from being edited
-        )
-
-        OutlinedTextField(
-            value = location,
-            onValueChange = { location = it },
-            label = { Text("Location") }
-        )
-
-        OutlinedTextField(
-            value = bio,
-            onValueChange = { bio = it },
-            label = { Text("Bio") }
-        )
-
-        // Tutor-Specific Fields
-        if (isTutor) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("Subjects You Teach")
-
-            MultiSelectDropdown(
-                availableOptions = listOf("Math", "Science", "English", "History", "Physics"),
-                selectedOptions = selectedSubjects,
-                onSelectionChange = { selectedSubjects = it }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("Grade Levels")
-
-            MultiSelectDropdown(
-                availableOptions = (7..12).map { it.toString() },
-                selectedOptions = selectedGrades.map { it.toString() },
-                onSelectionChange = { selectedGrades = it.map { it.toInt() } }
-            )
-        } else {
-            LaunchedEffect(userProfile) {
-                userProfile?.let {
-                    progress_item = it.progress_item.toMutableList()
-                    progress_grade = it.progress_item.toMutableList()
-                }
-            }
-            Column(modifier = Modifier
-                .padding(16.dp)
-                .verticalScroll(scrollState)) {
-
+        .verticalScroll(scrollState)
+    ) {
+            Box(modifier = Modifier.height(200.dp)) {
+                Text("Edit Profile")
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Update Progress")
-                for (i in progress_item.indices) {
-                    OutlinedTextField(
-                        value = progress_item[i],
-                        onValueChange = { newValue ->
-                            progress_item = progress_item.toMutableList().also { list ->
-                                list[i] = newValue
-                            }
-                        },
-                        label = { Text("Title of Assessment") })
-                    OutlinedTextField(
-                        value = progress_grade[i],
-                        onValueChange = { newValue ->
-                            progress_grade = progress_grade.toMutableList().also { list ->
-                                list[i] = newValue
-                            }
-                        },
-                        label = { Text("Grade") }
+                // Circular profile picture that acts as a button
+                AsyncImage(
+                    model = profilePictureUrl
+                        ?: R.drawable.baseline_person_24, // Default profile picture if none is set
+                    contentDescription = "Profile Picture",
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(CircleShape)
+                        .border(2.dp, Color.Gray, CircleShape)
+                        .clickable { launcher.launch("image/*") } // When clicked, allow the user to select a new image
+                )
+                Spacer(modifier = Modifier.height(16.dp))
 
+                OutlinedTextField(
+                    value = firstName,
+                    onValueChange = { firstName = it },
+                    label = { Text("First Name") }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = lastName,
+                    onValueChange = { lastName = it },
+                    label = { Text("Last Name") }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
 
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Email") },
+                    enabled = false // Prevent email from being edited
+                )
+                Spacer(modifier = Modifier.height(16.dp))
 
+                OutlinedTextField(
+                    value = location,
+                    onValueChange = { location = it },
+                    label = { Text("Location") }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = bio,
+                    onValueChange = { bio = it },
+                    label = { Text("Bio") }
+                )
+
+                // Tutor-Specific Fields
+                if (isTutor) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Subjects You Teach")
+
+                    MultiSelectDropdown(
+                        availableOptions = listOf(
+                            "Math",
+                            "Science",
+                            "English",
+                            "History",
+                            "Physics"
+                        ),
+                        selectedOptions = selectedSubjects,
+                        onSelectionChange = { selectedSubjects = it }
                     )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Grade Levels")
+
+                    MultiSelectDropdown(
+                        availableOptions = (7..12).map { it.toString() },
+                        selectedOptions = selectedGrades.map { it.toString() },
+                        onSelectionChange = { selectedGrades = it.map { it.toInt() } }
+                    )}
+                else {
+                    LaunchedEffect(userProfile) {
+                        userProfile?.let {
+                            progress_item = it.progress_item.toMutableList()
+                            progress_grade = it.progress_item.toMutableList()
+                        }
+                    }
+                    Column(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .verticalScroll(scrollState)
+                    ) {
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Update Progress")
+                        for (i in progress_item.indices) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            OutlinedTextField(
+                                value = progress_item[i],
+                                onValueChange = { newValue ->
+                                    progress_item = progress_item.toMutableList().also { list ->
+                                        list[i] = newValue
+                                    }
+                                },
+                                label = { Text("Title of Assessment") })
+                            OutlinedTextField(
+                                value = progress_grade[i],
+                                onValueChange = { newValue ->
+                                    progress_grade = progress_grade.toMutableList().also { list ->
+                                        list[i] = newValue
+                                    }
+                                },
+                                label = { Text("Grade") }
+
+
+                            )
+                        }
+                    }
                 }
             }
-        }
-    }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -205,7 +217,7 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
                 navController.popBackStack() }) {
                 Text("Cancel")
             }
-        }
+        }}
     }
 
 @Composable
