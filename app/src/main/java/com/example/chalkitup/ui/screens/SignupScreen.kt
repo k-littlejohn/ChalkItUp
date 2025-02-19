@@ -1057,7 +1057,7 @@ fun SelectedFileItem(fileName: String, fileUri: Uri, onRemove: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()  // Ensures the image takes up the full width
                         .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop // Ensures the image fills width and crops exces
+                    contentScale = ContentScale.Crop // Ensures the image fills width and crops excess
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
