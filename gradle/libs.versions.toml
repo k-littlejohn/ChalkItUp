@@ -1,6 +1,9 @@
 [versions]
 agp = "8.8.1"
 coilCompose = "2.2.2"
+compose = "2.0.0"
+desugar_jdk_libs = "2.1.4"
+firebaseFirestoreKtx = "25.1.2"
 foundation = "1.5.1"
 foundationVersion = "1.4.0"
 junit = "4.13.2"
@@ -14,6 +17,7 @@ composeBom = "2025.01.01"
 googleGmsGoogleServices = "4.4.2"
 firebaseAuth = "23.2.0"
 firebaseFirestore = "25.1.2"
+material = "1.5.4"
 materialIconsExtended = "1.7.8"
 navigationComposeVersion = "2.8.6"
 navigationRuntimeAndroid = "2.9.0-alpha05"
@@ -30,6 +34,7 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-foundation-v140 = { module = "androidx.compose.foundation:foundation", version.ref = "foundationVersion" }
 androidx-foundation-v151 = { module = "androidx.compose.foundation:foundation", version.ref = "foundation" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
+androidx-material = { module = "androidx.compose.material:material", version.ref = "material" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-navigation-compose-v275 = { module = "androidx.navigation:navigation-compose", version.ref = "navigationComposeVersion" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
@@ -45,6 +50,8 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+compose = { module = "com.kizitonwose.calendar:compose", version.ref = "compose" }
+desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 androidx-navigation-runtime-android = { group = "androidx.navigation", name = "navigation-runtime-android", version.ref = "navigationRuntimeAndroid" }
@@ -52,6 +59,7 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx" }
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "composeFoundation" }
+google-firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 junit = { module = "junit:junit", version.ref = "junit" }
 places-compose = { module = "com.google.maps.android:places-compose", version.ref = "placesCompose" }
 testng = { group = "org.testng", name = "testng", version.ref = "testng" }

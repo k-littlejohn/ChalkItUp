@@ -57,7 +57,6 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.firebase.storage)
     implementation(libs.androidx.runtime.livedata)
-    implementation(libs.places)
     testImplementation(libs.testng)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -72,10 +71,10 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.foundation.v151) // New
-    implementation("com.kizitonwose.calendar:compose:2.0.0") // Calendar
+    implementation(libs.compose) // Calendar
     implementation(libs.firebase.firestore.ktx)
     // Enable Java 8+ API desugaring (only if minSdk < 26)
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4") // Latest version//
-    implementation("com.google.firebase:firebase-firestore-ktx:25.1.2")
-    implementation(libs.places.compose)
+    coreLibraryDesugaring(libs.desugar.jdk.libs) // Latest version//
+    implementation(libs.google.firebase.firestore.ktx)
+    implementation(libs.androidx.material)
 }
