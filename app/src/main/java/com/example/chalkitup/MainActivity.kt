@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.material3.Surface
 import com.example.chalkitup.ui.screens.MainScreen
 import com.example.chalkitup.ui.theme.ChalkitupTheme
+import com.google.android.libraries.places.api.Places
 
 // Initializes app on launch
 // -> launches MainScreen()
@@ -13,6 +14,9 @@ import com.example.chalkitup.ui.theme.ChalkitupTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        Places.initialize(this, "AIzaSyCp6eJq4S6fiAbSb-yOaiGfmZc1imPAxAM")
+
         setContent {
             ChalkitupTheme { // Color Theme
                 Surface {
