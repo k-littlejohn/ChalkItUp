@@ -68,7 +68,7 @@ fun MyTopBar(
                         Icon(Icons.Default.Menu, contentDescription = "Menu")
                     }
                 }
-                // On the login and signup page currently,
+                // On the login and signup page currently,          // Here are the alternative back buttons on login & signup screen
                 // there is a back button in the top left
                 "login","signup" -> {
                     IconButton(onClick = { navController.navigate("start") }) {
