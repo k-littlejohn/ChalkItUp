@@ -3,7 +3,6 @@ package com.example.chalkitup.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -27,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
+import androidx.compose.ui.unit.dp
 
 
 val AtkinsonFontEmail = FontFamily(
@@ -61,7 +61,7 @@ fun CheckEmailScreen(
     ) {
 
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -72,13 +72,25 @@ fun CheckEmailScreen(
                 color = Color.Black
             )
 
+            Spacer(modifier = Modifier.height(32.dp))
 
             if (checkType == "verify") { // The following is shown if it is email verification
-                Text("We sent you a verification link!",
-                    fontFamily = AtkinsonFontEmail,
-                    fontSize = 16.sp,
-                    color = Color.Gray
-                )
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        "  We've sent a confirmation email to your inbox.\n" +
+                                "            Please click the link to verify your\n" +
+                                "                          email address.",
+                        fontFamily = AtkinsonFontEmail,
+                        fontSize = 16.sp,
+                        color = Color.Gray,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
 
                 Text("Didn't receive an email?",
                     fontFamily = AtkinsonFontEmail,
@@ -86,6 +98,7 @@ fun CheckEmailScreen(
                     color = Color.Gray
                 )
 
+                Spacer(modifier = Modifier.height(4.dp))
 
                 TextButton(onClick = {
                     successMessage = ""
@@ -98,6 +111,8 @@ fun CheckEmailScreen(
                 ) {
                     Text("Send another email")
                 }
+
+                Spacer(modifier = Modifier.height(32.dp))
 
                 TextButton(onClick = {
                     // signout the user bc they are not verified!
@@ -122,11 +137,21 @@ fun CheckEmailScreen(
 
             } else { // The following is shown if it is forgot password
 
-                Text("We sent you a forgot password link!",
-                    fontFamily = AtkinsonFontEmail,
-                    fontSize = 16.sp,
-                    color = Color.Gray
-                )
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        "  We've sent a password reset link to your inbox.\n" +
+                                "      Please click the link in your email to reset\n" +
+                                "                          your password.",
+                        fontFamily = AtkinsonFontEmail,
+                        fontSize = 16.sp,
+                        color = Color.Gray,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
 
                 TextButton(onClick = {
                     navController.navigate("start")
@@ -139,7 +164,6 @@ fun CheckEmailScreen(
                 }
 
             }
-
         }
     }
 }

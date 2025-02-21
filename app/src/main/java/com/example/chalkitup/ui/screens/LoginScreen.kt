@@ -1,7 +1,5 @@
 package com.example.chalkitup.ui.screens
 
-//import androidx.compose.foundation.layout.windowInsetsPadding // newly added
-// import androidx.compose.foundation.layout.WindowInsets // newly added
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -24,9 +22,9 @@ import androidx.compose.ui.text.font.FontWeight
 import com.example.chalkitup.R
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-//import androidx.compose.ui.layout.matchParentSize
-
-
+// import androidx.compose.ui.layout.matchParentSize
+// import androidx.compose.foundation.layout.windowInsetsPadding // newly added
+// import androidx.compose.foundation.layout.WindowInsets // newly added
 
 val AtkinsonFont = FontFamily(
     Font(R.font.atkinson_regular, FontWeight.Normal),
@@ -72,16 +70,16 @@ fun LoginScreen(
             horizontalAlignment = Alignment.Start
         ) {
             // Back Button
-            IconButton(
-                onClick = { navController.navigate("start") },
-                modifier = Modifier.size(36.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.Black
-                )
-            }
+//            IconButton(
+//                onClick = { navController.navigate("start") },
+//                modifier = Modifier.size(36.dp)
+//            ) {
+//                Icon(
+//                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+//                    contentDescription = "Back",
+//                    tint = Color.Black
+//                )
+//            }
 
             Spacer(modifier = Modifier.height(16.dp))
 

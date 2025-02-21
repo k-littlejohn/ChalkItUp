@@ -1,11 +1,15 @@
 package com.example.chalkitup.ui.components
 
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
@@ -18,13 +22,16 @@ fun MyTopBar(
     onMenuClick: () -> Unit
 ) {
     // Holds the value of the current screen the user is on
-    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    var currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    currentRoute = currentRoute?.substringBefore("/")
 
     // Use theme colors dynamically
     // Changes the background colour of the top bar based on what
     // screen the user is on
     val backgroundColor = when (currentRoute) {
         "home" -> MaterialTheme.colorScheme.primary
+        "start", "login", "signup", "forgotPassword" -> Color(0xFF54A4FF) // Fill top-screen white space
+        "checkEmail" -> Color(0xFF06C59C) // Fill top-screen white space
         else -> MaterialTheme.colorScheme.primaryContainer
     }
 
@@ -40,6 +47,7 @@ fun MyTopBar(
                     "settings" -> "Settings"
                     "booking" -> "Book a Session"
                     "messages" -> "Messages"
+                    "start", "login", "signup", "forgotPassword", "checkEmail" -> ""
                     else -> "ChalkItUp Tutors"
                 }
             )
@@ -60,11 +68,13 @@ fun MyTopBar(
                         Icon(Icons.Default.Menu, contentDescription = "Menu")
                     }
                 }
-                // On the login and signup page currently,
+                // On the login and signup page currently,          // Here are the alternative back buttons on login & signup screen
                 // there is a back button in the top left
                 "login","signup" -> {
                     IconButton(onClick = { navController.navigate("start") }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            modifier = Modifier.size(30.dp))
                     }
                 }
                 // On unspecified pages there is no button in the top left

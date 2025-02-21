@@ -133,7 +133,7 @@ fun StartScreen(navController: NavController) {
                 currentImageIndex = index
             }
             // Moves login/signup Down The Higher dp
-            Spacer(modifier = Modifier.height(75.dp))
+            Spacer(modifier = Modifier.height(30.dp))
 
             // Login Button & Text
             Button(

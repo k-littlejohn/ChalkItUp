@@ -55,8 +55,11 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.CheckboxColors
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.withStyle
 import com.example.chalkitup.R
 import com.example.chalkitup.ui.components.LocationAutocompleteTextField
 import com.example.chalkitup.ui.components.SelectedFileItem
@@ -195,19 +198,19 @@ fun SignupScreen(
             .background(gradientBrush)
     ) {
         // Back Button . couldnt get it to look like the login page one.. will reattempt soon -Kaitlyn
-        IconButton(
-            onClick = { navController.navigate("start") },
-            modifier = Modifier
-                .size(58.dp)
-                .padding(16.dp)
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                tint = Color.Black,
-                modifier = Modifier.size(106.dp)
-            )
-        }
+//        IconButton(
+//            onClick = { navController.navigate("start") },
+//            modifier = Modifier
+//                .size(58.dp)
+//                .padding(16.dp)
+//        ) {
+//            Icon(
+//                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+//                contentDescription = "Back",
+//                tint = Color.Black,
+//                modifier = Modifier.size(106.dp)
+//            )
+//        }
 
         // Main content column.
         Column(
@@ -658,9 +661,91 @@ fun SignupScreen(
                     .padding(8.dp)
                     .verticalScroll(termsScrollState) // Separate scroll state
             ) {
+                // Converted to an annotated string to individually format each line
+                // Easier to edit individual lines + style them.
                 Text(
-                    text = termsAndConditions,
-                    style = MaterialTheme.typography.bodyMedium
+                    buildAnnotatedString {
+                        //MaterialTheme.typography.bodyMedium)
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Terms and Conditions\n\n")
+                            append("Last Updated February 17, 2025\n\n")
+                        }
+                        append("Welcome to ChalkItUp! By signing up and using our platform," +
+                                "you agree to the following Terms and Conditions. Please read them carefully.\n\n")
+
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("1. Introduction\n")
+                        }
+                        append("ChalkItUp provides a platform that connects students " +
+                                "with tutors for educational sessions. By using our app, you " +
+                                "acknowledge that you have read, understood, and agreed to these terms.\n\n")
+
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("2. User Accounts\n")
+                        }
+                        append("- Users must provide accurate information when creating an account.\n" +
+                                "- You are responsible for maintaining the confidentiality of your login credentials.\n" +
+                                "- We reserve the right to suspend or terminate accounts that violate these terms.\n\n")
+
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("3. User Responsibilities\n")
+                            append("- Students")
+                        }
+                        append(" must respect tutors' time and effort. Cancellations should be made in advance.\n")
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("- Tutors")
+                        }
+                        append(" must provide accurate information about their qualifications and availability.\n")
+                        append("- Users must communicate professionally and respectfully at all times.\n" +
+                                "- Any misuse of the platform, including harassment or fraud, may result in suspension.\n\n")
+
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("4. Payments and Fees\n")
+                        }
+                        append("Blank for now...\n\n")
+
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("5. Session Cancellations and Refunds\n")
+                        }
+                        append("- Tutors and students should provide at least one days notice" +
+                                " before canceling a session.\n\n")
+
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("6. Privacy and Data Protection\n")
+                        }
+                        append("- We collect and store user data as described in our ")
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Privacy Policy.\n")
+                        }
+
+                        append("- Personal information will not be shared without user consent, " +
+                                "except as required by law.\n\n")
+
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("7. Prohibited Activities\n")
+                        }
+                        append("Users must not:\n" +
+                                "- Provide false or misleading information.\n" +
+                                "- Use the platform for any illegal activities.\n" +
+                                "- Share or distribute inappropriate or offensive content.\n" +
+                                "- Attempt to hack, manipulate, or disrupt the platform.\n\n")
+
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("8. Limitation of Liability\n")
+                        }
+                        append("We are not responsible for:\n" +
+                                "- Provide false or misleading information.\n" +
+                                "- Use the platform for any illegal activities.\n" +
+                                "- Share or distribute inappropriate or offensive content.\n" +
+                                "- Attempt to hack, manipulate, or disrupt the platform.\n\n")
+
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("9. Changes to These Terms\n")
+                        }
+                        append("We may update these Terms and Conditions from time to time. " +
+                                "Users will be notified of significant changes, and continued use of the app " +
+                                "implies acceptance of the updated terms.")
+                    }
                 )
             }
 
@@ -733,11 +818,11 @@ fun SignupScreen(
                     if (!emailError && !firstNameError && !lastNameError && !userTypeError &&
                         !passwordError && !confirmPasswordError && !subjectError && !termsError &&
                         !passGreaterThan6Error && !passIncludesNumError && !passIncludesLowerError &&
-                        !passMatchError && !(tutorSubjectErrors.any { it.subjectError || it.gradeError || it.specError } &&
-                                !locationError)
+                        !passMatchError && !(tutorSubjectErrors.any { it.subjectError || it.gradeError || it.specError }) &&
+                        !locationError
                     ) {
                         authViewModel.signupWithEmail(email, password, firstName, lastName,
-                            userType!!.name, tutorSubjects,
+                            userType!!.name, tutorSubjects, location,
                             onUserReady = { user ->
                                 certificationViewModel.uploadFiles(context, user)
                                 navController.navigate("checkEmail/verify")
@@ -745,6 +830,7 @@ fun SignupScreen(
                             onError = { errorMessage = it },
                             onEmailError = { invalidEmailError = true }
                         )
+                        authViewModel.signout() // Sign out the user after signup
                     }
                 },
                 modifier = Modifier
@@ -765,50 +851,3 @@ enum class UserType {
     Student,
     Tutor
 }
-
-val termsAndConditions = """
-    |**Terms and Conditions**
-    |
-    |**Last Updated:** February 10, 2025
-    |
-    |Welcome to ChalkItUp! By signing up and using our platform, you agree to the following Terms and Conditions. Please read them carefully.
-    |
-    |**1. Introduction**
-    |ChalkItUp provides a platform that connects students with tutors for educational sessions. By using our app, you acknowledge that you have read, understood, and agreed to these terms.
-    |
-    |**2. User Accounts**
-    |- Users must provide accurate information when creating an account.
-    |- You are responsible for maintaining the confidentiality of your login credentials.
-    |- We reserve the right to suspend or terminate accounts that violate these terms.
-    |
-    |**3. User Responsibilities**
-    |- **Students** must respect tutors' time and effort. Cancellations should be made in advance.
-    |- **Tutors** must provide accurate information about their qualifications and availability.
-    |- Users must communicate professionally and respectfully at all times.
-    |- Any misuse of the platform, including harassment or fraud, may result in suspension.
-    |
-    |**4. Payments and Fees**
-    |
-    |**5. Session Cancellations and Refunds**
-    |- Tutors and students should provide at least one days notice before canceling a session.
-    |
-    |**6. Privacy and Data Protection**
-    |- We collect and store user data as described in our **Privacy Policy**.
-    |- Personal information will not be shared without user consent, except as required by law.
-    |
-    |**7. Prohibited Activities**
-    |Users must not:
-    |- Provide false or misleading information.
-    |- Use the platform for any illegal activities.
-    |- Share or distribute inappropriate or offensive content.
-    |- Attempt to hack, manipulate, or disrupt the platform.
-    |
-    |**8. Limitation of Liability**
-    |We are not responsible for:
-    |- The quality or outcomes of tutoring sessions.
-    |- Any disputes between tutors and students.
-    |- Technical issues that may interrupt service.
-    |
-    |**9. Changes to These Terms**
-    |We may update these Terms and Conditions from time to time. Users will be notified of significant changes, and continued use of the app implies acceptance of the updated terms.
-""".trimMargin()

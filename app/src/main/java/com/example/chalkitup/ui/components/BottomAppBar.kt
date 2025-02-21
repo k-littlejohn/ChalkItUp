@@ -10,6 +10,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
 
@@ -20,31 +21,47 @@ fun BottomNavigationBar(navController: NavController) {
 
     // List of the items that are displayed on the Bottom Bar
     val items = listOf(
-        BottomNavItem("home", Icons.Default.Home, "Home"),     // Home icon with label "Home"
-        BottomNavItem("booking", Icons.Default.Add, "Book"),   // Book icon with label "Book"
+        BottomNavItem("home", Icons.Default.Home, "Home"),         // Home icon with label "Home"
+        BottomNavItem("booking", Icons.Default.Add, "Book"),       // Book icon with label "Book"
         BottomNavItem("messages", Icons.Default.Face, "Messages"), // Messages icon with label "Messages"
         BottomNavItem("profile", Icons.Default.Person, "Profile")  // Profile icon with label "Profile"
     )
 
     // Get the current route from the NavController to determine which item is selected
-    val currentRoute = navController.currentDestination?.route
+    var currentRoute = navController.currentDestination?.route
+    currentRoute = currentRoute?.substringBefore("/")
+
+    val fillerBar = "checkEmail" == currentRoute
 
     // Create the Bottom Navigation Bar
-    NavigationBar {
-        // Iterate over the list of items and create a NavigationBarItem for each
-        items.forEach { item ->
-            NavigationBarItem(
-                icon = { Icon(item.icon, contentDescription = item.label) }, // Set the icon for the item
-                label = { Text(item.label) }, // Set the label for the item
-                selected = currentRoute == item.route, // Highlight item if it's the current route
-                onClick = {
-                    // Navigate to the corresponding screen when the item is clicked
-                    navController.navigate(item.route) {
-                        launchSingleTop = true // Only one instance of this screen is launched
-                        restoreState = true // Restore the state of the screen when navigating back
+    NavigationBar (
+        containerColor = if (fillerBar) Color(0xFF54A4FF) else Color.LightGray,
+        contentColor = if (fillerBar) Color(0xFF54A4FF) else Color.LightGray,
+    ) {
+        if (fillerBar) {
+            Unit
+        } else {
+            // Iterate over the list of items and create a NavigationBarItem for each
+            items.forEach { item ->
+                NavigationBarItem(
+                    icon = {
+                        Icon(
+                            item.icon,
+                            contentDescription = item.label
+                        )
+                    }, // Set the icon for the item
+                    label = { Text(item.label) }, // Set the label for the item
+                    selected = currentRoute == item.route, // Highlight item if it's the current route
+                    onClick = {
+                        // Navigate to the corresponding screen when the item is clicked
+                        navController.navigate(item.route) {
+                            launchSingleTop = true // Only one instance of this screen is launched
+                            restoreState =
+                                true // Restore the state of the screen when navigating back
+                        }
                     }
-                }
-            )
+                )
+            }
         }
     }
 }
