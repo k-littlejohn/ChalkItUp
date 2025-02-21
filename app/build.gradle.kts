@@ -77,4 +77,6 @@ dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs) // Latest version//
     implementation(libs.google.firebase.firestore.ktx)
     implementation(libs.androidx.material)
+    implementation(libs.places)
+    implementation(libs.places.compose)
 }
