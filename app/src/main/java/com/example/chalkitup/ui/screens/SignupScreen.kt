@@ -55,8 +55,11 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.CheckboxColors
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.withStyle
 import com.example.chalkitup.R
 import com.example.chalkitup.ui.components.LocationAutocompleteTextField
 import com.example.chalkitup.ui.components.SelectedFileItem
@@ -815,11 +818,11 @@ fun SignupScreen(
                     if (!emailError && !firstNameError && !lastNameError && !userTypeError &&
                         !passwordError && !confirmPasswordError && !subjectError && !termsError &&
                         !passGreaterThan6Error && !passIncludesNumError && !passIncludesLowerError &&
-                        !passMatchError && !(tutorSubjectErrors.any { it.subjectError || it.gradeError || it.specError } &&
-                                !locationError)
+                        !passMatchError && !(tutorSubjectErrors.any { it.subjectError || it.gradeError || it.specError }) &&
+                        !locationError
                     ) {
                         authViewModel.signupWithEmail(email, password, firstName, lastName,
-                            userType!!.name, tutorSubjects,
+                            userType!!.name, tutorSubjects, location,
                             onUserReady = { user ->
                                 certificationViewModel.uploadFiles(context, user)
                                 navController.navigate("checkEmail/verify")
@@ -827,6 +830,7 @@ fun SignupScreen(
                             onError = { errorMessage = it },
                             onEmailError = { invalidEmailError = true }
                         )
+                        authViewModel.signout() // Sign out the user after signup
                     }
                 },
                 modifier = Modifier

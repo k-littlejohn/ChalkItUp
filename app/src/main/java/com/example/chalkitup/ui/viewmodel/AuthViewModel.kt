@@ -41,8 +41,9 @@ class AuthViewModel : ViewModel() {
     // Function to check if the user is currently logged in
     // This is done by checking if the current user is non-null in FirebaseAuth
     private fun checkUserLoggedIn() {
-        // Set the LiveData value to true if a user is logged in, false otherwise
-        _isUserLoggedIn.value = auth.currentUser != null
+        val currentUser = auth.currentUser
+        // Set the LiveData value to true if a user is logged in and their email is verified, false otherwise
+        _isUserLoggedIn.value = currentUser != null && currentUser.isEmailVerified
     }
 
     /**
@@ -107,9 +108,7 @@ class AuthViewModel : ViewModel() {
         lastName: String,
         userType: String,
         subjects: List<TutorSubject> = emptyList(),
-
-        //location: String,
-
+        location: String,
         onUserReady: (FirebaseUser) -> Unit, // Callback with the user for file upload
         onError: (String) -> Unit, // Callback for errors during signup
         onEmailError: () -> Unit
@@ -134,9 +133,7 @@ class AuthViewModel : ViewModel() {
                                     "lastName" to lastName,
                                     "email" to email,
                                     "subjects" to subjects,
-
-                                    //"location" to location,
-
+                                    "location" to location,
                                 )
 
                                 // Save the user data in Firestore under their UID
