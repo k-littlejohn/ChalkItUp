@@ -55,14 +55,14 @@ fun MainScreen() {
     }
 
     // List of routes where the bottom bar should be hidden.
-    val hideBottomBarRoutes = listOf("start","login", "signup","checkEmail","forgotPassword")
+    val hideBottomBarRoutes = listOf("start","login", "signup","forgotPassword")
     // Determine whether to show the bottom bar based on the current route.
     val showBottomBar = currentRoute !in hideBottomBarRoutes
 
-    // List of routes where the top bar should be hidden.
-    val hideTopBarRoutes = listOf("start","login","signup","checkEmail","forgotPassword")
-    // Determine whether to show the top bar based on the current route.
-    val showTopBar = currentRoute !in hideTopBarRoutes
+//    // List of routes where the top bar should be hidden.
+//    val hideTopBarRoutes = listOf("start","login","signup","checkEmail","forgotPassword")
+//    // Determine whether to show the top bar based on the current route.
+//    val showTopBar = currentRoute !in hideTopBarRoutes
 
     // Observe the user's authentication state to determine whether they are logged in.
     val isUserLoggedIn by authViewModel.isUserLoggedIn.observeAsState(initial = false)
@@ -85,7 +85,7 @@ fun MainScreen() {
         Scaffold(
             topBar = {
                 // Conditionally show the top bar based on the current route.
-                if (showTopBar) {
+                if (true) { // Top bar is used to camouflage screens it's not deliberately shown on (currently no screens it is fully hidden)
                     MyTopBar(
                         navController = navController,
                         onMenuClick = {

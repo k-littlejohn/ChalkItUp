@@ -198,19 +198,19 @@ fun SignupScreen(
             .background(gradientBrush)
     ) {
         // Back Button . couldnt get it to look like the login page one.. will reattempt soon -Kaitlyn
-        IconButton(
-            onClick = { navController.navigate("start") },
-            modifier = Modifier
-                .size(58.dp)
-                .padding(16.dp)
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                tint = Color.Black,
-                modifier = Modifier.size(106.dp)
-            )
-        }
+//        IconButton(
+//            onClick = { navController.navigate("start") },
+//            modifier = Modifier
+//                .size(58.dp)
+//                .padding(16.dp)
+//        ) {
+//            Icon(
+//                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+//                contentDescription = "Back",
+//                tint = Color.Black,
+//                modifier = Modifier.size(106.dp)
+//            )
+//        }
 
         // Main content column.
         Column(

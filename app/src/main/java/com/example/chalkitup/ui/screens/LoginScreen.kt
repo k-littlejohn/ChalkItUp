@@ -70,16 +70,16 @@ fun LoginScreen(
             horizontalAlignment = Alignment.Start
         ) {
             // Back Button
-            IconButton(
-                onClick = { navController.navigate("start") },
-                modifier = Modifier.size(36.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.Black
-                )
-            }
+//            IconButton(
+//                onClick = { navController.navigate("start") },
+//                modifier = Modifier.size(36.dp)
+//            ) {
+//                Icon(
+//                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+//                    contentDescription = "Back",
+//                    tint = Color.Black
+//                )
+//            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
