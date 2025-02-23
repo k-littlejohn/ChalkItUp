@@ -85,8 +85,7 @@ data class UserProfile(
     val firstName: String = "", // First name of the user
     val lastName: String = "",  // Last name of the user
     val email: String = "",     // Email address of the user
-    val subjects: List<String> = emptyList(), // List of subjects the user is associated with (e.g., for tutors)
-    val grades: List<Int> = emptyList(),      // List of grades associated with the user (e.g., for tutors)
+    val subjects: List<TutorSubject> = emptyList(), // List of subjects the user is associated with (for tutors)
     val bio: String = "",        // User's bio
     val location: String = "",   // User's location
     val interests: List<String> = emptyList(),

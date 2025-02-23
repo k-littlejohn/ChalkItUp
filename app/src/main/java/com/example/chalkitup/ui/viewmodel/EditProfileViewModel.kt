@@ -57,8 +57,7 @@ class EditProfileViewModel : ViewModel() {
     fun updateProfile(
         firstName: String,
         lastName: String,
-        subjects: List<String>,
-        grades: List<Int>,
+        subjects: List<TutorSubject>,
         bio: String,
         location: String
     ) {
@@ -78,7 +77,6 @@ class EditProfileViewModel : ViewModel() {
         userProfile.value?.let {
             if (it.userType == "Tutor") {
                 updateData["subjects"] = subjects
-                updateData["grades"] = grades
             }
         }
 
