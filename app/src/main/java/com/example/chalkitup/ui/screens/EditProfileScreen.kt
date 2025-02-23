@@ -2,6 +2,8 @@ package com.example.chalkitup.ui.screens
 
 import android.content.ClipData.Item
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
@@ -88,9 +90,10 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
         listOf("- 1", "- 2", "AP", "IB")
 
     var originalProfilePictureUrl by remember { mutableStateOf<String?>(null) }
-    var progress_item = remember { mutableListOf<String>()}
-    var progress_grade =remember { mutableListOf<String>() }
+    val progress_item = remember { mutableListOf<String>()}
+    val progress_grade =remember { mutableListOf<String>() }
     var selectedInterests by remember { mutableStateOf(listOf<Int>()) }
+    val mainHandler= Handler(Looper.getMainLooper())
 
     // Profile picture
     val launcher =
@@ -259,14 +262,13 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
 //                        )
 //            }
         } else {
-            LaunchedEffect(userProfile) {
-                userProfile?.let {
-                    progress_item.clear()
-                    progress_item.addAll(it.progress_item)
-                    progress_grade.clear()
-                    progress_grade.addAll(it.progress_grade)
+            userProfile?.let {
+                progress_item.clear()
+                progress_item.addAll(it.progress_item)
+                progress_grade.clear()
+                progress_grade.addAll(it.progress_grade)
+
                 }
-            }
 
             Spacer(modifier = Modifier.height(16.dp))
             Text("Progress")
@@ -287,7 +289,7 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
                         onValueChange = { grade_input = it },
                         label = { Text("Grade") })
                     Button(onClick = {
-                        // Needs field error checking
+
                         if (item_input.isNotBlank() && grade_input.isNotBlank()) {
                             progress_item.add(item_input)
                             progress_grade.add(grade_input)
