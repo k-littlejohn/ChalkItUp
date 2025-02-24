@@ -46,7 +46,7 @@ fun SettingsScreen(
             Text("Logout")
         }
 
-        // Show alert dialog on button click
+        // Show alert dialog when "Delete Account" button clicked
         OutlinedButton(onClick = { showDialog = true })
         {
             Text("Delete Account")
