@@ -12,6 +12,7 @@ import com.example.chalkitup.ui.screens.EditProfileScreen
 import com.example.chalkitup.ui.screens.HomeScreen
 import com.example.chalkitup.ui.screens.LoginScreen
 import com.example.chalkitup.ui.screens.MessagesScreen
+import com.example.chalkitup.ui.screens.AskQuestionScreen
 import com.example.chalkitup.ui.screens.ProfileScreen
 import com.example.chalkitup.ui.screens.SettingsScreen
 import com.example.chalkitup.ui.screens.SignupScreen
@@ -21,6 +22,7 @@ import com.example.chalkitup.ui.viewmodel.CertificationViewModel
 import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
 import com.example.chalkitup.ui.viewmodel.ProfileViewModel
 import com.example.chalkitup.ui.viewmodel.SettingsViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 // Navigation Center, NavHost with navController
 // On app launch, opens startScreen
@@ -68,7 +70,18 @@ fun NavGraph(navController: NavHostController) {
 
         // Messages Screen
         composable("messages") {
-            MessagesScreen(navController = navController)
+            val user = FirebaseAuth.getInstance().currentUser
+            if (user != null) {
+                MessagesScreen(
+                    navController = navController,
+                    userId = user.uid
+                )
+            }
+        }
+
+        // Ask Question Screen
+        composable("askQuestion") {
+            AskQuestionScreen(navController = navController)
         }
 
         // Profile Screen
