@@ -19,10 +19,12 @@ import androidx.navigation.NavController
 @Composable
 fun BottomNavigationBar(navController: NavController) {
 
+    // need to make this selective for student and tutors for booking screen and availability screen
+
     // List of the items that are displayed on the Bottom Bar
     val items = listOf(
         BottomNavItem("home", Icons.Default.Home, "Home"),         // Home icon with label "Home"
-        BottomNavItem("booking", Icons.Default.Add, "Book"),       // Book icon with label "Book"
+        BottomNavItem("tutorAvailability", Icons.Default.Add, "Book"),       // Book icon with label "Book"
         BottomNavItem("messages", Icons.Default.Face, "Messages"), // Messages icon with label "Messages"
         BottomNavItem("profile", Icons.Default.Person, "Profile")  // Profile icon with label "Profile"
     )

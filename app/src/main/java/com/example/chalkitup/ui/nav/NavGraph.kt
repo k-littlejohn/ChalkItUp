@@ -13,6 +13,7 @@ import com.example.chalkitup.ui.screens.HomeScreen
 import com.example.chalkitup.ui.screens.LoginScreen
 import com.example.chalkitup.ui.screens.MessagesScreen
 import com.example.chalkitup.ui.screens.AskQuestionScreen
+import com.example.chalkitup.ui.screens.EnterTutorAvailability
 import com.example.chalkitup.ui.screens.ProfileScreen
 import com.example.chalkitup.ui.screens.SettingsScreen
 import com.example.chalkitup.ui.screens.SignupScreen
@@ -22,6 +23,7 @@ import com.example.chalkitup.ui.viewmodel.CertificationViewModel
 import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
 import com.example.chalkitup.ui.viewmodel.ProfileViewModel
 import com.example.chalkitup.ui.viewmodel.SettingsViewModel
+import com.example.chalkitup.ui.viewmodel.TutorAvailabilityViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 // Navigation Center, NavHost with navController
@@ -129,6 +131,15 @@ fun NavGraph(navController: NavHostController) {
             ForgotPasswordScreen(
                 navController = navController,
                 viewModel = authViewModel
+            )
+        }
+
+        // Tutor Availability Screen
+        composable("tutorAvailability") {
+            val viewmodel: TutorAvailabilityViewModel = viewModel()
+            EnterTutorAvailability(
+                navController = navController,
+                viewModel = viewmodel
             )
         }
 

@@ -8,6 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 
+
 @Composable
 fun BookingScreen(navController: NavController) {
     Box(
