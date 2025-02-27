@@ -98,7 +98,7 @@ fun MainScreen() {
             bottomBar = {
                 // Conditionally show the bottom navigation bar based on the current route.
                 if (showBottomBar) {
-                    BottomNavigationBar(navController) // Display the bottom navigation bar
+                    BottomNavigationBar(navController)
                 }
             }
         ) { paddingValues ->
