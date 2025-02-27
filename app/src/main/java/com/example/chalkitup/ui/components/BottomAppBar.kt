@@ -10,22 +10,58 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 // Bottom App Bar
 
 @Composable
-fun BottomNavigationBar(navController: NavController) {
+fun BottomNavigationBar(
+    navController: NavController
+) {
 
-    // List of the items that are displayed on the Bottom Bar
-    val items = listOf(
-        BottomNavItem("home", Icons.Default.Home, "Home"),         // Home icon with label "Home"
-        BottomNavItem("booking", Icons.Default.Add, "Book"),       // Book icon with label "Book"
-        BottomNavItem("messages", Icons.Default.Face, "Messages"), // Messages icon with label "Messages"
-        BottomNavItem("profile", Icons.Default.Person, "Profile")  // Profile icon with label "Profile"
-    )
+    // Temporary solution to get the user type
+    val firestore = FirebaseFirestore.getInstance()
+    val auth = FirebaseAuth.getInstance()
+    var userType by remember { mutableStateOf<String?>(null) }
+
+    // Fetch userType
+    LaunchedEffect(Unit) {
+        val uid = auth.currentUser?.uid ?: return@LaunchedEffect
+        firestore.collection("users").document(uid).get()
+            .addOnSuccessListener { document ->
+                userType = document.getString("userType")
+            }
+            .addOnFailureListener {
+                userType = null
+            }
+    }
+
+    val items = when (userType) {
+        "Tutor" -> listOf(
+            // List of the items that are displayed on the Bottom Bar for Tutors
+            BottomNavItem("home", Icons.Default.Home, "Home"),         // Home icon with label "Home"
+            BottomNavItem("tutorAvailability", Icons.Default.Add, "Availability"),       // Availability icon with label "Availability"
+            BottomNavItem("messages", Icons.Default.Face, "Messages"), // Messages icon with label "Messages"
+            BottomNavItem("profile", Icons.Default.Person, "Profile")  // Profile icon with label "Profile"
+        )
+        // List of the items that are displayed on the Bottom Bar for Students
+        "Student" -> listOf(
+            BottomNavItem("home", Icons.Default.Home, "Home"),         // Home icon with label "Home"
+            BottomNavItem("booking", Icons.Default.Add, "Book"),       // Book icon with label "Book"
+            BottomNavItem("messages", Icons.Default.Face, "Messages"), // Messages icon with label "Messages"
+            BottomNavItem("profile", Icons.Default.Person, "Profile")  // Profile icon with label "Profile"
+        )
+        else -> emptyList()
+    }
 
     // Get the current route from the NavController to determine which item is selected
     var currentRoute = navController.currentDestination?.route

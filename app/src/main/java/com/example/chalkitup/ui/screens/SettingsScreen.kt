@@ -20,11 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.chalkitup.ui.viewmodel.AuthViewModel
 import com.example.chalkitup.ui.viewmodel.SettingsViewModel
 
 @Composable
 fun SettingsScreen(
-    viewModel: SettingsViewModel,
+    settingsViewModel: SettingsViewModel,
+    authViewModel: AuthViewModel,
     navController: NavController,
     context: Context = LocalContext.current
 ) {
@@ -40,7 +42,7 @@ fun SettingsScreen(
     ) {
         // temp logout button
         Button(onClick = {
-            viewModel.signout()
+            authViewModel.signout()
             navController.navigate("start")}
         ) {
             Text("Logout")
@@ -59,7 +61,7 @@ fun SettingsScreen(
                 confirmButton = {
                     OutlinedButton(
                         onClick = {
-                            viewModel.deleteAccount(
+                            settingsViewModel.deleteAccount(
                                 onSuccess = {
                                     successMessage = "Account Deleted!"
                                     showDialog = false
