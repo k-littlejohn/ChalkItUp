@@ -67,7 +67,14 @@ fun NavGraph(navController: NavHostController) {
 
         // Booking Screen
         composable("booking") {
-            BookingScreen(navController = navController)
+            val authViewModel: AuthViewModel = viewModel()
+            val certificationViewModel: CertificationViewModel = viewModel()
+
+            BookingScreen(
+                navController = navController,
+                certificationViewModel = certificationViewModel,
+                authViewModel = authViewModel
+            )
         }
 
         // Messages Screen

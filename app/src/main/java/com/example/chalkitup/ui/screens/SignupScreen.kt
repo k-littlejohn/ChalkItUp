@@ -38,6 +38,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.navigation.NavController
 import com.example.chalkitup.ui.viewmodel.AuthViewModel
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
@@ -55,8 +58,6 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.CheckboxColors
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.withStyle
@@ -197,7 +198,7 @@ fun SignupScreen(
             .fillMaxSize()
             .background(gradientBrush)
     ) {
-        // Back Button . couldnt get it to look like the login page one.. will reattempt soon -Kaitlyn
+        // Back Button. Couldn't get it to look like the login page one.. will reattempt soon -Kaitlyn
 //        IconButton(
 //            onClick = { navController.navigate("start") },
 //            modifier = Modifier
