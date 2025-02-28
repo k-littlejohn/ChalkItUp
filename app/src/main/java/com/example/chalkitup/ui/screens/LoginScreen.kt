@@ -1,10 +1,9 @@
 package com.example.chalkitup.ui.screens
 
-import androidx.compose.foundation.layout.windowInsetsPadding // newly added
-import androidx.compose.foundation.layout.WindowInsets // newly added
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+//import androidx.compose.foundation.layout.BoxScopeInstance.matchParentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,7 +22,9 @@ import androidx.compose.ui.text.font.FontWeight
 import com.example.chalkitup.R
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-
+// import androidx.compose.ui.layout.matchParentSize
+// import androidx.compose.foundation.layout.windowInsetsPadding // newly added
+// import androidx.compose.foundation.layout.WindowInsets // newly added
 
 val AtkinsonFont = FontFamily(
     Font(R.font.atkinson_regular, FontWeight.Normal),
@@ -52,12 +53,15 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(gradientBrush)
-            .windowInsetsPadding(WindowInsets.statusBars) // New, Push content below status bar
-            .windowInsetsPadding(WindowInsets.navigationBars) //New,  Avoid overlap with navigation bar
-            .windowInsetsPadding(WindowInsets.ime), // New, Avoid overlap with keyboard when typing
-        contentAlignment = Alignment.TopCenter
     ) {
+        // Background Gradient
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(gradientBrush)
+        )
+
+        // Foreground UI
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -66,16 +70,16 @@ fun LoginScreen(
             horizontalAlignment = Alignment.Start
         ) {
             // Back Button
-            IconButton(
-                onClick = { navController.navigate("start") },
-                modifier = Modifier.size(36.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.Black
-                )
-            }
+//            IconButton(
+//                onClick = { navController.navigate("start") },
+//                modifier = Modifier.size(36.dp)
+//            ) {
+//                Icon(
+//                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+//                    contentDescription = "Back",
+//                    tint = Color.Black
+//                )
+//            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -86,7 +90,6 @@ fun LoginScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
                 Text(
                     text = "Welcome Back",
                     fontWeight = FontWeight.Bold,
@@ -141,7 +144,6 @@ fun LoginScreen(
                     )
                 }
 
-                // Placement of Login Button
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Login Button

@@ -1,9 +1,15 @@
 package com.example.chalkitup.ui.viewmodel
 
+import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.chalkitup.ui.components.TutorSubject
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 // AuthViewModel
 // Handles interactions for user:
@@ -25,6 +31,23 @@ class AuthViewModel : ViewModel() {
 
     // FirebaseFirestore instance for storing user data
     private val firestore = FirebaseFirestore.getInstance()
+
+    // LiveData to track authentication state; reflects whether the user is logged in
+    private val _isUserLoggedIn = MutableLiveData<Boolean>()
+    val isUserLoggedIn: LiveData<Boolean> = _isUserLoggedIn
+
+    // Initializes the ViewModel and checks if a user is already logged in
+    init {
+        checkUserLoggedIn()
+    }
+
+    // Function to check if the user is currently logged in
+    // This is done by checking if the current user is non-null in FirebaseAuth
+    private fun checkUserLoggedIn() {
+        val currentUser = auth.currentUser
+        // Set the LiveData value to true if a user is logged in and their email is verified, false otherwise
+        _isUserLoggedIn.value = currentUser != null && currentUser.isEmailVerified
+    }
 
     /**
      * Logs in a user using email and password.
@@ -88,9 +111,7 @@ class AuthViewModel : ViewModel() {
         lastName: String,
         userType: String,
         subjects: List<TutorSubject> = emptyList(),
-
-        //location: String,
-
+        location: String,
         onUserReady: (FirebaseUser) -> Unit, // Callback with the user for file upload
         onError: (String) -> Unit, // Callback for errors during signup
         onEmailError: () -> Unit
@@ -115,15 +136,36 @@ class AuthViewModel : ViewModel() {
                                     "lastName" to lastName,
                                     "email" to email,
                                     "subjects" to subjects,
-
-                                    //"location" to location,
-
+                                    "location" to location,
                                 )
 
                                 // Save the user data in Firestore under their UID
                                 firestore.collection("users").document(user.uid)
                                     .set(userData)
                                     .addOnSuccessListener {
+                                        // If user is a tutor, store subjects in the availability collection
+                                        if (userType == "Tutor") {
+                                            val monthYear = SimpleDateFormat("yyyy-MM", Locale.getDefault())
+                                                .format(System.currentTimeMillis())
+
+                                            val tutorAvailRef = firestore.collection("availability")
+                                                .document(monthYear)
+                                                .collection(user.uid)
+                                                .document("subjectData")
+
+                                            val subjectsData = hashMapOf(
+                                                "subjects" to subjects,
+                                            )
+
+                                            tutorAvailRef.set(subjectsData)
+                                                .addOnSuccessListener {
+                                                    Log.d("Signup", "Subjects saved to availability successfully")
+                                                }
+                                                .addOnFailureListener { e ->
+                                                    Log.e("Signup", "Failed to save subjects to availability: ${e.message}")
+                                                }
+                                        }
+
                                         // Send a verification email to the new user
                                         user.sendEmailVerification()
                                             .addOnCompleteListener { emailTask ->
@@ -216,53 +258,5 @@ class AuthViewModel : ViewModel() {
                 }
             }
     }
-}
 
-/**
- * Data class representing a subject, grade, and specialization that a tutor can offer.
- *
- * This class holds information about a tutor's subject, grade level, and specialization
- * for a specific grade.
- */
-// consider moving this to a separate file later on -Jeremelle
-data class TutorSubject(
-    val subject: String = "",
-    val grade: String = "",
-    val specialization: String = ""
-)
-
-/**
- * Data class to represent errors in tutor subject details.
- *
- * This class contains flags for errors related to subject, grade, and specialization.
- */
-// consider moving this to a separate file later on -Jeremelle
-data class TutorSubjectError(
-    val subjectError: Boolean,
-    val gradeError: Boolean,
-    val specError: Boolean
-)
-
-/**
- * Validates a list of tutor subjects to check for missing or incorrect information.
- *
- * This function checks if each tutor subject has valid subject, grade, and specialization details.
- * If any of these fields are missing or invalid, an error flag is set.
- *
- * @param tutorSubjects The list of tutor subjects to validate.
- * @return A list of TutorSubjectError objects representing validation errors for each subject.
- */
-// consider moving this to a separate file later on -Jeremelle
-fun validateTutorSubjects(tutorSubjects: List<TutorSubject>): List<TutorSubjectError> {
-    return tutorSubjects.map { subject ->
-        TutorSubjectError(
-            subjectError = subject.subject.isEmpty(),
-            gradeError = subject.grade.isEmpty(),
-            specError = (subject.grade in listOf(
-                "10",
-                "11",
-                "12"
-            ) && subject.specialization.isEmpty())
-        )
-    }
 }

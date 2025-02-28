@@ -29,6 +29,8 @@ android {
         }
     }
     compileOptions {
+        // Enable Java 8+ API desugaring for minSdk < 26
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -50,7 +52,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.firebase.auth)
-    implementation(libs.firebase.firestore)
+    //implementation(libs.firebase.firestore)
     implementation(libs.androidx.navigation.runtime.android)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.firebase.storage)
@@ -67,6 +69,14 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     testImplementation(libs.junit)
     implementation(libs.coil.compose)
-    implementation("androidx.compose.material:material-icons-extended:1.5.1")
-    implementation("androidx.compose.foundation:foundation:1.5.1") // New
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.foundation.v151) // New
+    implementation(libs.compose) // Calendar
+    implementation(libs.firebase.firestore.ktx)
+    // Enable Java 8+ API desugaring (only if minSdk < 26)
+    coreLibraryDesugaring(libs.desugar.jdk.libs) // Latest version//
+    implementation(libs.google.firebase.firestore.ktx)
+    implementation(libs.androidx.material)
+    implementation(libs.places)
+    implementation(libs.places.compose)
 }

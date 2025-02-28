@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
-
+import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,11 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.chalkitup.ui.viewmodel.AuthViewModel
 import com.example.chalkitup.ui.viewmodel.SettingsViewModel
 
 @Composable
 fun SettingsScreen(
-    viewModel: SettingsViewModel,
+    settingsViewModel: SettingsViewModel,
+    authViewModel: AuthViewModel,
     navController: NavController,
     context: Context = LocalContext.current
 ) {
@@ -38,7 +40,15 @@ fun SettingsScreen(
             .fillMaxSize()
             .padding(24.dp)
     ) {
-        // Show alert dialog on button click
+        // temp logout button
+        Button(onClick = {
+            authViewModel.signout()
+            navController.navigate("start")}
+        ) {
+            Text("Logout")
+        }
+
+        // Show alert dialog when "Delete Account" button clicked
         OutlinedButton(onClick = { showDialog = true })
         {
             Text("Delete Account")
@@ -51,7 +61,7 @@ fun SettingsScreen(
                 confirmButton = {
                     OutlinedButton(
                         onClick = {
-                            viewModel.deleteAccount(
+                            settingsViewModel.deleteAccount(
                                 onSuccess = {
                                     successMessage = "Account Deleted!"
                                     showDialog = false

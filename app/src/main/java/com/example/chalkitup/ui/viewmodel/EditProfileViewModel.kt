@@ -5,11 +5,14 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.chalkitup.ui.components.TutorSubject
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.storage
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 // EditProfileViewModel
 // Handles EditProfileScreen logic:
@@ -61,9 +64,15 @@ class EditProfileViewModel : ViewModel() {
         bio: String,
         location: String
     ) {
+        val monthYear = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(System.currentTimeMillis())
+
         // Get the current user's UID
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val userRef = FirebaseFirestore.getInstance().collection("users").document(userId)
+        val tutorAvailRef = FirebaseFirestore.getInstance().collection("availability")
+            .document(monthYear)
+            .collection(userId)
+            .document("subjectData")
 
         // Prepare the update data map for Firestore
         val updateData = mutableMapOf<String, Any>(
@@ -77,13 +86,12 @@ class EditProfileViewModel : ViewModel() {
         userProfile.value?.let {
             if (it.userType == "Tutor") {
                 updateData["subjects"] = subjects
+                val subjectsData = hashMapOf(
+                    "subjects" to subjects
+                )
+                tutorAvailRef.set(subjectsData) // Needs error handling
             }
         }
-
-        // If there is a new profile picture URL, add it to the update data
-//        tempProfilePictureUrl?.let {
-//            updateData["profilePictureUrl"] = it
-//        }
 
         // Update the user's profile in Firestore
         userRef.update(updateData)

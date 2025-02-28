@@ -133,7 +133,7 @@ fun StartScreen(navController: NavController) {
                 currentImageIndex = index
             }
             // Moves login/signup Down The Higher dp
-            Spacer(modifier = Modifier.height(75.dp))
+            Spacer(modifier = Modifier.height(30.dp))
 
             // Login Button & Text
             Button(
@@ -145,12 +145,11 @@ fun StartScreen(navController: NavController) {
                     containerColor = TealGreen,
                     contentColor = Color.White
                 ),
-                shape = RoundedCornerShape(0.dp)
+                shape = RoundedCornerShape(4.dp)
             ) {
                 Text(
                     text = "LOGIN",
                     fontSize = 16.sp,
-
                 )
             }
 

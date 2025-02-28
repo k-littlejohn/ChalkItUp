@@ -12,6 +12,8 @@ import com.example.chalkitup.ui.screens.EditProfileScreen
 import com.example.chalkitup.ui.screens.HomeScreen
 import com.example.chalkitup.ui.screens.LoginScreen
 import com.example.chalkitup.ui.screens.MessagesScreen
+import com.example.chalkitup.ui.screens.AskQuestionScreen
+import com.example.chalkitup.ui.screens.EnterTutorAvailability
 import com.example.chalkitup.ui.screens.ProfileScreen
 import com.example.chalkitup.ui.screens.SettingsScreen
 import com.example.chalkitup.ui.screens.SignupScreen
@@ -21,6 +23,8 @@ import com.example.chalkitup.ui.viewmodel.CertificationViewModel
 import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
 import com.example.chalkitup.ui.viewmodel.ProfileViewModel
 import com.example.chalkitup.ui.viewmodel.SettingsViewModel
+import com.example.chalkitup.ui.viewmodel.TutorAvailabilityViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 // Navigation Center, NavHost with navController
 // On app launch, opens startScreen
@@ -63,12 +67,30 @@ fun NavGraph(navController: NavHostController) {
 
         // Booking Screen
         composable("booking") {
-            BookingScreen(navController = navController)
+            val authViewModel: AuthViewModel = viewModel()
+            val certificationViewModel: CertificationViewModel = viewModel()
+
+            BookingScreen(
+                navController = navController,
+                certificationViewModel = certificationViewModel,
+                authViewModel = authViewModel
+            )
         }
 
         // Messages Screen
         composable("messages") {
-            MessagesScreen(navController = navController)
+            val user = FirebaseAuth.getInstance().currentUser
+            if (user != null) {
+                MessagesScreen(
+                    navController = navController,
+                    userId = user.uid
+                )
+            }
+        }
+
+        // Ask Question Screen
+        composable("askQuestion") {
+            AskQuestionScreen(navController = navController)
         }
 
         // Profile Screen
@@ -83,18 +105,23 @@ fun NavGraph(navController: NavHostController) {
 
         // Edit Profile Screen
         composable("editProfile") {
+            val certificationViewModel: CertificationViewModel = viewModel()
             val editProfileViewModel: EditProfileViewModel = viewModel()
             EditProfileScreen(
                 navController = navController,
-                viewModel = editProfileViewModel)
+                editProfileViewModel = editProfileViewModel,
+                certificationViewModel = certificationViewModel)
         }
 
         // Settings Screen
         composable("settings") {
             val settingsViewModel: SettingsViewModel = viewModel()
+            val authViewModel: AuthViewModel = viewModel()
             SettingsScreen(
                 navController = navController,
-                viewModel = settingsViewModel)
+                settingsViewModel = settingsViewModel,
+                authViewModel = authViewModel
+            )
         }
 
         // Check Email Screen
@@ -114,6 +141,15 @@ fun NavGraph(navController: NavHostController) {
             ForgotPasswordScreen(
                 navController = navController,
                 viewModel = authViewModel
+            )
+        }
+
+        // Tutor Availability Screen
+        composable("tutorAvailability") {
+            val viewmodel: TutorAvailabilityViewModel = viewModel()
+            EnterTutorAvailability(
+                navController = navController,
+                viewModel = viewmodel
             )
         }
 
