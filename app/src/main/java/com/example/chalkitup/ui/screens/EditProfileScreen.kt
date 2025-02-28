@@ -261,74 +261,75 @@ fun EditProfileScreen(navController: NavController, viewModel: EditProfileViewMo
 //                            onSelectionChange = { selectedGrades = it.map { it.toInt() } }
 //                        )
 //            }
-        } else {
-            userProfile?.let {
-                progress_item.clear()
-                progress_item.addAll(it.progress_item)
-                progress_grade.clear()
-                progress_grade.addAll(it.progress_grade)
-
-                }
-
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("Progress")
-            Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
-                Column (
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .verticalScroll(scrollState)
-                ){
-                    var item_input by remember { mutableStateOf("") }
-                    var grade_input by remember { mutableStateOf("") }
-                    OutlinedTextField(
-                        value = item_input,
-                        onValueChange = { item_input = it },
-                        label = { Text("Progress Item") })
-                    OutlinedTextField(
-                        value = grade_input,
-                        onValueChange = { grade_input = it },
-                        label = { Text("Grade") })
-                    Button(onClick = {
-
-                        if (item_input.isNotBlank() && grade_input.isNotBlank()) {
-                            progress_item.add(item_input)
-                            progress_grade.add(grade_input)
-                            item_input = ""
-                            grade_input = ""
-                        }
-                    })
-                    { Text("add progress") }
-
-
-                }
-
-                LazyColumn {
-                    itemsIndexed(progress_item) { index, progItem ->
-                        Column(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .verticalScroll(scrollState)
-                        )
-                        {
-                            OutlinedTextField(
-                                value = progItem,
-                                onValueChange = { newValue ->
-                                    progress_item[index] = newValue
-                                },
-                                label = { Text("Title of Assessment") })
-                            Spacer(modifier = Modifier.height(16.dp))
-                            OutlinedTextField(
-                                value = progress_grade[index],
-                                onValueChange = { newValue ->
-                                    progress_grade[index] = newValue
-                                },
-                                label = { Text("Grade") })
-                        }
-                    }
-                }
-
-            }
         }
+//        else {
+//            userProfile?.let {
+//                progress_item.clear()
+//                progress_item.addAll(it.progress_item)
+//                progress_grade.clear()
+//                progress_grade.addAll(it.progress_grade)
+//
+//                }
+//
+//            Spacer(modifier = Modifier.height(16.dp))
+//            Text("Progress")
+//            Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
+//                Column (
+//                    modifier = Modifier
+//                        .padding(16.dp)
+//                        .verticalScroll(scrollState)
+//                ){
+//                    var item_input by remember { mutableStateOf("") }
+//                    var grade_input by remember { mutableStateOf("") }
+//                    OutlinedTextField(
+//                        value = item_input,
+//                        onValueChange = { item_input = it },
+//                        label = { Text("Progress Item") })
+//                    OutlinedTextField(
+//                        value = grade_input,
+//                        onValueChange = { grade_input = it },
+//                        label = { Text("Grade") })
+//                    Button(onClick = {
+//
+//                        if (item_input.isNotBlank() && grade_input.isNotBlank()) {
+//                            progress_item.add(item_input)
+//                            progress_grade.add(grade_input)
+//                            item_input = ""
+//                            grade_input = ""
+//                        }
+//                    })
+//                    { Text("add progress") }
+//
+//
+//                }
+//
+//                LazyColumn {
+//                    itemsIndexed(progress_item) { index, progItem ->
+//                        Column(
+//                            modifier = Modifier
+//                                .padding(16.dp)
+//                                .verticalScroll(scrollState)
+//                        )
+//                        {
+//                            OutlinedTextField(
+//                                value = progItem,
+//                                onValueChange = { newValue ->
+//                                    progress_item[index] = newValue
+//                                },
+//                                label = { Text("Title of Assessment") })
+//                            Spacer(modifier = Modifier.height(16.dp))
+//                            OutlinedTextField(
+//                                value = progress_grade[index],
+//                                onValueChange = { newValue ->
+//                                    progress_grade[index] = newValue
+//                                },
+//                                label = { Text("Grade") })
+//                        }
+//                    }
+//                }
+//
+//            }
+//        }
         Spacer(modifier = Modifier.height(16.dp))
         Row {
             Button(onClick = {
