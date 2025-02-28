@@ -30,12 +30,17 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 import com.google.android.libraries.places.api.net.PlacesClient
 import kotlinx.coroutines.tasks.await
 
+// Left these functions here for now in case they might be useful to
+// reference in the future -Jeremelle
+
 /**
  * Suspends to fetch location predictions from the Google Places API.
  *
  * This function takes a PlacesClient, a query string, and a session token to
  * request autocomplete predictions restricted to cities. It returns a list of
  * city and province/state combinations.
+ *
+ * CURRENTLY NOT IN USE
  *
  * @param placesClient The Google Places API client.
  * @param query The user's input text for location search.
@@ -74,7 +79,7 @@ suspend fun fetchPredictions(
  * When a user selects a location, the text field updates, and the selection is passed
  * to the parent composable through a callback.
  *
- * Current usage: EditProfileScreen, SignupScreen
+ * CURRENTLY NOT IN USE
  *
  * @param placesClient The Google Places API client.
  * @param sessionToken The session token for autocomplete requests.
@@ -169,3 +174,7 @@ fun LocationAutocompleteTextField(
         }
     }
 }
+
+//// Google Places API client for location autocomplete.
+//val placesClient = remember { Places.createClient(context) }
+//val sessionToken = remember { AutocompleteSessionToken.newInstance() }
