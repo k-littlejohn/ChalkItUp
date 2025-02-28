@@ -127,7 +127,7 @@ fun EditProfileScreen(
     var lastNameError by remember { mutableStateOf(false) }
     var subjectError by remember { mutableStateOf(false) }
     var locationError by remember { mutableStateOf(false) }
-    var originalProfilePictureUrl by remember { mutableStateOf<String?>(null) }
+    //var originalProfilePictureUrl by remember { mutableStateOf<String?>(null) }
     val progress_item = remember { mutableListOf<String>()}
     val progress_grade =remember { mutableListOf<String>() }
     var selectedInterests by remember { mutableStateOf(listOf<Int>()) }
