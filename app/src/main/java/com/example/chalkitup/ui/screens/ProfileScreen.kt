@@ -120,7 +120,6 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text("Location: ${it.location.ifEmpty { "Not specified" }}")
             Text("Bio: ${it.bio.ifEmpty { "No bio available" }}")
         }
 

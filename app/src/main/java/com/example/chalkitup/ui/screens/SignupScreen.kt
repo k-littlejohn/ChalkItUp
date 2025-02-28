@@ -53,23 +53,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.IconButtonColors
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.CheckboxColors
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.withStyle
 import com.example.chalkitup.R
-import com.example.chalkitup.ui.components.LocationAutocompleteTextField
 import com.example.chalkitup.ui.components.SelectedFileItem
 import com.example.chalkitup.ui.components.SubjectGradeItem
 import com.example.chalkitup.ui.components.TutorSubject
 import com.example.chalkitup.ui.components.TutorSubjectError
 import com.example.chalkitup.ui.components.validateTutorSubjects
-import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 
 /**
  * Composable function for the Signup Screen.
@@ -119,10 +114,6 @@ fun SignupScreen(
             }
         }
 
-    // Initialize Google Places with the API key.
-    val placesClient = remember { Places.createClient(context) }
-    val sessionToken = remember { AutocompleteSessionToken.newInstance() }
-
     // State variables for user input fields.
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -132,7 +123,6 @@ fun SignupScreen(
     var errorMessage by remember { mutableStateOf("") }
     var userType by remember { mutableStateOf<UserType?>(null) } // Track user type: Student or Tutor
     var tutorSubjects by remember { mutableStateOf<List<TutorSubject>>(emptyList()) } // To store selected subjects
-    var location by remember { mutableStateOf("") }
 
     // State variables to track input field errors.
     var emailError by remember { mutableStateOf(false) }        // Tracks Empty Field
@@ -148,7 +138,6 @@ fun SignupScreen(
     var userTypeError by remember { mutableStateOf(false) }     // Tracks Empty Field
     var subjectError by remember { mutableStateOf(false) }      // Tracks Empty Field
     var termsError by remember { mutableStateOf(false) }        // Tracks Not Checked
-    var locationError by remember { mutableStateOf(false) }     // Tracks Empty Field
 
     // State to track errors in tutor subject selections.
     var tutorSubjectErrors by remember { mutableStateOf<List<TutorSubjectError>>(emptyList()) }
@@ -496,17 +485,6 @@ fun SignupScreen(
 //            want to remove
 //            TextField(value = bio, onValueChange = { bio = it }, label = { Text("BIO") })
 
-            // Location Autocomplete TextField
-            LocationAutocompleteTextField(
-                placesClient = placesClient,
-                sessionToken = sessionToken,
-                location = location,
-                onLocationSelected = { selectedLocation ->
-                    location = selectedLocation
-                },
-                locationError = locationError
-            )
-
             Spacer(modifier = Modifier.height(8.dp))
 
             // Subject selection (only visible for Tutors)
@@ -810,7 +788,6 @@ fun SignupScreen(
                     passMatchError = (password != confirmPassword) || password.isEmpty()
                     subjectError = ((userType == UserType.Tutor) && (tutorSubjects.isEmpty()))
                     termsError = !hasAgreedToTerms
-                    locationError = location.isEmpty()
 
                     // Validate tutor subjects.
                     tutorSubjectErrors = validateTutorSubjects(tutorSubjects)
@@ -819,11 +796,10 @@ fun SignupScreen(
                     if (!emailError && !firstNameError && !lastNameError && !userTypeError &&
                         !passwordError && !confirmPasswordError && !subjectError && !termsError &&
                         !passGreaterThan6Error && !passIncludesNumError && !passIncludesLowerError &&
-                        !passMatchError && !(tutorSubjectErrors.any { it.subjectError || it.gradeError || it.specError }) &&
-                        !locationError
+                        !passMatchError && !(tutorSubjectErrors.any { it.subjectError || it.gradeError || it.specError })
                     ) {
                         authViewModel.signupWithEmail(email, password, firstName, lastName,
-                            userType!!.name, tutorSubjects, location,
+                            userType!!.name, tutorSubjects,
                             onUserReady = { user ->
                                 certificationViewModel.uploadFiles(context, user)
                                 navController.navigate("checkEmail/verify")
