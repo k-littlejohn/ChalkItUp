@@ -88,7 +88,6 @@ data class UserProfile(
     val email: String = "",     // Email address of the user
     val subjects: List<TutorSubject> = emptyList(), // List of subjects the user is associated with (for tutors)
     val bio: String = "",        // User's bio
-    val location: String = "",   // User's location
     val interests: List<Interest> =listOf( Interest("Accounting", false), Interest("Agriculture", false),
                                             Interest("Ancient History", false), Interest("Animal", false),
                                             Interest("Art", false), Interest("Art-History", false),
