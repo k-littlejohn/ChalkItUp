@@ -51,6 +51,7 @@ import com.example.chalkitup.lifecycle.AppLifecycleObserver
 import com.example.chalkitup.ui.viewmodel.Certification
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
 import com.example.chalkitup.ui.viewmodel.ProfileViewModel
+import com.google.firebase.firestore.AggregateField.count
 
 /**
  * Composable function for the Profile Screen.
@@ -197,24 +198,38 @@ fun ProfileScreen(
                 //------------------------------STUDENT-SPECIFIC---------------------------------------------
 
                 Text("Academic Performance:")
-                userProfile?.let {
-                    if (it.progress.isEmpty()){
-                        Text("NO PROGRESS LISTED")}
-                    else{
-                    ItemGrid(it.progress, columns = 4)}
+                userProfile?.let { profile ->
+                    if (profile.progress_item.isEmpty()) {
+                        Text("NO PROGRESS LISTED")
+                    } else {
+                        val progress_numb=profile.progress_item.size
+                        for (i in 0 until progress_numb) {
+                            ItemGrid(listOf(profile.progress_item[i]), columns = 1)
+                            ItemGrid(listOf(profile.progress_grade[i]), columns = 1)
+                        }
+
+                    }
                 }
                 //------------------------------STUDENT-SPECIFIC-END--------------------------------------------
             }
-
+            val addedInterests: MutableList<String> = mutableListOf()
             // Display user's interests.
             userProfile?.let {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Interests:")
-                if(it.interests.isEmpty()){
-                    Text("NO INTERESTS LISTED")}
-                else{
-                    ItemGrid(it.interests, columns = 4)}
+                it.interests.forEachIndexed{ _, interest ->
+                    if (interest.isSelected){
+                        addedInterests.add(interest.name)
+                    }
+                }
             }
+            if (addedInterests.isNotEmpty()) {
+                ItemGrid(addedInterests, 2)
+            }
+            else{
+                Text("No Interests Have been Listed")
+            }
+            //-----------------end of interest display
 
             Spacer(modifier = Modifier.height(16.dp))
             // Edit Profile Button
@@ -226,6 +241,24 @@ fun ProfileScreen(
             }
         }
     }
+
+
+    //----------------------------------------------------------------
+
+    //list interests
+//                Spacer(modifier = Modifier.height(16.dp))
+//                Text("Interests:")
+//
+//                if (interests.isNullOrEmpty()) {
+//                    Text("No progress found.")
+//                } else {
+//                    ProgressGrid(interests!!)
+//                }
+
+    Spacer(modifier = Modifier.height(16.dp))
+    // Edit Profile Button
+    Button(onClick = { navController.navigate("editProfile") })
+    { Text("Edit Profile") }
 }
 
 /**

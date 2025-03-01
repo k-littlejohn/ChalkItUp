@@ -1,6 +1,9 @@
 package com.example.chalkitup.ui.screens
 
+import android.content.ClipData.Item
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
@@ -57,6 +60,9 @@ import com.example.chalkitup.ui.components.TutorSubjectError
 import com.example.chalkitup.ui.components.validateTutorSubjects
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
 import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
+import com.example.chalkitup.ui.viewmodel.Interest
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 
 /**
  * EditProfileScreen
@@ -113,12 +119,17 @@ fun EditProfileScreen(
     val availableGradeLevelsBPC = listOf("11","12")
     val grade10Specs = listOf("- 1","- 2","Honours")
     val grade1112Specs = listOf("- 1","- 2","AP","IB")
+    val availablePrice = listOf("$20/hr", "$25/hr", "$30/hr", "$35/hr", "$40/hr", "$45/hr", "$50/hr", "$55/hr", "$60/hr", "$65/hr", "$70/hr", "$75/hr", "$80/hr", "$85/hr", "$90/hr", "$95/hr", "$100/hr", "$105/hr", "$110/hr", "$115/hr", "$120/hr")
 
     // Error states for form validation. -> all check only for empty fields
     var tutorSubjectErrors by remember { mutableStateOf<List<TutorSubjectError>>(emptyList()) }
     var firstNameError by remember { mutableStateOf(false) }
     var lastNameError by remember { mutableStateOf(false) }
     var subjectError by remember { mutableStateOf(false) }
+    val progress_item = remember { mutableListOf<String>()}
+    val progress_grade =remember { mutableListOf<String>() }
+    var selectedInterests by remember { mutableStateOf(listOf<Int>()) }
+    val mainHandler= Handler(Looper.getMainLooper())
 
     // Initialize profile fields when the user profile data changes.
     LaunchedEffect(userProfile) {
@@ -161,7 +172,8 @@ fun EditProfileScreen(
 
         // Circular profile picture with a click to change.
         AsyncImage(
-            model = profilePictureUrl ?: R.drawable.baseline_person_24, // Default profile picture if none is set
+            model = profilePictureUrl
+                ?: R.drawable.baseline_person_24, // Default profile picture if none is set
             contentDescription = "Profile Picture",
             modifier = Modifier
                 .size(100.dp)
@@ -218,24 +230,29 @@ fun EditProfileScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             if (subjectError) {
-                Text("You must be able to teach at least 1 subject",
-                    color = Color.Red)
+                Text(
+                    "You must be able to teach at least 1 subject",
+                    color = Color.Red
+                )
             }
 
             Text("Subjects You Teach")
 
-            Row (
+            Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Tap the  +  to add a subject",
-                    color = Color.Gray)
+                Text(
+                    "Tap the  +  to add a subject",
+                    color = Color.Gray
+                )
 
                 Spacer(modifier = Modifier.width(50.dp))
 
                 // Add Subject button.
                 IconButton(
                     onClick = {
-                        tutorSubjects = tutorSubjects + TutorSubject("", "", "") // Add empty entry
+                        tutorSubjects =
+                            tutorSubjects + TutorSubject("", "", "", "") // Add empty entry
                     },
                     modifier = Modifier.size(36.dp),
                     colors = IconButtonColors(
@@ -262,7 +279,7 @@ fun EditProfileScreen(
             }
 
             // Display list of subjects the tutor teaches.
-            Box (modifier = Modifier.heightIn(20.dp,500.dp)) {
+            Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
                 LazyColumn {
                     itemsIndexed(tutorSubjects) { index, tutorSubject ->
                         SubjectGradeItem(
@@ -270,6 +287,7 @@ fun EditProfileScreen(
                             availableSubjects = availableSubjects,
                             availableGradeLevels = availableGradeLevels,
                             availableGradeLevelsBPC = availableGradeLevelsBPC,
+                            availablePrice = availablePrice,
                             grade10Specs = grade10Specs,
                             grade1112Specs = grade1112Specs,
                             onSubjectChange = { newSubject ->
@@ -287,13 +305,21 @@ fun EditProfileScreen(
                                     this[index] = this[index].copy(specialization = newSpec)
                                 }
                             },
+                            onPriceChange = { newPrice ->
+                                tutorSubjects = tutorSubjects.toMutableList().apply {
+                                    this[index] = this[index].copy(price = newPrice)
+                                }
+                            },
+
                             onRemove = {
                                 tutorSubjects =
                                     tutorSubjects.toMutableList().apply { removeAt(index) }
                             },
-                            subjectError = tutorSubjectErrors.getOrNull(index)?.subjectError ?: false,
+                            subjectError = tutorSubjectErrors.getOrNull(index)?.subjectError
+                                ?: false,
                             gradeError = tutorSubjectErrors.getOrNull(index)?.gradeError ?: false,
-                            specError = tutorSubjectErrors.getOrNull(index)?.specError ?: false
+                            specError = tutorSubjectErrors.getOrNull(index)?.specError ?: false,
+                            priceError = tutorSubjectErrors.getOrNull(index)?.priceError ?: false
                         )
                     }
                 }
@@ -337,9 +363,103 @@ fun EditProfileScreen(
         } else {
             // Student-Specific Fields
 
+//            else {
+//                UserType.Student - Specific Fields
+//                        MultiSelectDropdown(
+//                            availableOptions = (7..12).map { it.toString() },
+//                            selectedOptions = selectedGrades.map { it.toString() },
+//                            onSelectionChange = { selectedGrades = it.map { it.toInt() } }
+//                        )
+//            }
         }
 
         // Save and Cancel buttons.
+//        else {
+//            userProfile?.let {
+//                progress_item.clear()
+//                progress_item.addAll(it.progress_item)
+//                progress_grade.clear()
+//                progress_grade.addAll(it.progress_grade)
+//
+//                }
+//
+//            Spacer(modifier = Modifier.height(16.dp))
+//            Text("Progress")
+//            Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
+//                Column (
+//                    modifier = Modifier
+//                        .padding(16.dp)
+//                        .verticalScroll(scrollState)
+//                ){
+//                    var item_input by remember { mutableStateOf("") }
+//                    var grade_input by remember { mutableStateOf("") }
+//                    OutlinedTextField(
+//                        value = item_input,
+//                        onValueChange = { item_input = it },
+//                        label = { Text("Progress Item") })
+//                    OutlinedTextField(
+//                        value = grade_input,
+//                        onValueChange = { grade_input = it },
+//                        label = { Text("Grade") })
+//                    Button(onClick = {
+//
+//                        if (item_input.isNotBlank() && grade_input.isNotBlank()) {
+//                            progress_item.add(item_input)
+//                            progress_grade.add(grade_input)
+//                            item_input = ""
+//                            grade_input = ""
+//                        }
+//                    })
+//                    { Text("add progress") }
+//
+//
+//                }
+//
+//                LazyColumn {
+//                    itemsIndexed(progress_item) { index, progItem ->
+//                        Column(
+//                            modifier = Modifier
+//                                .padding(16.dp)
+//                                .verticalScroll(scrollState)
+//                        )
+//                        {
+//                            OutlinedTextField(
+//                                value = progItem,
+//                                onValueChange = { newValue ->
+//                                    progress_item[index] = newValue
+//                                },
+//                                label = { Text("Title of Assessment") })
+//                            Spacer(modifier = Modifier.height(16.dp))
+//                            OutlinedTextField(
+//                                value = progress_grade[index],
+//                                onValueChange = { newValue ->
+//                                    progress_grade[index] = newValue
+//                                },
+//                                label = { Text("Grade") })
+//                        }
+//                    }
+//                }
+//
+//            }
+//        }
+        //------------------INTERESTS--------------------------------------
+        Spacer(modifier = Modifier.height(16.dp))
+        Column(
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.Start
+        ) {
+            userProfile?.let {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Interests:")
+                it.interests.forEachIndexed { _, interest ->
+                        SelectableButton(interest)
+                    }
+                }
+            }
+        //------------------INTERESTS--------------------------------------
+
+
+        Spacer(modifier = Modifier.height(16.dp))
         Row {
             Button(onClick = {
                 // Error checks
@@ -376,5 +496,20 @@ fun EditProfileScreen(
                 Text("Cancel")
             }
         }
+    }
+}
+
+@Composable
+fun SelectableButton(interest: Interest) {
+    var isSelected by remember { mutableStateOf(interest.isSelected) }
+    Button(
+        onClick = { isSelected = !isSelected },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (isSelected) Color.Green else Color.Gray
+        ),
+        shape = RoundedCornerShape(8.dp),
+        modifier = Modifier.padding(8.dp)
+    ) {
+        Text(interest.name)
     }
 }

@@ -56,8 +56,15 @@ class ProfileViewModel : ViewModel() {
                     // Check if the user is a tutor or a student
                     _isTutor.value = user.userType == "Tutor"
                 }
-            }
-    }
+                //if (user.userType == "Tutor") {
+                    // Placeholder for loading tutor specific information
+                    // Currently none saved yet
+                    // Certification loading is handled by the CertificationViewModel
+                }
+        }
+
+
+
 
     // Function to load the profile picture from storage
     private fun loadProfilePicture(userId: String) {
@@ -70,6 +77,9 @@ class ProfileViewModel : ViewModel() {
     }
 }
 
+
+
+
 // Data class to represent the user profile data
 data class UserProfile(
     val userType: String = "",  // Type of user ("Tutor" or "Student")
@@ -78,6 +88,25 @@ data class UserProfile(
     val email: String = "",     // Email address of the user
     val subjects: List<TutorSubject> = emptyList(), // List of subjects the user is associated with (for tutors)
     val bio: String = "",        // User's bio
-    val interests: List<String> = emptyList(),
-    val progress: List<String> = emptyList(),
+    val interests: List<Interest> =listOf( Interest("Accounting", false), Interest("Agriculture", false),
+                                            Interest("Ancient History", false), Interest("Animal", false),
+                                            Interest("Art", false), Interest("Art-History", false),
+                                            Interest("Biology", false), Interest("Business", false),
+                                            Interest("Computer Science", false), Interest("Cell-Biology", false),
+                                            Interest("Chemistry", false), Interest("Earth-Science", false),
+                                            Interest("English", false), Interest("Engineering", false),
+                                             Interest("Finance", false), Interest("French", false),
+                                            Interest("Food", false), Interest("Geology", false),
+                                            Interest("Government", false), Interest("Kinesiology", false),
+                                            Interest("Language", false), Interest("Legal", false),
+                                            Interest("Marketing", false), Interest("Math", false),
+                                            Interest("Medical Science", false), Interest("Music", false),
+                                            Interest("Nutrition", false), Interest("Physics", false),
+                                            Interest("Psychology", false), Interest("Social Studies", false),
+                                            Interest("Physical Activity", false), Interest("Zoology", false)),
+    val progress_item: List<String> = emptyList(),
+    val progress_grade: List<String> = emptyList(),
+    val progressItems: List<ProgressItem> =emptyList()
 )
+data class Interest(val name: String, var isSelected: Boolean)
+data class ProgressItem(val title: String, val grade: String)

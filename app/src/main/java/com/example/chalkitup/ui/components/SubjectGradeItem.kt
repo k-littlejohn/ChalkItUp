@@ -1,13 +1,18 @@
 package com.example.chalkitup.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
@@ -50,6 +55,7 @@ import androidx.compose.ui.unit.sp
  * @param subjectError A boolean flag indicating if there's an error with the subject selection.
  * @param gradeError A boolean flag indicating if there's an error with the grade level selection.
  * @param specError A boolean flag indicating if there's an error with the specialization selection.
+ * @param priceError A boolean flag indicating if there's an error with the price selection.
  */
 @Composable
 fun SubjectGradeItem(
@@ -57,20 +63,26 @@ fun SubjectGradeItem(
     availableSubjects: List<String>,
     availableGradeLevels: List<String>,
     availableGradeLevelsBPC: List<String>,
+    availablePrice: List<String>,
     grade10Specs: List<String>,
     grade1112Specs: List<String>,
     onSubjectChange: (String) -> Unit,
     onGradeChange: (String) -> Unit,
     onSpecChange: (String) -> Unit,
+    onPriceChange: (String) -> Unit,
     onRemove: () -> Unit,
     subjectError: Boolean,
     gradeError: Boolean,
-    specError: Boolean
+    specError: Boolean,
+    priceError: Boolean
 ) {
     // State variables to control the visibility of dropdown menus for subject, grade, and specialization
+    val scrollState = rememberScrollState() // Main form scroll state - entire screen
+    val termsScrollState = rememberScrollState() // Terms & Conditions scroll state - inside Terms and Cond. box
     var expandedSubject by remember { mutableStateOf(false) }
     var expandedGrade by remember { mutableStateOf(false) }
     var expandedSpec by remember { mutableStateOf(false) }
+    var expandPrice by remember { mutableStateOf(false) }
 
     // Define colors for the buttons based on their state (selected, error, default)
     val selectedButtonColor = Color(0xFF54A4FF)
@@ -125,6 +137,7 @@ fun SubjectGradeItem(
                                 onSubjectChange(subj) // Update the subject when a selection is made
                                 onGradeChange("") // Reset grade and specialization when subject changes
                                 onSpecChange("")
+                                onPriceChange("")
                                 expandedSubject = false // Close the dropdown
                             },
                             //modifier = Modifier.padding(horizontal = 3.dp, vertical = 3.dp)
@@ -132,6 +145,7 @@ fun SubjectGradeItem(
                     }
                 }
             }
+
         }
 
         Spacer(modifier = Modifier.width(8.dp))
@@ -256,14 +270,74 @@ fun SubjectGradeItem(
             Box(modifier = Modifier.weight(2.9f)) {} // Empty box when no specialization is available
             onSpecChange("") // Reset specialization if not applicable
         }
+    }
 
-        // Remove Button to delete the subject-grade-specialization item
-        IconButton(onClick = onRemove) {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = "Remove Subject",
-                tint = Color.Gray
-            )
+    //--------------------------price start-----------------
+    Column()
+        {
+        Row(
+            modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically)
+        {
+            Box(modifier = Modifier.weight(3.5f)) {
+
+                Button(
+                    onClick = { expandPrice = true }, // Show the subject dropdown when clicked
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = when {
+                            tutorSubject.price.isNotEmpty() -> selectedButtonColor
+                            priceError -> errorButtonColor
+                            else -> defaultButtonColor
+                        }
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(text = tutorSubject.price.ifEmpty { "Price" }, fontSize = 14.sp)
+                }
+
+                DropdownMenu(
+                    expanded = expandPrice,
+                    onDismissRequest = { expandPrice = false },
+                    shadowElevation = 0.dp,
+                    containerColor = Color.Transparent,
+                    modifier = Modifier.width(75.dp)
+                ) {
+                    availablePrice.forEach { price -> // Iterate through available grade levels
+                        Box(
+                            modifier = Modifier
+                                .padding(2.dp)
+                                .shadow(
+                                    6.dp,
+                                    shape = RoundedCornerShape(8.dp),
+                                    clip = true
+                                ) // Apply shadow properly
+                                .background(Color.White, shape = RoundedCornerShape(8.dp))
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(price) },
+                                onClick = {
+                                    onPriceChange(price) // Update the price when a selection is made
+                                    expandPrice = false // Close the dropdown
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            ///------------------------------price fin
+
+            // Remove Button to delete the subject-grade-specialization item
+            IconButton(onClick = onRemove) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Remove Subject",
+                    tint = Color.Gray
+                )
+            }
         }
     }
 }
@@ -277,7 +351,8 @@ fun SubjectGradeItem(
 data class TutorSubject(
     val subject: String = "",
     val grade: String = "",
-    val specialization: String = ""
+    val specialization: String = "",
+    val price: String=""
 )
 
 /**
@@ -288,7 +363,8 @@ data class TutorSubject(
 data class TutorSubjectError(
     val subjectError: Boolean,
     val gradeError: Boolean,
-    val specError: Boolean
+    val specError: Boolean,
+    val priceError: Boolean
 )
 
 /**
@@ -305,11 +381,13 @@ fun validateTutorSubjects(tutorSubjects: List<TutorSubject>): List<TutorSubjectE
         TutorSubjectError(
             subjectError = subject.subject.isEmpty(),
             gradeError = subject.grade.isEmpty(),
+            priceError = subject.grade.isEmpty(),
             specError = (subject.grade in listOf(
                 "10",
                 "11",
                 "12"
             ) && subject.specialization.isEmpty())
+
         )
     }
 }

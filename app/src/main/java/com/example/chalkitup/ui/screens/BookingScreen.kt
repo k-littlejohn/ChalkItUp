@@ -81,6 +81,8 @@ fun BookingScreen(
     val availableGradeLevelsBPC = listOf("11", "12")
     val grade10Specs = listOf("- 1", "- 2", "Honours")
     val grade1112Specs = listOf("- 1", "- 2", "AP", "IB")
+    val availablePrice = listOf("$20/hr", "$25/hr", "$30/hr", "$35/hr", "$40/hr", "$45/hr", "$50/hr", "$55/hr", "$60/hr", "$65/hr", "$70/hr", "$75/hr", "$80/hr", "$85/hr", "$90/hr", "$95/hr", "$100/hr", "$105/hr", "$110/hr", "$115/hr", "$120/hr")
+
 
     var userSubjects by remember { mutableStateOf<List<TutorSubject>>(emptyList()) } // To store selected subjects
     var sessionStartTime = String
@@ -157,7 +159,7 @@ fun BookingScreen(
                         // Add an empty tutor subject entry.
                         subjectError = false
                         userSubjects =
-                            userSubjects + TutorSubject("", "", "") // Add empty entry
+                            userSubjects + TutorSubject("", "", "", "") // Add empty entry
                     },
                     modifier = Modifier.size(36.dp),
                     colors = IconButtonColors(
@@ -195,6 +197,7 @@ fun BookingScreen(
                         availableSubjects = availableSubjects,
                         availableGradeLevels = availableGradeLevels,
                         availableGradeLevelsBPC = availableGradeLevelsBPC,
+                        availablePrice = availablePrice,
                         grade10Specs = grade10Specs,
                         grade1112Specs = grade1112Specs,
                         onSubjectChange = { newSubject ->
@@ -212,6 +215,11 @@ fun BookingScreen(
                                 this[index] = this[index].copy(specialization = newSpec)
                             }
                         },
+                        onPriceChange = { newPrice ->
+                            userSubjects = userSubjects.toMutableList().apply {
+                                this[index] = this[index].copy(price = newPrice)
+                            }
+                        },
 
                         onRemove = {
                             userSubjects =
@@ -224,7 +232,11 @@ fun BookingScreen(
                             ?: false,
                         gradeError = userSubjectErrors.getOrNull(index)?.gradeError
                             ?: false,
-                        specError = userSubjectErrors.getOrNull(index)?.specError ?: false
+                        specError = userSubjectErrors.getOrNull(index)?.specError
+                            ?: false,
+                        priceError= userSubjectErrors.getOrNull(index)?.priceError
+                            ?:false
+
 
                     )
                 }
