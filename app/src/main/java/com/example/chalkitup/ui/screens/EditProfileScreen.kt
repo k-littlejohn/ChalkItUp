@@ -120,6 +120,7 @@ fun EditProfileScreen(
     val availableGradeLevelsBPC = listOf("11","12")
     val grade10Specs = listOf("- 1","- 2","Honours")
     val grade1112Specs = listOf("- 1","- 2","AP","IB")
+    val availablePrice = listOf("$20/hr", "$25/hr", "$30/hr", "$35/hr", "$40/hr", "$45/hr", "$50/hr", "$55/hr", "$60/hr", "$65/hr", "$70/hr", "$75/hr", "$80/hr", "$85/hr", "$90/hr", "$95/hr", "$100/hr", "$105/hr", "$110/hr", "$115/hr", "$120/hr")
 
     // Error states for form validation. -> all check only for empty fields
     var tutorSubjectErrors by remember { mutableStateOf<List<TutorSubjectError>>(emptyList()) }
@@ -264,7 +265,7 @@ fun EditProfileScreen(
                 // Add Subject button.
                 IconButton(
                     onClick = {
-                        tutorSubjects = tutorSubjects + TutorSubject("", "", "") // Add empty entry
+                        tutorSubjects = tutorSubjects + TutorSubject("", "", "", "") // Add empty entry
                     },
                     modifier = Modifier.size(36.dp),
                     colors = IconButtonColors(
@@ -299,6 +300,7 @@ fun EditProfileScreen(
                             availableSubjects = availableSubjects,
                             availableGradeLevels = availableGradeLevels,
                             availableGradeLevelsBPC = availableGradeLevelsBPC,
+                            availablePrice= availablePrice,
                             grade10Specs = grade10Specs,
                             grade1112Specs = grade1112Specs,
                             onSubjectChange = { newSubject ->
@@ -316,13 +318,20 @@ fun EditProfileScreen(
                                     this[index] = this[index].copy(specialization = newSpec)
                                 }
                             },
+                            onPriceChange = { newPrice ->
+                                tutorSubjects = tutorSubjects.toMutableList().apply {
+                                    this[index] = this[index].copy(price = newPrice)
+                                }
+                            },
+
                             onRemove = {
                                 tutorSubjects =
                                     tutorSubjects.toMutableList().apply { removeAt(index) }
                             },
                             subjectError = tutorSubjectErrors.getOrNull(index)?.subjectError ?: false,
                             gradeError = tutorSubjectErrors.getOrNull(index)?.gradeError ?: false,
-                            specError = tutorSubjectErrors.getOrNull(index)?.specError ?: false
+                            specError = tutorSubjectErrors.getOrNull(index)?.specError ?: false,
+                            priceError= tutorSubjectErrors.getOrNull(index)?.priceError?: false
                         )
                     }
                 }
