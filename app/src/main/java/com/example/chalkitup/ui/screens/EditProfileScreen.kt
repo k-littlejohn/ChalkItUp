@@ -61,6 +61,7 @@ import com.example.chalkitup.ui.components.TutorSubjectError
 import com.example.chalkitup.ui.components.validateTutorSubjects
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
 import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
+import com.example.chalkitup.ui.viewmodel.Interest
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 
@@ -180,7 +181,8 @@ fun EditProfileScreen(
 
         // Circular profile picture with a click to change.
         AsyncImage(
-            model = profilePictureUrl ?: R.drawable.baseline_person_24, // Default profile picture if none is set
+            model = profilePictureUrl
+                ?: R.drawable.baseline_person_24, // Default profile picture if none is set
             contentDescription = "Profile Picture",
             modifier = Modifier
                 .size(100.dp)
@@ -248,24 +250,29 @@ fun EditProfileScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             if (subjectError) {
-                Text("You must be able to teach at least 1 subject",
-                    color = Color.Red)
+                Text(
+                    "You must be able to teach at least 1 subject",
+                    color = Color.Red
+                )
             }
 
             Text("Subjects You Teach")
 
-            Row (
+            Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Tap the  +  to add a subject",
-                    color = Color.Gray)
+                Text(
+                    "Tap the  +  to add a subject",
+                    color = Color.Gray
+                )
 
                 Spacer(modifier = Modifier.width(50.dp))
 
                 // Add Subject button.
                 IconButton(
                     onClick = {
-                        tutorSubjects = tutorSubjects + TutorSubject("", "", "", "") // Add empty entry
+                        tutorSubjects =
+                            tutorSubjects + TutorSubject("", "", "", "") // Add empty entry
                     },
                     modifier = Modifier.size(36.dp),
                     colors = IconButtonColors(
@@ -292,7 +299,7 @@ fun EditProfileScreen(
             }
 
             // Display list of subjects the tutor teaches.
-            Box (modifier = Modifier.heightIn(20.dp,500.dp)) {
+            Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
                 LazyColumn {
                     itemsIndexed(tutorSubjects) { index, tutorSubject ->
                         SubjectGradeItem(
@@ -300,7 +307,7 @@ fun EditProfileScreen(
                             availableSubjects = availableSubjects,
                             availableGradeLevels = availableGradeLevels,
                             availableGradeLevelsBPC = availableGradeLevelsBPC,
-                            availablePrice= availablePrice,
+                            availablePrice = availablePrice,
                             grade10Specs = grade10Specs,
                             grade1112Specs = grade1112Specs,
                             onSubjectChange = { newSubject ->
@@ -328,10 +335,11 @@ fun EditProfileScreen(
                                 tutorSubjects =
                                     tutorSubjects.toMutableList().apply { removeAt(index) }
                             },
-                            subjectError = tutorSubjectErrors.getOrNull(index)?.subjectError ?: false,
+                            subjectError = tutorSubjectErrors.getOrNull(index)?.subjectError
+                                ?: false,
                             gradeError = tutorSubjectErrors.getOrNull(index)?.gradeError ?: false,
                             specError = tutorSubjectErrors.getOrNull(index)?.specError ?: false,
-                            priceError= tutorSubjectErrors.getOrNull(index)?.priceError?: false
+                            priceError = tutorSubjectErrors.getOrNull(index)?.priceError ?: false
                         )
                     }
                 }
@@ -454,6 +462,23 @@ fun EditProfileScreen(
 //
 //            }
 //        }
+        //------------------INTERESTS--------------------------------------
+        Spacer(modifier = Modifier.height(16.dp))
+        Column(
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.Start
+        ) {
+            userProfile?.let {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Interests:")
+                it.interests.forEachIndexed { _, interest ->
+                        SelectableButton(interest)
+                    }
+                }
+            }
+        //------------------INTERESTS--------------------------------------
+
+
         Spacer(modifier = Modifier.height(16.dp))
         Row {
             Button(onClick = {
@@ -492,5 +517,20 @@ fun EditProfileScreen(
                 Text("Cancel")
             }
         }
+    }
+}
+
+@Composable
+fun SelectableButton(interest: Interest) {
+    var isSelected by remember { mutableStateOf(interest.isSelected) }
+    Button(
+        onClick = { isSelected = !isSelected },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (isSelected) Color.Green else Color.Gray
+        ),
+        shape = RoundedCornerShape(8.dp),
+        modifier = Modifier.padding(8.dp)
+    ) {
+        Text(interest.name)
     }
 }

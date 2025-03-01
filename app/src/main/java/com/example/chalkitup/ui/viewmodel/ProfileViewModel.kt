@@ -89,7 +89,25 @@ data class UserProfile(
     val subjects: List<TutorSubject> = emptyList(), // List of subjects the user is associated with (for tutors)
     val bio: String = "",        // User's bio
     val location: String = "",   // User's location
-    val interests: List<String> = emptyList(),
+    val interests: List<Interest> =listOf( Interest("Accounting", false), Interest("Agriculture", false),
+                                            Interest("Ancient History", false), Interest("Animal", false),
+                                            Interest("Art", false), Interest("Art-History", false),
+                                            Interest("Biology", false), Interest("Business", false),
+                                            Interest("Computer Science", false), Interest("Cell-Biology", false),
+                                            Interest("Chemistry", false), Interest("Earth-Science", false),
+                                            Interest("English", false), Interest("Engineering", false),
+                                             Interest("Finance", false), Interest("French", false),
+                                            Interest("Food", false), Interest("Geology", false),
+                                            Interest("Government", false), Interest("Kinesiology", false),
+                                            Interest("Language", false), Interest("Legal", false),
+                                            Interest("Marketing", false), Interest("Math", false),
+                                            Interest("Medical Science", false), Interest("Music", false),
+                                            Interest("Nutrition", false), Interest("Physics", false),
+                                            Interest("Psychology", false), Interest("Social Studies", false),
+                                            Interest("Physical Activity", false), Interest("Zoology", false)),
     val progress_item: List<String> = emptyList(),
     val progress_grade: List<String> = emptyList(),
+    val progressItems: List<ProgressItem> =emptyList()
 )
+data class Interest(val name: String, var isSelected: Boolean)
+data class ProgressItem(val title: String, val grade: String)

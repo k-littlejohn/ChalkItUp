@@ -213,19 +213,24 @@ fun ProfileScreen(
                 }
                 //------------------------------STUDENT-SPECIFIC-END--------------------------------------------
             }
-
+            val addedInterests: MutableList<String> = mutableListOf()
             // Display user's interests.
             userProfile?.let {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Interests:")
-                if (it.interests.isEmpty()) {
-                    Text("NO INTERESTS LISTED")
-                } else {
-                    for (i in it.interests.indices) {
-                        ItemGrid(listOf(it.interests[i]), columns = 1)
+                it.interests.forEachIndexed{ _, interest ->
+                    if (interest.isSelected){
+                        addedInterests.add(interest.name)
                     }
                 }
             }
+            if (addedInterests.isNotEmpty()) {
+                ItemGrid(addedInterests, 2)
+            }
+            else{
+                Text("No Interests Have been Listed")
+            }
+            //-----------------end of interest display
 
             Spacer(modifier = Modifier.height(16.dp))
             // Edit Profile Button
