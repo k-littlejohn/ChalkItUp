@@ -381,7 +381,7 @@ fun validateTutorSubjects(tutorSubjects: List<TutorSubject>): List<TutorSubjectE
         TutorSubjectError(
             subjectError = subject.subject.isEmpty(),
             gradeError = subject.grade.isEmpty(),
-            priceError = subject.grade.isEmpty(),
+            priceError = subject.price.isEmpty(),
             specError = (subject.grade in listOf(
                 "10",
                 "11",

@@ -62,6 +62,7 @@ import com.example.chalkitup.ui.components.validateTutorSubjects
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
 import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
 import com.example.chalkitup.ui.viewmodel.Interest
+import com.example.chalkitup.ui.viewmodel.InterestItem
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 
@@ -132,9 +133,9 @@ fun EditProfileScreen(
     //var originalProfilePictureUrl by remember { mutableStateOf<String?>(null) }
     val progress_item = remember { mutableListOf<String>()}
     val progress_grade =remember { mutableListOf<String>() }
-    var selectedInterests by remember { mutableStateOf(listOf<Int>()) }
     val mainHandler= Handler(Looper.getMainLooper())
-
+    var updatedInterests by remember { mutableStateOf<List<Interest>>(emptyList()) }
+    var interests by remember { mutableStateOf<List<Interest>>(emptyList()) }
     // Initialize profile fields when the user profile data changes.
     LaunchedEffect(userProfile) {
         userProfile?.let {
@@ -165,6 +166,7 @@ fun EditProfileScreen(
     // Google Places API client for location autocomplete.
     val placesClient = remember { Places.createClient(context) }
     val sessionToken = remember { AutocompleteSessionToken.newInstance() }
+
 
     //------------------------------VARIABLES-END----------------------------------------------
 
@@ -464,18 +466,43 @@ fun EditProfileScreen(
 //        }
         //------------------INTERESTS--------------------------------------
         Spacer(modifier = Modifier.height(16.dp))
-        Column(
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.Start
-        ) {
+        var interests by remember { mutableStateOf(userProfile?.interests ?: emptyList()) }
+        LaunchedEffect(userProfile) {
             userProfile?.let {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("Interests:")
-                it.interests.forEachIndexed { _, interest ->
-                        SelectableButton(interest)
-                    }
-                }
+                interests= it.interests
             }
+        }
+
+        Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
+            LazyColumn {
+                itemsIndexed(interests) { index, interest ->
+                    InterestItem(
+                        interest = interest,
+                        onInterestChange = { isSelected ->
+                            interests = interests.toMutableList().apply {
+                                this[index] = this[index].copy(isSelected = isSelected)
+                            }
+                        },
+                    )
+
+                }
+//            userProfile?.let { user->
+//                Spacer(modifier = Modifier.height(16.dp))
+//                Text("Interests:")
+//                updatedInterests=user.interests.map{it.copy()}
+//                updatedInterests.forEachIndexed { index, interest ->
+//                        SelectableButton(
+//                            interest = interest,
+//                            onSelectionChange = { selectionStatus ->
+//                                updatedInterests = updatedInterests.toMutableList().apply {
+//                                    this[index] = this[index].copy(isSelected = selectionStatus)
+//                                }
+//                                //val updatedUserProfile = user.copy(interests = updatedInterests)
+//                                //userProfile = updatedUserProfile
+//                            }
+//                        )
+            }
+        }
         //------------------INTERESTS--------------------------------------
 
 
@@ -493,7 +520,8 @@ fun EditProfileScreen(
                 if (!(tutorSubjectErrors.any { it.subjectError || it.gradeError || it.specError }) &&
                         !subjectError && !firstNameError && !lastNameError && !locationError
                     ) {
-                    editProfileViewModel.updateProfile(firstName, lastName, tutorSubjects, bio, location)
+                    val  finalInterests=updatedInterests.toList()
+                    editProfileViewModel.updateProfile(firstName, lastName, tutorSubjects, bio, location, finalInterests)
                     certificationViewModel.updateCertifications(context)
                     navController.navigate("profile") // Navigate back to profile
                 }
@@ -520,17 +548,3 @@ fun EditProfileScreen(
     }
 }
 
-@Composable
-fun SelectableButton(interest: Interest) {
-    var isSelected by remember { mutableStateOf(interest.isSelected) }
-    Button(
-        onClick = { isSelected = !isSelected },
-        colors = ButtonDefaults.buttonColors(
-            containerColor = if (isSelected) Color.Green else Color.Gray
-        ),
-        shape = RoundedCornerShape(8.dp),
-        modifier = Modifier.padding(8.dp)
-    ) {
-        Text(interest.name)
-    }
-}
