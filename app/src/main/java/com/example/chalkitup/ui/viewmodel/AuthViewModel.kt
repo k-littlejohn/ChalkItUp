@@ -142,27 +142,27 @@ class AuthViewModel : ViewModel() {
                                     .set(userData)
                                     .addOnSuccessListener {
                                         // If user is a tutor, store subjects in the availability collection
-                                        if (userType == "Tutor") {
-                                            val monthYear = SimpleDateFormat("yyyy-MM", Locale.getDefault())
-                                                .format(System.currentTimeMillis())
-
-                                            val tutorAvailRef = firestore.collection("availability")
-                                                .document(monthYear)
-                                                .collection(user.uid)
-                                                .document("subjectData")
-
-                                            val subjectsData = hashMapOf(
-                                                "subjects" to subjects,
-                                            )
-
-                                            tutorAvailRef.set(subjectsData)
-                                                .addOnSuccessListener {
-                                                    Log.d("Signup", "Subjects saved to availability successfully")
-                                                }
-                                                .addOnFailureListener { e ->
-                                                    Log.e("Signup", "Failed to save subjects to availability: ${e.message}")
-                                                }
-                                        }
+//                                        if (userType == "Tutor") {
+//                                            val monthYear = SimpleDateFormat("yyyy-MM", Locale.getDefault())
+//                                                .format(System.currentTimeMillis())
+//
+//                                            val tutorAvailRef = firestore.collection("availability")
+//                                                .document(monthYear)
+//                                                .collection(user.uid)
+//                                                .document("subjectData")
+//
+//                                            val subjectsData = hashMapOf(
+//                                                "subjects" to subjects,
+//                                            )
+//
+//                                            tutorAvailRef.set(subjectsData)
+//                                                .addOnSuccessListener {
+//                                                    Log.d("Signup", "Subjects saved to availability successfully")
+//                                                }
+//                                                .addOnFailureListener { e ->
+//                                                    Log.e("Signup", "Failed to save subjects to availability: ${e.message}")
+//                                                }
+//                                        }
 
                                         // Send a verification email to the new user
                                         user.sendEmailVerification()

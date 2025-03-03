@@ -255,10 +255,10 @@ fun ProfileScreen(
 //                    ProgressGrid(interests!!)
 //                }
 
-    Spacer(modifier = Modifier.height(16.dp))
-    // Edit Profile Button
-    Button(onClick = { navController.navigate("editProfile") })
-    { Text("Edit Profile") }
+//    Spacer(modifier = Modifier.height(16.dp))
+//    // Edit Profile Button
+//    Button(onClick = { navController.navigate("editProfile") })
+//    { Text("Edit Profile") }
 }
 
 /**

@@ -1,11 +1,14 @@
 package com.example.chalkitup.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.chalkitup.ui.screens.TutorAvailability
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -52,6 +55,11 @@ class TutorAvailabilityViewModel : ViewModel() {
         // Format the current month and year as "yyyy-MM" to structure Firestore documents
         val monthYear = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(System.currentTimeMillis())
         val db = FirebaseFirestore.getInstance()
+
+
+
+
+        initializeSessionCount(tutorId, monthYear)
 
         // Listen for changes in the tutor's availability data for the current month
         db.collection("availability")
@@ -158,6 +166,34 @@ class TutorAvailabilityViewModel : ViewModel() {
             _selectedTimeSlots.value = getSavedTimeSlotsForDay(day)
         }
         _isEditing.value = false
+    }
+
+
+
+
+    fun initializeSessionCount(tutorId: String, yearMonth: String) {
+        viewModelScope.launch {
+            val db = FirebaseFirestore.getInstance()
+
+            val sessionCountRef = db.collection("availability")
+                .document(yearMonth)
+                .collection(tutorId)
+                .document("sessionCount")
+
+            // Check if the document already exists
+            val document = sessionCountRef.get().await()
+            if (!document.exists()) {
+                // Initialize the document with default values
+                val defaultSessionCount = mapOf(
+                    "week1" to 0,
+                    "week2" to 0,
+                    "week3" to 0,
+                    "week4" to 0,
+                    "week5" to 0 // Include week5 for months with 5 weeks
+                )
+                sessionCountRef.set(defaultSessionCount).await()
+            }
+        }
     }
 }
 
