@@ -63,6 +63,7 @@ class EditProfileViewModel : ViewModel() {
         subjects: List<TutorSubject>,
         bio: String,
         location: String,
+        progress: List<ProgressItem>,
         interests: List<Interest>
     ) {
         val monthYear = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(System.currentTimeMillis())
@@ -80,7 +81,9 @@ class EditProfileViewModel : ViewModel() {
             "firstName" to firstName,
             "lastName" to lastName,
             "bio" to bio,
-            "location" to location
+            "location" to location,
+            "interests" to interests,
+            "progress" to progress
         )
 
         // Only update tutor-specific fields if the user is a tutor
@@ -92,11 +95,11 @@ class EditProfileViewModel : ViewModel() {
                 )
                 tutorAvailRef.set(subjectsData) // Needs error handling
             }
-            updateData["interests"] = interests
-            val interestsData = hashMapOf(
-                "interests" to interests
-            )
-            tutorAvailRef.set(interestsData) // Needs error handling
+//            updateData["interests"] = interests
+//            val interestsData = hashMapOf(
+//                "interests" to interests
+//            )
+//            tutorAvailRef.set(interestsData) // Needs error handling
         }
 
         // Update the user's profile in Firestore

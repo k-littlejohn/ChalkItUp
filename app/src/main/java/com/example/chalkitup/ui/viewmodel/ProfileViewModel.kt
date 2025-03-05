@@ -26,7 +26,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.storage
-
+import androidx.compose.material3.OutlinedTextField
 // Handles logic for ProfileScreen
 // - fetches user information from firebase and loads it
 
@@ -123,12 +123,11 @@ data class UserProfile(
                                             Interest("Nutrition", false), Interest("Physics", false),
                                             Interest("Psychology", false), Interest("Social Studies", false),
                                             Interest("Physical Activity", false), Interest("Zoology", false)),
-    val progress_item: List<String> = emptyList(),
-    val progress_grade: List<String> = emptyList(),
-    val progressItems: List<ProgressItem> =emptyList()
+    val progress: List<ProgressItem> =emptyList()
 )
-data class Interest(val name: String, var isSelected: Boolean)
-data class ProgressItem(val title: String, val grade: String)
+
+data class Interest(val name: String="", var isSelected: Boolean =false)
+data class ProgressItem(val title: String="", val grade: String="")
 
 @Composable
 fun InterestItem(
@@ -159,5 +158,38 @@ fun InterestItem(
                 Text(interest.name)
             }
             //---------------
+    }
+}
+
+
+@Composable
+fun ProgressInput(
+    progressItem: ProgressItem,
+    onProgressChange: (String, String) -> Unit,
+) {
+    val selectedButtonColor = Color(0xFF54A4FF)
+    val defaultButtonColor = Color.LightGray
+    val errorButtonColor = Color.Red
+    var title by remember { mutableStateOf(progressItem.title) }
+    var grade by remember { mutableStateOf(progressItem.grade) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        OutlinedTextField(
+            value = title,
+            onValueChange = {
+                title = it
+                onProgressChange(title, grade)},
+            label = { Text("Progress Title") })
+        OutlinedTextField(
+            value = grade,
+            onValueChange = {
+                grade= it
+                onProgressChange(title, grade)},
+            label = { Text("Grade") })
     }
 }
