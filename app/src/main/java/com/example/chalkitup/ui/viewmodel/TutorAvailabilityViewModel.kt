@@ -1,5 +1,6 @@
 package com.example.chalkitup.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.chalkitup.ui.screens.TutorAvailability
@@ -10,6 +11,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 /**
@@ -39,6 +42,11 @@ class TutorAvailabilityViewModel : ViewModel() {
     private val _isEditing = MutableStateFlow(false)
     val isEditing: StateFlow<Boolean> = _isEditing
 
+    // Add a new StateFlow for booked appointments
+    private val _bookedAppointments = MutableStateFlow<List<TutorAvailability>>(emptyList())
+    val bookedAppointments: StateFlow<List<TutorAvailability>> = _bookedAppointments
+
+
     // Generates time intervals from <9:00 AM to 9:30 PM> in 30-minute increments
     val timeIntervals = (9..20).flatMap { hour ->
         listOf("$hour:00", "$hour:30")
@@ -46,6 +54,76 @@ class TutorAvailabilityViewModel : ViewModel() {
 
     init {
         fetchAvailabilityFromFirestore() // Automatically fetch on ViewModel creation
+        fetchBookedAppointmentsFromFirestore() // Fetch booked appointments
+    }
+
+    private fun fetchBookedAppointmentsFromFirestore() {
+        val tutorId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val db = FirebaseFirestore.getInstance()
+
+        db.collection("appointments")
+            .whereEqualTo("tutorID", tutorId) // Filter by tutorID
+            .addSnapshotListener { querySnapshot, error ->
+                if (error != null) {
+                    // Handle error (e.g., log or show a message)
+                    Log.e("FirestoreError", "Error fetching appointments", error)
+                    return@addSnapshotListener
+                }
+
+                val appointments = mutableListOf<TutorAvailability>()
+
+                querySnapshot?.documents?.forEach { document ->
+                    val date = document.getString("date") ?: return@forEach // Skip if date is missing
+                    val timeRange = document.getString("time") ?: return@forEach // Skip if time is missing
+
+                    // Parse the time range (e.g., "2:00 PM - 3:00 PM")
+                    val times = parseTimeRange(timeRange)
+
+                    // Add the appointment to the list
+                    appointments.add(TutorAvailability(day = date, timeSlots = times))
+                }
+
+                // Update the StateFlow with the fetched appointments
+                _bookedAppointments.value = appointments
+            }
+    }
+
+    /**
+     * Parses a time range string (e.g., "2:00 PM - 3:00 PM") into a list of time slots.
+     */
+    private fun parseTimeRange(timeRange: String): List<String> {
+        val times = mutableListOf<String>()
+
+//        // Split the time range into start and end times
+//        val (startTime, endTime) = timeRange.split(" - ")
+//
+//        // Parse the start and end times into LocalTime objects
+//        val start = LocalTime.parse(startTime, DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH))
+//        val end = LocalTime.parse(endTime, DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH))
+//
+//        // Generate time slots in 30-minute increments
+//        var currentTime = start
+//        while (currentTime.isBefore(end) || currentTime == end) {
+//            times.add(currentTime.format(DateTimeFormatter.ofPattern("H:mm"))) // Format as "HH:mm"
+//            currentTime = currentTime.plusMinutes(30)
+//        }
+
+        try {
+            val (startTime, endTime) = timeRange.split(" - ")
+            val start = LocalTime.parse(startTime, DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH))
+            val end = LocalTime.parse(endTime, DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH))
+
+            var currentTime = start
+            while (currentTime.isBefore(end) || currentTime == end) {
+                times.add(currentTime.format(DateTimeFormatter.ofPattern("H:mm")))
+                currentTime = currentTime.plusMinutes(30)
+            }
+        } catch (e: Exception) {
+            // Log the error and return an empty list
+            Log.e("TimeParsing", "Error parsing time range: $timeRange", e)
+        }
+
+        return times
     }
 
     // Fetches the tutor's availability data from Firestore and updates the LiveData list
@@ -55,9 +133,6 @@ class TutorAvailabilityViewModel : ViewModel() {
         // Format the current month and year as "yyyy-MM" to structure Firestore documents
         val monthYear = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(System.currentTimeMillis())
         val db = FirebaseFirestore.getInstance()
-
-
-
 
         initializeSessionCount(tutorId, monthYear)
 

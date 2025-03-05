@@ -50,6 +50,26 @@ class BookingViewModel : ViewModel() {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> get() = _error
 
+    // TODO: ALERT DIALOG FOR ERRORS -for after submit: "your session has been booked" or "your session could not be booked bc..."
+
+    // Function to reset all state variables
+    fun resetState() {
+        _selectedDay.value = null
+        _selectedStartTime.value = null
+        _selectedEndTime.value = null
+        _availability.value = emptyMap()
+        _isLoading.value = false
+        _error.value = null
+    }
+
+    fun getFirstDayOfMonth(currentDate: LocalDate): LocalDate {
+        return currentDate.withDayOfMonth(1) // First day of the month
+    }
+
+    fun getLastDayOfMonth(currentDate: LocalDate): LocalDate {
+        return currentDate.withDayOfMonth(currentDate.lengthOfMonth()) // Last day of the month
+    }
+
     // Set the selected subject and fetch tutors
     fun setSubject(subject: TutorSubject, priceRange: ClosedFloatingPointRange<Float>) {
         fetchTutors(subject, priceRange)
@@ -213,18 +233,22 @@ class BookingViewModel : ViewModel() {
     // Function to get valid end times for a selected start time
     fun getValidEndTimes(startTime: LocalTime, availability: List<LocalTime>): List<LocalTime> {
         val validEndTimes = mutableListOf<LocalTime>()
-        var currentTime = startTime
+        var currentTime = startTime.plusMinutes(30) // Start with the next 30-minute increment
 
         while (currentTime in availability) {
             validEndTimes.add(currentTime)
-            currentTime = currentTime.plusMinutes(30) // Assuming time slots are 30 minutes apart
+            currentTime = currentTime.plusMinutes(30) // time slots are 30 minutes apart
         }
+
+        validEndTimes.add(currentTime) // supplement the next 30 min slot for end times
 
         return validEndTimes
     }
 
     fun matchTutorForTimeRange(selectedDay: LocalDate, startTime: LocalTime, endTime: LocalTime, onResult: (String?) -> Unit) {
         viewModelScope.launch {
+            println("matchTutorForTimeRange called for $selectedDay, $startTime - $endTime") // Logging
+
             val tutorAvailabilityMap = _tutorAvailabilityMap.value
             val weekNumber = getWeekNumber(selectedDay) // Helper function to get the week number
             val yearMonth = selectedDay.format(DateTimeFormatter.ofPattern("yyyy-MM")) // Format as yyyy-MM
@@ -234,8 +258,12 @@ class BookingViewModel : ViewModel() {
             for ((tutorId, availability) in tutorAvailabilityMap) {
                 val dayAvailability = availability[selectedDay] ?: continue
 
+                // Log the tutor's availability for the selected day
+                println("Tutor $tutorId availability for $selectedDay: $dayAvailability")
+
+
                 // Check if the selected time range is fully within the tutor's availability
-                if (dayAvailability.contains(startTime) && dayAvailability.contains(endTime)) {
+                if (dayAvailability.contains(startTime) && dayAvailability.contains(endTime.minusMinutes(30))) {
                     // Ensure there are no gaps in the selected time range
                     var currentTime = startTime
                     while (currentTime < endTime) {
@@ -249,16 +277,20 @@ class BookingViewModel : ViewModel() {
                         // Fetch the session count for the selected week
                         val sessionCount = getSessionCountForWeek(tutorId, yearMonth, weekNumber)
                         matchingTutors.add(tutorId to sessionCount)
+                        println("Tutor $tutorId is available for the selected time range") // Logging
                     }
                 }
             }
 
             // If no tutors match, return null
             val result = if (matchingTutors.isEmpty()) {
+                println("No matching tutors found") // Logging
                 null
             } else {
                 // Find the tutor with the lowest session count
+                println("Selected tutor: ${matchingTutors.minByOrNull { it.second }?.first}") // Logging
                 matchingTutors.minByOrNull { it.second }?.first
+
             }
 
             // Return the result via callback
@@ -423,6 +455,9 @@ class BookingViewModel : ViewModel() {
         // Get the timeSlots array
         val dayAvailability = dayEntry["timeSlots"] as? MutableList<String> ?: return
 
+        // Log the current time slots for the day
+        println("Current time slots for $day: $dayAvailability")
+
         // Generate the list of time slots to remove (formatted to match Firestore)
         val timeSlotsToRemove = mutableListOf<String>()
         var currentTime = startTime
@@ -431,25 +466,32 @@ class BookingViewModel : ViewModel() {
             currentTime = currentTime.plusMinutes(30)
         }
 
+        // Log the time slots to remove
+        println("Time slots to remove: $timeSlotsToRemove")
+
         // Remove booked slots
         val updatedAvailability = dayAvailability.filter { it !in timeSlotsToRemove }
 
         // Update Firestore with the modified availability
-        val updatedAvailabilityList = availabilityList.map { entry ->
-            if (entry["day"] == day.toString()) {
-                entry.toMutableMap().apply {
-                    this["timeSlots"] = updatedAvailability
+        val updatedAvailabilityList = availabilityList.toMutableList().apply {
+            // Find the index of the day entry
+            val dayIndex = indexOfFirst { it["day"] == day.toString() }
+            if (dayIndex != -1) {
+                if (updatedAvailability.isEmpty()) {
+                    // If no time slots are left, remove the entire day entry
+                    removeAt(dayIndex)
+                } else {
+                    // Otherwise, update the time slots for the day
+                    this[dayIndex] = this[dayIndex].toMutableMap().apply {
+                        this["timeSlots"] = updatedAvailability
+                    }
                 }
-            } else {
-                entry
             }
         }
 
         // Push the updated availability back to Firestore
         availabilityRef.update("availability", updatedAvailabilityList).await()
     }
-
-
 
     private suspend fun addSessionToFirestore(
         tutorId: String,
