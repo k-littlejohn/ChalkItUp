@@ -41,6 +41,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -61,6 +62,9 @@ import com.example.chalkitup.ui.components.validateTutorSubjects
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
 import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
 import com.example.chalkitup.ui.viewmodel.Interest
+import com.example.chalkitup.ui.viewmodel.InterestItem
+import com.example.chalkitup.ui.viewmodel.ProgressInput
+import com.example.chalkitup.ui.viewmodel.ProgressItem
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 
@@ -489,7 +493,7 @@ fun EditProfileScreen(
                         !subjectError && !firstNameError && !lastNameError
                     ) {
                     //val  finalInterests=updatedInterests.toList()
-                    editProfileViewModel.updateProfile(firstName, lastName, tutorSubjects, bio, location, progress, interests)
+                    editProfileViewModel.updateProfile(firstName, lastName, tutorSubjects, bio, progress, interests)
                     certificationViewModel.updateCertifications(context)
                     navController.navigate("profile") // Navigate back to profile
                 }
