@@ -136,6 +136,7 @@ fun EditProfileScreen(
     val mainHandler= Handler(Looper.getMainLooper())
     var updatedInterests by remember { mutableStateOf<List<Interest>>(emptyList()) }
     var progress = remember { mutableStateListOf<ProgressItem>() }
+    var interests = remember { mutableStateListOf<Interest>() }
     //var interests by remember { mutableStateOf<List<Interest>>(emptyList()) }
     // Initialize profile fields when the user profile data changes.
     LaunchedEffect(userProfile) {
@@ -388,92 +389,34 @@ fun EditProfileScreen(
                         ProgressInput(
                             progressItem = item,
                             onProgressChange = { updatedTitle, updatedGrade ->
-                                progress[index] =
-                                    item.copy(title = updatedTitle, grade = updatedGrade)
-                            }
+                                    progress=progress.apply{
+                                        this[index]=item.copy(title = updatedTitle, grade = updatedGrade)}},
+                            onRemove={
+                                    progress=progress.apply{removeAt(index)}}
                         )
                     }
                 }
             }
-//        else {
-//            userProfile?.let {
-//                progress_item.clear()
-//                progress_item.addAll(it.progress_item)
-//                progress_grade.clear()
-//                progress_grade.addAll(it.progress_grade)
-//
-//                }
-//
-//           Spacer(modifier = Modifier.height(16.dp))
-//            Text("Progress")
-//            Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
-//                Column (
-//                   modifier = Modifier
-//                        .padding(16.dp)
-//                        .verticalScroll(scrollState)
-//                ){
-//                    var item_input by remember { mutableStateOf("") }
-//                    var grade_input by remember { mutableStateOf("") }
-//                    OutlinedTextField(
-//                        value = item_input,
-//                        onValueChange = { item_input = it },
-//                        label = { Text("Progress Item") })
-//                    OutlinedTextField(
-//                        value = grade_input,
-//                        onValueChange = { grade_input = it },
-//                        label = { Text("Grade") })
+            //------------------INTERESTS--------------------------------------
+            Spacer(modifier = Modifier.height(16.dp))
 
-        }
-//
-//
-//                }
-//
-//                LazyColumn {
-//                    itemsIndexed(progress_item) { index, progItem ->
-//                        Column(
-//                            modifier = Modifier
-//                                .padding(16.dp)
-//                                .verticalScroll(scrollState)
-//                        )
-//                        {
-//                            OutlinedTextField(
-//                                value = progItem,
-//                                onValueChange = { newValue ->
-//                                    progress_item[index] = newValue
-//                                },
-//                                label = { Text("Title of Assessment") })
-//                            Spacer(modifier = Modifier.height(16.dp))
-//                            OutlinedTextField(
-//                                value = progress_grade[index],
-//                                onValueChange = { newValue ->
-//                                    progress_grade[index] = newValue
-//                                },
-//                                label = { Text("Grade") })
-//                        }
-//                    }
-//               }
-//
-//            }
-//        }
-        //------------------INTERESTS--------------------------------------
-        Spacer(modifier = Modifier.height(16.dp))
-        var interests = remember { mutableStateListOf<Interest>() }
 
-        LaunchedEffect(userProfile) {
-            userProfile?.let {
-                interests.clear()
-                interests.addAll(it.interests.map { interest -> interest.copy() }) // Ensures a separate copy
+            LaunchedEffect(userProfile) {
+                userProfile?.let {
+                    interests.clear()
+                    interests.addAll(it.interests.map { interest -> interest.copy() }) // Ensures a separate copy
+                }
             }
-        }
-        Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
-            LazyColumn {
-                itemsIndexed(interests) { index, interest ->
-                    InterestItem(
-                        interest = interest,
-                        onInterestChange = { isSelected ->
-                            interests[index] = interest.copy(isSelected = isSelected)
-                        }
-                    )
+            Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
+                LazyColumn {
+                    itemsIndexed(interests) { index, interest ->
+                        InterestItem(
+                            interest = interest,
+                            onInterestChange = { isSelected ->
+                                interests[index] = interest.copy(isSelected = isSelected)
+                            }
+                        )
+                    }
                 }
             }
         }

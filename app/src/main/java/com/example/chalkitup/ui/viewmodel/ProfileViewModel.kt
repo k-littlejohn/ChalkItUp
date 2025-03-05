@@ -6,8 +6,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -162,6 +166,7 @@ fun InterestItem(
 fun ProgressInput(
     progressItem: ProgressItem,
     onProgressChange: (String, String) -> Unit,
+    onRemove:() ->Unit
 ) {
     val selectedButtonColor = Color(0xFF54A4FF)
     val defaultButtonColor = Color.LightGray
@@ -180,12 +185,24 @@ fun ProgressInput(
             onValueChange = {
                 title = it
                 onProgressChange(title, grade)},
-            label = { Text("Progress Title") })
+            label = { Text("Title") },
+            modifier = Modifier.weight(1f)
+        )
         OutlinedTextField(
             value = grade,
             onValueChange = {
                 grade= it
                 onProgressChange(title, grade)},
-            label = { Text("Grade") })
+            label = { Text("Grade") },
+            modifier = Modifier.weight(1f)
+        )
+
+        IconButton(onClick = onRemove) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Remove",
+                tint = Color.Gray
+            )
+        }
     }
 }
