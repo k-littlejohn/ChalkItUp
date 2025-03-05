@@ -63,9 +63,6 @@ class ProfileViewModel : ViewModel() {
                 }
         }
 
-
-
-
     // Function to load the profile picture from storage
     private fun loadProfilePicture(userId: String) {
         val storageRef = Firebase.storage.reference.child("$userId/profilePicture.jpg")

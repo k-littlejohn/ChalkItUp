@@ -65,7 +65,7 @@ class TutorAvailabilityViewModel : ViewModel() {
             .whereEqualTo("tutorID", tutorId) // Filter by tutorID
             .addSnapshotListener { querySnapshot, error ->
                 if (error != null) {
-                    // Handle error (e.g., log or show a message)
+                    // error
                     Log.e("FirestoreError", "Error fetching appointments", error)
                     return@addSnapshotListener
                 }
@@ -73,8 +73,8 @@ class TutorAvailabilityViewModel : ViewModel() {
                 val appointments = mutableListOf<TutorAvailability>()
 
                 querySnapshot?.documents?.forEach { document ->
-                    val date = document.getString("date") ?: return@forEach // Skip if date is missing
-                    val timeRange = document.getString("time") ?: return@forEach // Skip if time is missing
+                    val date = document.getString("date") ?: return@forEach // Skip if date is missing??
+                    val timeRange = document.getString("time") ?: return@forEach // Skip if time is missing??
 
                     // Parse the time range (e.g., "2:00 PM - 3:00 PM")
                     val times = parseTimeRange(timeRange)
@@ -93,20 +93,6 @@ class TutorAvailabilityViewModel : ViewModel() {
      */
     private fun parseTimeRange(timeRange: String): List<String> {
         val times = mutableListOf<String>()
-
-//        // Split the time range into start and end times
-//        val (startTime, endTime) = timeRange.split(" - ")
-//
-//        // Parse the start and end times into LocalTime objects
-//        val start = LocalTime.parse(startTime, DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH))
-//        val end = LocalTime.parse(endTime, DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH))
-//
-//        // Generate time slots in 30-minute increments
-//        var currentTime = start
-//        while (currentTime.isBefore(end) || currentTime == end) {
-//            times.add(currentTime.format(DateTimeFormatter.ofPattern("H:mm"))) // Format as "HH:mm"
-//            currentTime = currentTime.plusMinutes(30)
-//        }
 
         try {
             val (startTime, endTime) = timeRange.split(" - ")
@@ -243,10 +229,7 @@ class TutorAvailabilityViewModel : ViewModel() {
         _isEditing.value = false
     }
 
-
-
-
-    fun initializeSessionCount(tutorId: String, yearMonth: String) {
+    private fun initializeSessionCount(tutorId: String, yearMonth: String) {
         viewModelScope.launch {
             val db = FirebaseFirestore.getInstance()
 

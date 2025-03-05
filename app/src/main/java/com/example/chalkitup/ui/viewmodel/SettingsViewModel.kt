@@ -19,7 +19,7 @@ class SettingsViewModel : ViewModel() {
     private val storage = FirebaseStorage.getInstance()
 
     // TODO delete account now also needs to delete the user's availabilities if
-    //  they are a tutor, and the user's appointments, and the user's messages
+    //  they are a tutor, the user's appointments, and the user's messages
     // Function to delete user account, Storage files, and Firestore database
     fun deleteAccount(onSuccess: () -> Unit, onError: () -> Unit) {
         val user = FirebaseAuth.getInstance().currentUser

@@ -171,63 +171,15 @@ fun BookingScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-//        Text(
-//            text = "Booking Options",
-//            textAlign = TextAlign.Center,
-//            style = MaterialTheme.typography.headlineMedium,
-//            fontWeight = FontWeight.Bold,
-//            modifier = Modifier
-//                .padding(8.dp)
-//        )
-
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            color = Color.White,
-            shape = RoundedCornerShape(16.dp),
-            shadowElevation = 2.dp
-        ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
+                    .padding(16.dp)
             ) {
-
-//        --may want to keep to add more subjects per session in the future
-//        --would need to account for the remove button ^^
-//        // Button to add subjects to the students selection list.
-//        Row(
-//            verticalAlignment = Alignment.CenterVertically,
-//            modifier = Modifier
-//                .padding(8.dp)
-//        ) {
-//                IconButton(
-//                    onClick = {
-//                        // Add an empty tutor subject entry.
-//                        subjectError = false
-//                        userSubjects =
-//                            userSubjects + TutorSubject("", "", "", "inBooking") // Add empty entry
-//                    },
-//                    modifier = Modifier.size(36.dp),
-//                    colors = IconButtonColors(
-//                        Color(0xFF06C59C),
-//                        contentColor = Color.White,
-//                        disabledContainerColor = Color(0xFF06C59C),
-//                        disabledContentColor = Color.White
-//                    )
-//                ) {
-//                    Icon(
-//                        imageVector = Icons.Default.Add,
-//                        contentDescription = "Add Subject",
-//                        tint = Color.White
-//                    )
-//                }
-//        }
 
                 Text(
                     text = "Subject",
-                    fontSize = 12.sp
+                    fontSize = 16.sp
                 )
 
                 // Display list of selected subjects and their grade levels.
@@ -268,52 +220,17 @@ fun BookingScreen(
                     }
                 }
             }
-        }
 
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            color = Color.White,
-            shape = RoundedCornerShape(16.dp),
-            shadowElevation = 2.dp
-        ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
+                    .padding(16.dp)
             ) {
                 // Price Range Slider
                 Text(
                     text = "Price Range: \$${priceRange.start.toInt()} - \$${priceRange.endInclusive.toInt()}",
-                    fontSize = 12.sp
+                    fontSize = 16.sp
                 )
-
-//                // Range Slider with step increments of 5
-//                RangeSlider(
-//                    value = priceRange,
-//                    onValueChange = { newRange ->
-//                        // Snap values to the nearest multiple of 5
-//                        val roundedStart = (newRange.start / 5).roundToInt() * 5f
-//                        val roundedEnd = (newRange.endInclusive / 5).roundToInt() * 5f
-//                        priceRange = roundedStart..roundedEnd
-//                        continueSuccess = false // Hide time selection on price range change
-//                    },
-//                    valueRange = 20f..120f,
-//                    steps = (120 / 5) - 1, // Ensures increments of 5
-//                    onValueChangeFinished = {
-//                        // Handle price range selection if needed
-//                    },
-//                    modifier = Modifier.padding(horizontal = 16.dp),
-//                    colors = SliderDefaults.colors(
-//                        activeTrackColor = Color.Blue, // Color of the active track
-//                        inactiveTrackColor = Color.LightGray, // Color of the inactive track
-//                        thumbColor = Color.Blue, // Color of the thumbs
-//                        activeTickColor = Color.Transparent, // Color of active ticks (if any)
-//                        inactiveTickColor = Color.Transparent // Color of inactive ticks (if any)
-//                    ),
-//
-//                )
 
                 CustomRangeSlider(
                     priceRange = priceRange,
@@ -331,25 +248,16 @@ fun BookingScreen(
                     Text(text = "\$120")
                 }
             }
-        }
 
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            color = Color.White,
-            shape = RoundedCornerShape(16.dp),
-            shadowElevation = 2.dp
-        ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
+                    .padding(16.dp)
             ) {
                 // Comments Box
                 Text(
                     text = "Additional Notes (Optional)",
-                    fontSize = 12.sp
+                    fontSize = 16.sp
                 )
                 OutlinedTextField(
                     value = comments,
@@ -360,45 +268,21 @@ fun BookingScreen(
                     placeholder = { Text("Enter any additional notes here") }
                 )
             }
-        }
 
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            color = Color.White,
-            shape = RoundedCornerShape(16.dp),
-            shadowElevation = 2.dp
-        ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
+                    .padding(16.dp)
             ) {
                 // Session Type Selection
                 Text(
                     text = "Session Type",
-                    fontSize = 12.sp
+                    fontSize = 16.sp
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-//                    Row(verticalAlignment = Alignment.CenterVertically) { temp keep incase error did not test button w saving
-//                        RadioButton(
-//                            selected = sessionType == "In-Person",
-//                            onClick = { sessionType = "In-Person" }
-//                        )
-//                        Text(text = "In-Person", modifier = Modifier.padding(start = 4.dp))
-//                    }
-//                    Row(verticalAlignment = Alignment.CenterVertically) {
-//                        RadioButton(
-//                            selected = sessionType == "Online",
-//                            onClick = { sessionType = "Online" }
-//                        )
-//                        Text(text = "Online", modifier = Modifier.padding(start = 4.dp))
-//                    }
-
                     Button(
                         onClick = { sessionType = "In-Person"},
                         colors = ButtonDefaults.buttonColors(
@@ -406,7 +290,7 @@ fun BookingScreen(
                             else Color.LightGray
                         ),
                         shape = RoundedCornerShape(12.dp)
-                    ) { Text("In-Person", color = Color.White, fontSize = 12.sp)}
+                    ) { Text("In-Person", color = Color.White, fontSize = 16.sp)}
 
                     Button(
                         onClick = { sessionType = "Online"},
@@ -415,11 +299,10 @@ fun BookingScreen(
                             else Color.LightGray
                         ),
                         shape = RoundedCornerShape(12.dp)
-                    ) { Text("Online", color = Color.White, fontSize = 12.sp)}
+                    ) { Text("Online", color = Color.White, fontSize = 16.sp)}
 
                 }
             }
-        }
 
         Button(
             onClick = {
@@ -440,14 +323,14 @@ fun BookingScreen(
                 }
             },
             modifier = Modifier
-                .padding(25.dp),
+                .padding(40.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF06C59C),
                 contentColor = Color.White
             ),
-            shape = RoundedCornerShape(8.dp)
+            shape = RoundedCornerShape(16.dp)
         ) {
-            Text("Continue", fontSize = 15.sp, modifier = Modifier.padding(12.dp))
+            Text("Continue", fontSize = 16.sp, modifier = Modifier.padding(4.dp))
         }
 
         if (continueSuccess) {
@@ -533,13 +416,6 @@ fun BookingScreen(
                         Row(
                             horizontalArrangement = Arrangement.Center,
                         ) {
-//                        daysInWeek.forEach { day ->
-//                            DaySquare(
-//                                day = day,
-//                                isSelected = day == selectedDay,
-//                                onClick = { viewModel.selectDay(day) }
-//                            )
-//                        }
                             daysInWeek.forEachIndexed { index, day ->
                                 Box(
                                     modifier = Modifier
@@ -685,6 +561,8 @@ fun BookingScreen(
                 }
             }
 
+            Spacer(modifier = Modifier.height(20.dp))
+
             // Submit Button
             Button(
                 onClick = {
@@ -714,7 +592,7 @@ fun BookingScreen(
                     .padding(16.dp),
                 enabled = selectedDay != null && selectedStartTime != null && selectedEndTime != null
             ) {
-                Text("Submit Booking")
+                Text("Submit Booking", fontSize = 16.sp, modifier = Modifier.padding(4.dp))
             }
 
             // Loading and Error Handling
