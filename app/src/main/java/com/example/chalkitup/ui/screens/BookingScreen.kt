@@ -1,5 +1,10 @@
 package com.example.chalkitup.ui.screens
 
+
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
+import android.widget.Button
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,7 +18,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -31,6 +35,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.TabRowDefaults.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.ArrowForward
@@ -49,6 +55,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -69,6 +76,8 @@ import androidx.navigation.NavController
 import com.example.chalkitup.ui.components.validateTutorSubjects
 import com.example.chalkitup.ui.components.SessionClassInfo
 import com.example.chalkitup.ui.components.SubjectGradeItemNoPrice
+import com.example.chalkitup.ui.components.SessionClassInfo
+import com.example.chalkitup.ui.components.SubjectGradeItem
 import com.example.chalkitup.ui.components.TutorSubject
 import com.example.chalkitup.ui.components.TutorSubjectError
 import com.example.chalkitup.ui.viewmodel.BookingViewModel
@@ -79,6 +88,14 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 import kotlin.math.roundToInt
+import com.example.chalkitup.ui.viewmodel.AuthViewModel
+import com.example.chalkitup.ui.viewmodel.CertificationViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestore
+import com.google.type.Date
+import kotlinx.coroutines.tasks.await
+import java.util.Dictionary
 
 @Composable
 fun BookingScreen(
@@ -105,6 +122,7 @@ fun BookingScreen(
 
     // State to track errors in tutor subject selections.
     var userSubjectErrors by remember { mutableStateOf<List<TutorSubjectError>>(emptyList()) }
+    var userType by remember { mutableStateOf<String?>(null) }
 
     var sessionClassInfo by remember { mutableStateOf<List<SessionClassInfo>>(emptyList()) }
 
@@ -161,6 +179,22 @@ fun BookingScreen(
         sessionType = "In-Person"
         viewModel.resetState() // Reset ViewModel state
         continueSuccess = false
+    }
+    // Necessary user information
+    val database = FirebaseFirestore.getInstance()
+
+    var fName by remember { mutableStateOf<String?>(null) }
+    var userEmail by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(userId) {
+        try {
+            val userDocument = Firebase.firestore.collection("users").document(userId).get().await()
+            userType = userDocument.getString("userType")
+            fName = userDocument.getString("firstName").toString()
+            userEmail = userDocument.getString("email").toString()
+        } catch (exception: Exception) {
+            Log.e("MessagesScreen", "Error fetching user type: ${exception.message}")
+        }
     }
 
     // Container for the subject selection.
@@ -607,6 +641,70 @@ fun BookingScreen(
 //                )
 //            }
         }
+        if (userSubjects.isNotEmpty()) {
+
+            // Space for calendar visual
+
+            // Info needed to send the emails
+            val userSubj = userSubjects[userSubjects.lastIndex].subject
+            val userGrade = userSubjects[userSubjects.lastIndex].grade
+            val userSpec = userSubjects[userSubjects.lastIndex].specialization
+            val userPrice = userSubjects[userSubjects.lastIndex].price
+
+            val emailSubj: String
+            val emailHTML: String
+
+            // Handles the string formatting in case the specialization DNE.
+            if (userSpec.isEmpty()) {
+                emailSubj = "Your appointment for $userSubj $userGrade has been booked"
+                emailHTML = "<p> Hi $fName,<br><br> Your appointment for <b>$userSubj</b>" +
+                        " <b>$userGrade</b> with TEMPNAME has been booked at DATE: TIME. </p>" +
+                        "<p> The rate of the appointment is: $userPrice <p>" +
+                        "<p> The appointment has been added to your calendar. </p>" +
+                        "<p> Have a good day! </p>" +
+                        "<p> -ChalkItUp Tutors </p>"
+            } else {
+                emailSubj = "Your appointment for $userSubj $userGrade $userSpec has been booked"
+                emailHTML = "<p> Hi $fName,<br><br> Your appointment for <b>$userSubj</b>" +
+                        " <b>$userGrade</b> <b>$userSpec</b> with TEMPNAME has been booked at DATE: TIME. </p>" +
+                        "<p> The rate of the appointment is: $userPrice <p>" +
+                        "<p> The appointment has been added to your calendar. </p>" +
+                        "<p> Have a good day! </p>" +
+                        "<p> -ChalkItUp Tutors </p>"
+            }
+
+            val email = userEmail?.let {
+                Email(
+                    to = it,
+                    message = EmailMessage(emailSubj, emailHTML)
+                )
+            }
+
+            // Selection button to book the session
+            Button(
+                onClick = {
+                    if (email != null) {
+                        database.collection("mail").add(email)
+                            .addOnSuccessListener {
+                                println("Appointment booked successfully!")
+                            }
+                            .addOnFailureListener { e ->
+                                println("Error booking appointment: ${e.message}")
+                            }
+                    }
+                },
+                modifier = Modifier
+                    .padding(all = 16.dp)
+                    .fillMaxWidth()
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
+                shape = RoundedCornerShape(4.dp)
+            ) {
+                Text("Book Session", color = Color.White, fontSize = 18.sp)
+            }
+
+        }
+
     }
 }
 
@@ -734,3 +832,16 @@ fun CustomRangeSlider(
 //        }
     }
 }
+
+// Email Class info
+
+data class Email (
+    var to: String = "",
+    var message: EmailMessage
+)
+
+data class EmailMessage(
+    var subject: String = "",
+    var html: String = "",
+    var body: String = "",
+)
