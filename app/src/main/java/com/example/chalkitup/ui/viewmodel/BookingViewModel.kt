@@ -1,12 +1,15 @@
 package com.example.chalkitup.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.chalkitup.ui.components.TutorSubject
 import com.example.chalkitup.ui.screens.TutorAvailability
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +24,112 @@ import java.util.Locale
 
 class BookingViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
+
+    // ------------------- EMAIL NOTIFICATIONS FOR BOOKING ---------------------------
+
+    // Values are set in addSessionToFirestore() function
+
+    // may be better to put these in a data class or something
+    // feel free to make changes to this, variables, functions, whatever u like
+    // just made this quick -Jeremelle
+    private val _userSubject = MutableStateFlow<TutorSubject?>(null)
+    private val userSubject: StateFlow<TutorSubject?> get() = _userSubject
+
+    private val _userType = MutableStateFlow<String?>("Unknown")
+    val userType: StateFlow<String?> get() = _userType
+
+    private val _fName = MutableStateFlow<String?>("Unknown")
+    private val fName: StateFlow<String?> get() = _fName
+
+    private val _userEmail = MutableStateFlow<String?>("Unknown")
+    private val userEmail: StateFlow<String?> get() = _userEmail
+
+    private val _tutorName = MutableStateFlow<String?>("Unknown")
+    private val tutorName: StateFlow<String?> get() = _tutorName
+
+    private val _price = MutableStateFlow<String?>("Unknown")
+    private val price: StateFlow<String?> get() = _price
+
+    private val _timeSlot = MutableStateFlow<String?>("Unknown")
+    private val timeSlot: StateFlow<String?> get() = _timeSlot
+
+    private val _date = MutableStateFlow<String?>("Unknown")
+    private val date: StateFlow<String?> get() = _date
+
+    init {
+        getUserInfoFromUsers()
+    }
+
+    private fun getUserInfoFromUsers() {
+        // Necessary user information
+        val user = FirebaseAuth.getInstance().currentUser
+        val userId = user?.uid ?: ""
+        if (userId.isBlank()) {
+            Log.e("MessagesScreen", "User ID is empty. Cannot fetch user info.")
+            return
+        }
+        viewModelScope.launch {
+            try {
+                val userDocument =
+                    Firebase.firestore.collection("users").document(userId).get().await()
+                // Check if the document exists
+                if (userDocument.exists()) {
+                    Log.d("MessagesScreen", "User document found: ${userDocument.data}")
+
+                    val userTypeValue = userDocument.getString("userType") ?: "Unknown"
+                    val firstNameValue = userDocument.getString("firstName") ?: "Unknown"
+                    val emailValue = userDocument.getString("email") ?: "Unknown"
+
+                    Log.d("MessagesScreen", "userType: $userTypeValue, fName: $firstNameValue, email: $emailValue")
+
+                    // Update LiveData or StateFlow properties
+                    _userType.value = userTypeValue
+                    _fName.value = firstNameValue
+                    _userEmail.value = emailValue
+                    Log.d("MessagesScreen", "userType: $userTypeValue, fName: ${fName.value}, email: ${userEmail.value}")
+
+                } else {
+                    Log.e("MessagesScreen", "User document does not exist for userId: $userId")
+                }
+            } catch (exception: Exception) {
+                Log.e("MessagesScreen", "Error fetching user type: ${exception.message}")
+            }
+        }
+    }
+
+    private fun sendEmail(onSuccess: () -> Unit) {
+
+        Log.d("MessagesScreen", "fName: ${fName.value}, email: ${userEmail.value}")
+
+        val formattedSubject =
+            "${userSubject.value!!.subject} ${userSubject.value!!.grade} ${userSubject.value!!.specialization}"
+
+        val emailSubj = "Your appointment for $formattedSubject has been booked"
+        val emailHTML =
+            "<p> Hi ${fName.value},<br><br> Your appointment for <b>$formattedSubject</b>" +
+                    " with ${tutorName.value} has been booked at ${date.value}: ${timeSlot.value}. </p>" +
+                    "<p> The rate of the appointment is: ${price.value} <p>" +
+                    "<p> The appointment has been added to your calendar. </p>" +
+                    "<p> Have a good day! </p>" +
+                    "<p> -ChalkItUp Tutors </p>"
+
+        val email = Email(
+            to = userEmail.value!!,
+            message = EmailMessage(emailSubj, emailHTML)
+        )
+
+        db.collection("mail").add(email)
+            .addOnSuccessListener {
+                println("Appointment booked successfully!")
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                println("Error booking appointment: ${e.message}")
+            }
+    }
+
+    // ------------------- EMAIL NOTIFICATIONS FOR BOOKING END---------------------------
+
 
     // State for tutors who can teach the selected subject
     private val _tutors = MutableStateFlow<List<String>>(emptyList())
@@ -50,6 +159,7 @@ class BookingViewModel : ViewModel() {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> get() = _error
 
+
     // TODO: ALERT DIALOG FOR ERRORS -for after submit: "your session has been booked" or "your session could not be booked bc..."
 
     // Function to reset all state variables
@@ -60,6 +170,15 @@ class BookingViewModel : ViewModel() {
         _availability.value = emptyMap()
         _isLoading.value = false
         _error.value = null
+
+        // EMAIL VARIABLES RESET
+        _userSubject.value = null
+        _tutorName.value = "Unknown"
+        _userType.value = "Unknown"
+        _fName.value = "Unknown"
+        _userEmail.value = "Unknown"
+        _timeSlot.value = "Unknown"
+        _date.value = "Unknown"
     }
 
     fun getFirstDayOfMonth(currentDate: LocalDate): LocalDate {
@@ -324,7 +443,8 @@ class BookingViewModel : ViewModel() {
         tutorId: String,
         comments: String,
         sessionType: String,
-        subject: TutorSubject // Keep subject as a parameter
+        subject: TutorSubject, // Keep subject as a parameter
+        onSuccess: () -> Unit
     ) {
         viewModelScope.launch {
             val day = _selectedDay.value
@@ -388,8 +508,13 @@ class BookingViewModel : ViewModel() {
                 tutorFullName = tutorFullName,
                 studentFullName = studentFullName
             )
+
+            sendEmail(
+                onSuccess = { onSuccess() }
+            )
         }
     }
+
 
     private suspend fun fetchTutorPriceForSubject(tutorId: String, selectedSubject: TutorSubject): String? {
         return try {
@@ -505,10 +630,15 @@ class BookingViewModel : ViewModel() {
         tutorFullName: String,
         studentFullName: String,
     ) {
-
         val formattedSubject = "${subject.subject} ${subject.grade} ${subject.specialization}"
 
         val formattedTimeRange = formatTimeRange(startTime.toString(), endTime.toString())
+
+        _tutorName.value = tutorFullName
+        _userSubject.value = subject
+        _price.value = subject.price
+        _timeSlot.value = formattedTimeRange
+        _date.value = day.toString()
 
         val sessionData = hashMapOf(
             "tutorID" to tutorId,
@@ -560,3 +690,16 @@ class BookingViewModel : ViewModel() {
         }
     }
 }
+
+// Email Class info
+
+data class Email (
+    var to: String = "",
+    var message: EmailMessage
+)
+
+data class EmailMessage(
+    var subject: String = "",
+    var html: String = "",
+    var body: String = "",
+)
