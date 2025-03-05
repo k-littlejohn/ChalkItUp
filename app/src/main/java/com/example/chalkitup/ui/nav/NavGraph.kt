@@ -67,14 +67,17 @@ fun NavGraph(navController: NavHostController) {
 
         // Booking Screen
         composable("booking") {
+            val user = FirebaseAuth.getInstance().currentUser
             val authViewModel: AuthViewModel = viewModel()
             val certificationViewModel: CertificationViewModel = viewModel()
-
-            BookingScreen(
-                navController = navController,
-                certificationViewModel = certificationViewModel,
-                authViewModel = authViewModel
-            )
+            if (user != null) {
+                BookingScreen(
+                    navController = navController,
+                    certificationViewModel = certificationViewModel,
+                    authViewModel = authViewModel,
+                    userId = user.uid
+                )
+            }
         }
 
         // Messages Screen
