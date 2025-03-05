@@ -32,6 +32,10 @@ class TutorAvailabilityViewModel : ViewModel() {
     private val _tutorAvailabilityList = MutableStateFlow<List<TutorAvailability>>(emptyList())
     val tutorAvailabilityList: StateFlow<List<TutorAvailability>> = _tutorAvailabilityList
 
+    // State to manage edit mode
+    private val _isEditing = MutableStateFlow(false)
+    val isEditing: StateFlow<Boolean> = _isEditing
+
     // Generates time intervals from <9:00 AM to 9:30 PM> in 30-minute increments
     val timeIntervals = (9..20).flatMap { hour ->
         listOf("$hour:00", "$hour:30")
@@ -41,18 +45,15 @@ class TutorAvailabilityViewModel : ViewModel() {
         fetchAvailabilityFromFirestore() // Automatically fetch on ViewModel creation
     }
 
-    /**
-     * Fetches the tutor's availability data from Firestore.
-     *
-     * Retrieves the tutor's availability for the current month and listens
-     * for updates in real-time. If data exists, it is loaded into the
-     * `_tutorAvailabilityList` state. If no data is found, an empty list is used.
-     */
+    // Fetches the tutor's availability data from Firestore and updates the LiveData list
     private fun fetchAvailabilityFromFirestore() {
+        // Get the currently logged-in tutor's ID
         val tutorId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        // Format the current month and year as "yyyy-MM" to structure Firestore documents
         val monthYear = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(System.currentTimeMillis())
         val db = FirebaseFirestore.getInstance()
 
+        // Listen for changes in the tutor's availability data for the current month
         db.collection("availability")
             .document(monthYear)
             .collection(tutorId)
@@ -63,71 +64,55 @@ class TutorAvailabilityViewModel : ViewModel() {
                 }
 
                 if (document != null && document.exists()) {
-                    // Parse Firestore data into a list of availability entries
+                    // Convert Firestore document into a TutorAvailabilityWrapper object
                     val availability = document.toObject(TutorAvailabilityWrapper::class.java)?.availability ?: emptyList()
+                    // Update LiveData with the fetched availability list
                     _tutorAvailabilityList.value = availability
                 } else {
-                    _tutorAvailabilityList.value = emptyList() // Ensure empty state if no data
+                    // If no availability data exists, set an empty list to prevent null issues
+                    _tutorAvailabilityList.value = emptyList()
                 }
             }
     }
 
-    /**
-     * Selects a specific day for modifying availability.
-     *
-     * Updates the selected day and loads any previously saved time slots
-     * for that day.
-     *
-     * @param day The selected date in "yyyy-MM-dd" format.
-     */
+    // Sets the selected day and loads its corresponding saved time slots
     fun selectDay(day: String) {
         _selectedDay.value = day
         _selectedTimeSlots.value = getSavedTimeSlotsForDay(day)
     }
 
-    /**
-     * Toggles the selection of a specific time slot.
-     *
-     * If the time slot is already selected, it is removed. If not, it is added.
-     *
-     * @param timeSlot The time slot in "HH:mm" format.
-     */
+    // Toggles the selection of a time slot for the selected day
     fun toggleTimeSlotSelection(timeSlot: String) {
         _selectedTimeSlots.value = _selectedTimeSlots.value.toMutableSet().apply {
+            // If the time slot is already selected, remove it; otherwise, add it
             if (contains(timeSlot)) remove(timeSlot) else add(timeSlot)
         }
     }
 
-    /**
-     * Saves the selected availability to the ViewModel and Firestore.
-     *
-     * If time slots exist for the selected day, the availability is saved or
-     * updated. If no time slots are selected, the existing availability entry
-     * for that day is removed.
-     */
+    // Saves the tutor's availability to Firestore, updating or removing entries as needed
     fun saveAvailability() {
         _selectedDay.value?.let { day ->
-            // Check if selectedTimeSlots is empty
             if (_selectedTimeSlots.value.isEmpty()) {
-                // Remove the entry for this day if it exists
+                // If no time slots are selected, remove the day's availability
                 val updatedList = _tutorAvailabilityList.value.toMutableList()
                 val existingEntry = updatedList.find { it.day == day }
 
-                // Remove the entry if no time slots are selected
                 if (existingEntry != null) {
                     updatedList.remove(existingEntry)
                     _tutorAvailabilityList.value = updatedList
                     saveToFirestore()
                 }
             } else {
-                // Save or update the entry
+                // Update the availability list with selected time slots for the day
                 val updatedList = _tutorAvailabilityList.value.toMutableList()
                 val existingEntry = updatedList.find { it.day == day }
 
                 if (existingEntry != null) {
+                    // Modify the existing entry with the updated time slots
                     updatedList[updatedList.indexOf(existingEntry)] =
                         existingEntry.copy(timeSlots = _selectedTimeSlots.value.toList())
                 } else {
+                    // Add a new availability entry if it doesn't exist
                     updatedList.add(TutorAvailability(day, _selectedTimeSlots.value.toList()))
                 }
 
@@ -135,22 +120,21 @@ class TutorAvailabilityViewModel : ViewModel() {
                 saveToFirestore()
             }
         }
+        _isEditing.value = false // Exit editing mode
     }
 
-    /**
-     * Saves the tutor's availability data to Firestore.
-     *
-     * Filters out empty entries and updates Firestore with the current
-     * availability data.
-     */
+    // Saves the updated availability list to Firestore, removing empty entries
     private fun saveToFirestore() {
+        // Get the currently logged-in tutor's ID
         val tutorId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        // Format the current month and year for Firestore document structure
         val monthYear = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(System.currentTimeMillis())
         val db = FirebaseFirestore.getInstance()
 
-        // Filter out entries with empty time slots
+        // Filter out empty availability entries before saving
         val nonEmptyAvailabilityList = _tutorAvailabilityList.value.filter { it.timeSlots.isNotEmpty() }
 
+        // Store the updated availability data in Firestore
         db.collection("availability")
             .document(monthYear)
             .collection(tutorId)
@@ -158,16 +142,23 @@ class TutorAvailabilityViewModel : ViewModel() {
             .set(TutorAvailabilityWrapper(nonEmptyAvailabilityList))
     }
 
-    /**
-     * Retrieves saved time slots for a given day.
-     *
-     * @param day The date in "yyyy-MM-dd" format.
-     * @return A set of time slots selected for the given day.
-     */
+    // Retrieves the saved time slots for a specific day from the availability lis
     private fun getSavedTimeSlotsForDay(day: String): Set<String> {
         return _tutorAvailabilityList.value.find { it.day == day }?.timeSlots?.toSet() ?: emptySet()
     }
 
+    // Toggles edit mode for modifying availability
+    fun toggleEditMode() {
+        _isEditing.value = !_isEditing.value
+    }
+
+    // Cancels the editing process, restoring previously saved time slots
+    fun cancelEdit() {
+        _selectedDay.value?.let { day ->
+            _selectedTimeSlots.value = getSavedTimeSlotsForDay(day)
+        }
+        _isEditing.value = false
+    }
 }
 
 /**

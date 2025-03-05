@@ -95,11 +95,6 @@ class EditProfileViewModel : ViewModel() {
                 )
                 tutorAvailRef.set(subjectsData) // Needs error handling
             }
-//            updateData["interests"] = interests
-//            val interestsData = hashMapOf(
-//                "interests" to interests
-//            )
-//            tutorAvailRef.set(interestsData) // Needs error handling
         }
 
         // Update the user's profile in Firestore

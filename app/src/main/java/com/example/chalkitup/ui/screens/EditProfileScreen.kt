@@ -41,7 +41,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -54,7 +53,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.chalkitup.R
-import com.example.chalkitup.ui.components.LocationAutocompleteTextField
 import com.example.chalkitup.ui.components.SelectedFileItem
 import com.example.chalkitup.ui.components.SubjectGradeItem
 import com.example.chalkitup.ui.components.TutorSubject
@@ -63,9 +61,6 @@ import com.example.chalkitup.ui.components.validateTutorSubjects
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
 import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
 import com.example.chalkitup.ui.viewmodel.Interest
-import com.example.chalkitup.ui.viewmodel.InterestItem
-import com.example.chalkitup.ui.viewmodel.ProgressInput
-import com.example.chalkitup.ui.viewmodel.ProgressItem
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 
@@ -117,7 +112,6 @@ fun EditProfileScreen(
     var email by remember { mutableStateOf("") }
     var tutorSubjects by remember { mutableStateOf<List<TutorSubject>>(emptyList()) } // To store selected subjects
     var bio by remember { mutableStateOf("") }
-    var location by remember { mutableStateOf("") }
 
     // Lists for available subjects and grade levels.
     val availableSubjects = listOf("Math", "Science", "English", "Social", "Biology", "Physics", "Chemistry")
@@ -148,7 +142,6 @@ fun EditProfileScreen(
             email = it.email
             tutorSubjects = it.subjects
             bio = it.bio
-            location = it.location
             originalProfilePictureUrl = profilePictureUrl // Save original profile picture
         }
     }
@@ -166,11 +159,6 @@ fun EditProfileScreen(
                 certificationViewModel.addSelectedFiles(uris)
             }
         }
-
-    // Google Places API client for location autocomplete.
-    val placesClient = remember { Places.createClient(context) }
-    val sessionToken = remember { AutocompleteSessionToken.newInstance() }
-
 
     //------------------------------VARIABLES-END----------------------------------------------
 
@@ -231,17 +219,6 @@ fun EditProfileScreen(
 //            label = { Text("Email") },
 //            enabled = false // Prevent email from being edited
 //        )
-
-        // Location Autocomplete TextField.
-        LocationAutocompleteTextField(
-            placesClient = placesClient,
-            sessionToken = sessionToken,
-            location = location,
-            onLocationSelected = { selectedLocation ->
-                location = selectedLocation
-            },
-            locationError = locationError
-        )
 
         // Bio input field.
         OutlinedTextField(
@@ -507,10 +484,9 @@ fun EditProfileScreen(
                 subjectError = ((isTutor) && (tutorSubjects.isEmpty()))
                 firstNameError = firstName.isEmpty()
                 lastNameError = lastName.isEmpty()
-                locationError = location.isEmpty()
 
                 if (!(tutorSubjectErrors.any { it.subjectError || it.gradeError || it.specError }) &&
-                        !subjectError && !firstNameError && !lastNameError && !locationError
+                        !subjectError && !firstNameError && !lastNameError
                     ) {
                     //val  finalInterests=updatedInterests.toList()
                     editProfileViewModel.updateProfile(firstName, lastName, tutorSubjects, bio, location, progress, interests)
