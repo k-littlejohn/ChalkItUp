@@ -19,6 +19,7 @@ import com.example.chalkitup.ui.screens.SettingsScreen
 import com.example.chalkitup.ui.screens.SignupScreen
 import com.example.chalkitup.ui.screens.StartScreen
 import com.example.chalkitup.ui.viewmodel.AuthViewModel
+import com.example.chalkitup.ui.viewmodel.BookingViewModel
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
 import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
 import com.example.chalkitup.ui.viewmodel.ProfileViewModel
@@ -52,7 +53,6 @@ fun NavGraph(navController: NavHostController) {
         composable("signup") {
             val authViewModel: AuthViewModel = viewModel()
             val certificationViewModel: CertificationViewModel = viewModel()
-
             SignupScreen(
                 navController = navController,
                 certificationViewModel = certificationViewModel,
@@ -67,17 +67,11 @@ fun NavGraph(navController: NavHostController) {
 
         // Booking Screen
         composable("booking") {
-            val user = FirebaseAuth.getInstance().currentUser
-            val authViewModel: AuthViewModel = viewModel()
-            val certificationViewModel: CertificationViewModel = viewModel()
-            if (user != null) {
-                BookingScreen(
-                    navController = navController,
-                    certificationViewModel = certificationViewModel,
-                    authViewModel = authViewModel,
-                    userId = user.uid
-                )
-            }
+            val viewModel: BookingViewModel = viewModel()
+            BookingScreen(
+                navController = navController,
+                viewModel = viewModel
+            )
         }
 
         // Messages Screen

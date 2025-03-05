@@ -1,6 +1,5 @@
 package com.example.chalkitup.ui.screens
 
-import android.content.ClipData.Item
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper

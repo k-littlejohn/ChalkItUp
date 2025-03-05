@@ -68,10 +68,6 @@ class EditProfileViewModel : ViewModel() {
         // Get the current user's UID
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val userRef = FirebaseFirestore.getInstance().collection("users").document(userId)
-        val tutorAvailRef = FirebaseFirestore.getInstance().collection("availability")
-            .document(monthYear)
-            .collection(userId)
-            .document("subjectData")
 
         // Prepare the update data map for Firestore
         val updateData = mutableMapOf<String, Any>(
@@ -84,10 +80,6 @@ class EditProfileViewModel : ViewModel() {
         userProfile.value?.let {
             if (it.userType == "Tutor") {
                 updateData["subjects"] = subjects
-                val subjectsData = hashMapOf(
-                    "subjects" to subjects
-                )
-                tutorAvailRef.set(subjectsData) // Needs error handling
             }
         }
 

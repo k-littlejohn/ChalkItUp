@@ -69,6 +69,7 @@ fun EnterTutorAvailability(
     val scrollState = rememberScrollState()
 
     // Collecting states from ViewModel
+    val bookedAppointments by viewModel.bookedAppointments.collectAsState()
     val tutorAvailability by viewModel.tutorAvailabilityList.collectAsState() // List of tutor's available time slots
     val selectedDay by viewModel.selectedDay.collectAsState() // Currently selected day
     val selectedTimeSlots by viewModel.selectedTimeSlots.collectAsState() // Selected time slots for the chosen day
@@ -147,6 +148,7 @@ fun EnterTutorAvailability(
                     dayContent = { day ->
                         val formattedDate = day.date.format(dateFormatter)
                         val hasAvailability = tutorAvailability.any { it.day == formattedDate } // Check if day has availability
+                        val hasBooking = bookedAppointments.any { it.day == formattedDate } // Check if day has a booking
                         val isSelected = selectedDay == formattedDate // Check if day is selected
 
                         Box(
@@ -157,6 +159,7 @@ fun EnterTutorAvailability(
                                     when {
                                         isSelected -> Color(0xfffad96e) // Yellow for selected day
                                         hasAvailability -> Color(0xFF06C59C) // Green if availability exists
+                                        hasBooking -> Color(0xFFc183d4) // Pink if booked
                                         else -> Color.Transparent
                                     }
                                 )
@@ -167,7 +170,7 @@ fun EnterTutorAvailability(
                         ) {
                             Text(
                                 text = day.date.dayOfMonth.toString(),
-                                color = Color.White.takeIf { isSelected || hasAvailability }
+                                color = Color.White.takeIf { isSelected || hasAvailability || hasBooking }
                                     ?: Color.Black // Adjust text color based on background
                             )
                         }
@@ -286,15 +289,24 @@ fun EnterTutorAvailability(
                                 // Check if the time slot is selected
                                 val isSelected = selectedTimeSlots.contains(timeSlot)
 
+                                // Check if the time slot is booked for the selected day
+//                                val isBooked = bookedAppointments.any { it.day == selectedDay && it.timeSlots.contains(timeSlot) }
+                                val isBooked = selectedDay?.let { day ->
+                                    bookedAppointments.any { it.day == day && it.timeSlots.contains(timeSlot) }
+                                } ?: false
+
                                 // Clickable Box to act as a selectable time slot
                                 Box(
                                     modifier = Modifier
                                         .height(50.dp)
                                         .fillMaxWidth()
-                                        .background(if (isSelected && isEditing) Color(0xFF54A4FF) // Blue when selected in edit mode
-                                        else if (isSelected) Color(0xFF06C59C) // Green when selected in view mode
-                                        else Color.White) // Default white background when unselected
-                                        .clickable(enabled = isEditing) { // Clickable only when in edit mode
+                                        .background(when {
+                                            isBooked -> Color(0xFFc183d4) // Pink if booked
+                                            isSelected && isEditing -> Color(0xFF54A4FF) // Blue when selected in edit mode
+                                            isSelected -> Color(0xFF06C59C) // Green when selected in view mode
+                                            else -> Color.White // Default white background when unselected
+                                        })
+                                        .clickable(enabled = isEditing && !isBooked) { // Clickable only when in edit mode and not booked
                                             viewModel.toggleTimeSlotSelection(timeSlot) // Toggles selection state
                                         }
                                 )

@@ -478,15 +478,6 @@ fun SignupScreen(
                 }
             }
 
-//            OutlinedTextField(
-//                value = location,
-//                onValueChange = { location = it },
-//                label = { Text("City") },
-//                modifier = Modifier.fillMaxWidth()
-//            )
-//            want to remove
-//            TextField(value = bio, onValueChange = { bio = it }, label = { Text("BIO") })
-
             Spacer(modifier = Modifier.height(8.dp))
 
             // Subject selection (only visible for Tutors)
