@@ -40,6 +40,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -60,6 +61,9 @@ import com.example.chalkitup.ui.components.validateTutorSubjects
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
 import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
 import com.example.chalkitup.ui.viewmodel.Interest
+import com.example.chalkitup.ui.viewmodel.InterestItem
+import com.example.chalkitup.ui.viewmodel.ProgressInput
+import com.example.chalkitup.ui.viewmodel.ProgressItem
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 
@@ -125,11 +129,14 @@ fun EditProfileScreen(
     var firstNameError by remember { mutableStateOf(false) }
     var lastNameError by remember { mutableStateOf(false) }
     var subjectError by remember { mutableStateOf(false) }
-    val progress_item = remember { mutableListOf<String>()}
-    val progress_grade =remember { mutableListOf<String>() }
-    var selectedInterests by remember { mutableStateOf(listOf<Int>()) }
+    var locationError by remember { mutableStateOf(false) }
+    //var originalProfilePictureUrl by remember { mutableStateOf<String?>(null) }
+    //val progress_item = remember { mutableListOf<String>()}
+    //val progress_grade =remember { mutableListOf<String>() }
     val mainHandler= Handler(Looper.getMainLooper())
-
+    var updatedInterests by remember { mutableStateOf<List<Interest>>(emptyList()) }
+    var progress = remember { mutableStateListOf<ProgressItem>() }
+    //var interests by remember { mutableStateOf<List<Interest>>(emptyList()) }
     // Initialize profile fields when the user profile data changes.
     LaunchedEffect(userProfile) {
         userProfile?.let {
@@ -360,19 +367,34 @@ fun EditProfileScreen(
 
 
         } else {
-            // Student-Specific Fields
+            Spacer(modifier = Modifier.height(16.dp))
 
-//            else {
-//                UserType.Student - Specific Fields
-//                        MultiSelectDropdown(
-//                            availableOptions = (7..12).map { it.toString() },
-//                            selectedOptions = selectedGrades.map { it.toString() },
-//                            onSelectionChange = { selectedGrades = it.map { it.toInt() } }
-//                        )
-//            }
-        }
+            LaunchedEffect(userProfile) {
+                userProfile?.let {
+                    progress.clear()
+                    progress.addAll(it.progress.map { progress -> progress.copy() }) // Ensures a separate copy
+                }
+            }
+            Button(onClick = {
+                var newItem = ProgressItem("", "")
+                progress.add(newItem)
+            }
+            )
+            { Text("add progress") }
 
-        // Save and Cancel buttons.
+            Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
+                LazyColumn {
+                    itemsIndexed(progress) { index, item ->
+                        ProgressInput(
+                            progressItem = item,
+                            onProgressChange = { updatedTitle, updatedGrade ->
+                                progress[index] =
+                                    item.copy(title = updatedTitle, grade = updatedGrade)
+                            }
+                        )
+                    }
+                }
+            }
 //        else {
 //            userProfile?.let {
 //                progress_item.clear()
@@ -382,11 +404,11 @@ fun EditProfileScreen(
 //
 //                }
 //
-//            Spacer(modifier = Modifier.height(16.dp))
+//           Spacer(modifier = Modifier.height(16.dp))
 //            Text("Progress")
 //            Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
 //                Column (
-//                    modifier = Modifier
+//                   modifier = Modifier
 //                        .padding(16.dp)
 //                        .verticalScroll(scrollState)
 //                ){
@@ -400,16 +422,8 @@ fun EditProfileScreen(
 //                        value = grade_input,
 //                        onValueChange = { grade_input = it },
 //                        label = { Text("Grade") })
-//                    Button(onClick = {
-//
-//                        if (item_input.isNotBlank() && grade_input.isNotBlank()) {
-//                            progress_item.add(item_input)
-//                            progress_grade.add(grade_input)
-//                            item_input = ""
-//                            grade_input = ""
-//                        }
-//                    })
-//                    { Text("add progress") }
+
+        }
 //
 //
 //                }
@@ -437,26 +451,32 @@ fun EditProfileScreen(
 //                                label = { Text("Grade") })
 //                        }
 //                    }
-//                }
+//               }
 //
 //            }
 //        }
         //------------------INTERESTS--------------------------------------
         Spacer(modifier = Modifier.height(16.dp))
-        Column(
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.Start
-        ) {
+        var interests = remember { mutableStateListOf<Interest>() }
+
+        LaunchedEffect(userProfile) {
             userProfile?.let {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("Interests:")
-                it.interests.forEachIndexed { _, interest ->
-                        SelectableButton(interest)
-                    }
+                interests.clear()
+                interests.addAll(it.interests.map { interest -> interest.copy() }) // Ensures a separate copy
+            }
+        }
+        Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
+            LazyColumn {
+                itemsIndexed(interests) { index, interest ->
+                    InterestItem(
+                        interest = interest,
+                        onInterestChange = { isSelected ->
+                            interests[index] = interest.copy(isSelected = isSelected)
+                        }
+                    )
                 }
             }
-        //------------------INTERESTS--------------------------------------
-
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
         Row {
@@ -471,7 +491,8 @@ fun EditProfileScreen(
                 if (!(tutorSubjectErrors.any { it.subjectError || it.gradeError || it.specError }) &&
                         !subjectError && !firstNameError && !lastNameError
                     ) {
-                    editProfileViewModel.updateProfile(firstName, lastName, tutorSubjects, bio)
+                    //val  finalInterests=updatedInterests.toList()
+                    editProfileViewModel.updateProfile(firstName, lastName, tutorSubjects, bio, progress, interests)
                     certificationViewModel.updateCertifications(context)
                     navController.navigate("profile") // Navigate back to profile
                 }
@@ -498,17 +519,5 @@ fun EditProfileScreen(
     }
 }
 
-@Composable
-fun SelectableButton(interest: Interest) {
-    var isSelected by remember { mutableStateOf(interest.isSelected) }
-    Button(
-        onClick = { isSelected = !isSelected },
-        colors = ButtonDefaults.buttonColors(
-            containerColor = if (isSelected) Color.Green else Color.Gray
-        ),
-        shape = RoundedCornerShape(8.dp),
-        modifier = Modifier.padding(8.dp)
-    ) {
-        Text(interest.name)
-    }
-}
+
+

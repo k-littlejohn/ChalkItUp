@@ -196,22 +196,23 @@ fun ProfileScreen(
             //------------------------------TUTOR-SPECIFIC-END---------------------------------------------
             } else {
                 //------------------------------STUDENT-SPECIFIC---------------------------------------------
-
+                val addedProgress: MutableList<String> = mutableListOf()
                 Text("Academic Performance:")
-                userProfile?.let { profile ->
-                    if (profile.progress_item.isEmpty()) {
-                        Text("NO PROGRESS LISTED")
-                    } else {
-                        val progress_numb=profile.progress_item.size
-                        for (i in 0 until progress_numb) {
-                            ItemGrid(listOf(profile.progress_item[i]), columns = 1)
-                            ItemGrid(listOf(profile.progress_grade[i]), columns = 1)
+                userProfile?.let {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Interests:")
+                    it.progress.forEachIndexed{ _, progress ->
+                        addedProgress.add(progress.title+": "+progress.grade)}
+                if (addedProgress.isNotEmpty()) {
+                    ItemGrid(addedProgress, 1)
+                }
+                else{
+                    Text("No Progress Update")
                         }
 
                     }
                 }
                 //------------------------------STUDENT-SPECIFIC-END--------------------------------------------
-            }
             val addedInterests: MutableList<String> = mutableListOf()
             // Display user's interests.
             userProfile?.let {
@@ -382,3 +383,6 @@ fun CertificationItem(
         }
     }
 }
+
+
+

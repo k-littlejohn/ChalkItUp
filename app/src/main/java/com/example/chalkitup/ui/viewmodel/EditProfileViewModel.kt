@@ -62,6 +62,8 @@ class EditProfileViewModel : ViewModel() {
         lastName: String,
         subjects: List<TutorSubject>,
         bio: String,
+        progress: List<ProgressItem>,
+        interests: List<Interest>
     ) {
         val monthYear = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(System.currentTimeMillis())
 
@@ -74,6 +76,8 @@ class EditProfileViewModel : ViewModel() {
             "firstName" to firstName,
             "lastName" to lastName,
             "bio" to bio,
+            "interests" to interests,
+            "progress" to progress
         )
 
         // Only update tutor-specific fields if the user is a tutor
