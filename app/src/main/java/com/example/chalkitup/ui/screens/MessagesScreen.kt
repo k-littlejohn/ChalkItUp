@@ -3,8 +3,11 @@ package com.example.chalkitup.ui.screens
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
@@ -80,25 +83,22 @@ fun MessagesScreen(
         "Student" -> { StudentMessageScreen(navController) }
 
         // Tutor-specific UI
-        "Tutor" -> { TutorMessageScreen(navController)
-        }
+        "Tutor" -> { TutorMessageScreen(navController) }
     }
-
 
 }
 
 // Student-specific message screen
 @Composable
 fun StudentMessageScreen(navController: NavController) {
+
     // "Ask a new question" button
     Button(onClick = {
         navController.navigate("askQuestion")
     },
-        modifier = Modifier.fillMaxWidth()
     ) {
         Text("Ask a new question")
     }
-    // Add more here....
 }
 
 // Tutor-specific message screen
