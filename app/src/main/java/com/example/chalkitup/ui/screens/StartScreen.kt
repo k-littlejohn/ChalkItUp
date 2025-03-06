@@ -93,7 +93,7 @@ fun StartScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Spacer(modifier = Modifier.height(110.dp)) // Adjusts the height of image, higher=lower
+            Spacer(modifier = Modifier.height(20.dp)) // Adjusts the height of image, higher=lower
 
             // Image & Background To Image (circle)
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
@@ -133,7 +133,7 @@ fun StartScreen(navController: NavController) {
                 currentImageIndex = index
             }
             // Moves login/signup Down The Higher dp
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(60.dp))
 
             // Login Button & Text
             Button(

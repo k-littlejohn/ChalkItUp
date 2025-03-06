@@ -29,7 +29,7 @@ fun MyTopBar(
     // Changes the background colour of the top bar based on what
     // screen the user is on
     val backgroundColor = when (currentRoute) {
-        "home" -> MaterialTheme.colorScheme.primary
+        "home" -> Color(0xFFFFFFFF)//MaterialTheme.colorScheme.primary
         "start", "login", "signup", "forgotPassword" -> Color(0xFF54A4FF) // Fill top-screen white space
         "checkEmail" -> Color(0xFF06C59C) // Fill top-screen white space
         else -> MaterialTheme.colorScheme.primaryContainer
@@ -42,7 +42,7 @@ fun MyTopBar(
         title = {
             Text(
                 text = when (currentRoute) {
-                    "home" -> "Home"
+                    "home" -> ""
                     "profile" -> "Profile"
                     "settings" -> "Settings"
                     "booking" -> "Book a Session"
