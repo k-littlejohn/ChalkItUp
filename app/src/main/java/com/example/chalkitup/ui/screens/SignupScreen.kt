@@ -649,83 +649,88 @@ fun SignupScreen(
                         //MaterialTheme.typography.bodyMedium)
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                             append("Terms and Conditions\n\n")
-                            append("Last Updated February 17, 2025\n\n")
+                            append("Last Updated March 7, 2025\n\n")
                         }
                         append("Welcome to ChalkItUp! By signing up and using our platform," +
-                                "you agree to the following Terms and Conditions. Please read them carefully.\n\n")
+                                " you agree to the following Terms and Conditions. Please read them carefully.\n\n")
 
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                             append("1. Introduction\n")
                         }
-                        append("ChalkItUp provides a platform that connects students " +
+                        append("1.1 ChalkItUp provides a platform that connects students " +
                                 "with tutors for educational sessions. By using our app, you " +
                                 "acknowledge that you have read, understood, and agreed to these terms.\n\n")
 
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("2. User Accounts\n")
+                            append("2. User Agreement\n")
                         }
-                        append("- Users must provide accurate information when creating an account.\n" +
-                                "- You are responsible for maintaining the confidentiality of your login credentials.\n" +
-                                "- We reserve the right to suspend or terminate accounts that violate these terms.\n\n")
+                        append("2.1. By registering, you confirm that you are either (a) at least 18 years old, or (b) a minor with parental or legal guardian consent.\n" +
+                                "2.2. Parents/guardians must approve and monitor minors' use of the Platform.\n" +
+                                "2.3. Users must provide accurate, up-to-date information during registration.\n" +
+                                "2.4. We reserve the right to suspend or terminate accounts for violations of these terms.\n\n")
 
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                             append("3. User Responsibilities\n")
-                            append("- Students")
                         }
-                        append(" must respect tutors' time and effort. Cancellations should be made in advance.\n")
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("- Tutors")
-                        }
-                        append(" must provide accurate information about their qualifications and availability.\n")
-                        append("- Users must communicate professionally and respectfully at all times.\n" +
-                                "- Any misuse of the platform, including harassment or fraud, may result in suspension.\n\n")
+                        append("3.1. Tutors must provide accurate qualifications and availability. Misrepresentation may result in account suspension\n" +
+                                "3.2. Students and parents must ensure that sessions are attended as scheduled.\n" +
+                                "3.3. Users must adhere to professional conduct and avoid inappropriate communication.\n" +
+                                "3.4. The Platform is not responsible for the academic performance of the student. \n\n")
 
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("4. Payments and Fees\n")
+                            append("4. Payments & Fees\n")
                         }
-                        append("Blank for now...\n\n")
+                        append("4.1. Tutors are paid based on completed session\n" +
+                                "4.2 Students are responsible to pay tutor within 24 hours of session completion through the method decided between the tutor and student\n\n")
+
 
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("5. Session Cancellations and Refunds\n")
+                            append("5. Privacy and Data Protection\n")
                         }
-                        append("- Tutors and students should provide at least one days notice" +
-                                " before canceling a session.\n\n")
+                        append("5.1. We comply with the Personal Information Protection and Electronic Documents Act (PIPEDA) and applicable provincial privacy laws.\n" +
+                                "5.2. By using the Platform, you consent to the collection, use, and storage of personal data as outlined in our Privacy Policy.\n" +
+                                "5.3.  Users may request access to or deletion of their personal information.\n" +
+                                "5.4. We implement security measures to protect user data but cannot guarantee complete security. \n\n")
 
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("6. Privacy and Data Protection\n")
+                            append("6. Messaging & Communication\n")
                         }
-                        append("- We collect and store user data as described in our ")
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("Privacy Policy.\n")
-                        }
-
-                        append("- Personal information will not be shared without user consent, " +
-                                "except as required by law.\n\n")
+                        append("6.1. Tutors and students may communicate only through Platform-approved channels.\n" +
+                                "6.2. Messaging content must remain professional and educational.\n" +
+                                "6.3. We reserve the right to monitor communications to ensure compliance with child protection laws.\n\n")
 
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("7. Prohibited Activities\n")
+                            append("7. Intellectual Property\n")
                         }
-                        append("Users must not:\n" +
-                                "- Provide false or misleading information.\n" +
-                                "- Use the platform for any illegal activities.\n" +
-                                "- Share or distribute inappropriate or offensive content.\n" +
-                                "- Attempt to hack, manipulate, or disrupt the platform.\n\n")
+
+                        append("7.1. All content provided on the Platform, including lesson materials and resources, is either owned by or licensed to the Platform.\n" +
+                                "7.2. Users may not reproduce, distribute, or share proprietary content without permission.\n\n")
 
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("8. Limitation of Liability\n")
+                            append("8. Termination of Services\n")
                         }
-                        append("We are not responsible for:\n" +
-                                "- Provide false or misleading information.\n" +
-                                "- Use the platform for any illegal activities.\n" +
-                                "- Share or distribute inappropriate or offensive content.\n" +
-                                "- Attempt to hack, manipulate, or disrupt the platform.\n\n")
+
+                        append("8.1. We reserve the right to terminate or suspend access for users who violate these Terms.\n" +
+                                "8.2. Users may delete their accounts, but payment obligations must be settled before account closure.\n\n")
 
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("9. Changes to These Terms\n")
+                            append("9. Dispute Resolution\n")
                         }
-                        append("We may update these Terms and Conditions from time to time. " +
-                                "Users will be notified of significant changes, and continued use of the app " +
-                                "implies acceptance of the updated terms.")
+                        append("9.1. Any disputes should first be addressed through our Support Team.\n" +
+                                "9.2. If unresolved, disputes shall be governed by the laws of Alberta, Canada and subject to Canadian courts.\n\n")
+
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("10. Liability Disclaimer\n")
+                        }
+                        append("10.1. The Platform is a facilitator and is not responsible for any disputes, misconduct, or learning outcomes.\n" +
+                                "10.2. We disclaim liability for technical failures, loss of data, or unauthorized access.\n" +
+                                "10.3. Users assume full responsibility for their interactions, and we encourage parental supervision for minors.\n\n")
+
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("11. Amendments\n")
+                        }
+                        append("11.1. We may update these Terms from time to time, and users will be notified of significant changes.\n" +
+                                "11.2. Continued use of the Platform constitutes acceptance of revised Terms.")
                     }
                 )
             }
