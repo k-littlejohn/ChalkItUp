@@ -49,12 +49,32 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.Brush
 import java.util.Locale
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.chalkitup.ui.viewmodel.WeatherViewModel
 
 
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(
+    navController: NavController,
+    weatherViewModel: WeatherViewModel = viewModel()
+) {
     var selectedAppointment by remember { mutableStateOf<Appointment?>(null) }
     var userName by remember { mutableStateOf("User") }
+
+    // Observe Weather Data
+    val weatherState by weatherViewModel.weather
+
+    // Extract Temperature and Condition (Cloud, Sunny etc)
+    val temperature = weatherState?.current?.tempC?.toInt()?.toString() ?: "--"
+    val condition = weatherState?.current?.condition?.text ?: "Unknown"
+
+    // Gradient Background
+    val gradientBrush = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF54A4FF), // 5% Blue
+            Color.White, Color.White
+        )
+    )
 
     // Username from Firebase Database
     LaunchedEffect(Unit) {
@@ -68,14 +88,40 @@ fun HomeScreen(navController: NavController) {
     }
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(gradientBrush),
+        contentAlignment = Alignment.CenterEnd
     ) {
         Column(
-            modifier = Modifier.verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             Spacer(modifier = Modifier.height(20.dp))
-            GreetingSection(userName)
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                GreetingSection(userName)
+
+                Spacer(modifier = Modifier.weight(4f))
+
+                // Update WeatherWidget with Real Data
+                WeatherWidget(
+                    temperature = temperature,
+                    condition = condition,
+                    modifier = Modifier
+                        .size(110.dp)
+                        .align(Alignment.Top)
+                )
+            }
+
             Spacer(modifier = Modifier.height(26.dp))
             CalendarScreen()
             UpcomingAppointments { appointment ->
@@ -93,26 +139,85 @@ fun HomeScreen(navController: NavController) {
     }
 }
 
+
 // User Greeting Above Calendar Based On Time of Day.
 @Composable
-fun GreetingSection(userName: String) {
+fun GreetingSection(userName: String, modifier: Modifier = Modifier) {
     val greetingText = when (java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)) {
         in 0..11 -> "Good Morning"
         in 12..17 -> "Good Afternoon"
         else -> "Good Evening"
     }
 
-    Box(
-        modifier = Modifier.fillMaxSize().padding(16.dp)
-    ) {
+    Column(modifier = modifier) {
         Text(
-            text = "$greetingText, \n$userName",
+            text = "$greetingText,",
             style = MaterialTheme.typography.headlineMedium,
-            color = Color.Black,
-            modifier = Modifier.align(Alignment.TopStart)
+            color = Color.Black
         )
+        Text(
+            text = userName,
+            style = MaterialTheme.typography.headlineMedium,
+            color = Color.Black
+            )
     }
 }
+
+//Weather Widget, API Used: weatherapi.com
+@Composable
+fun WeatherWidget(temperature: String, condition: String, modifier: Modifier = Modifier) {
+    val weatherIcon = when (condition.lowercase(Locale.ROOT)) {
+        "cloudy" -> R.drawable.ic_cloudy
+        "rainy" -> R.drawable.ic_rainy
+        "sunny" -> R.drawable.ic_sunny
+        "snow" -> R.drawable.ic_snow
+        else -> R.drawable.ic_cloudy
+    }
+
+    Box(
+        modifier = modifier
+            .width(90.dp)
+            .height(140.dp)
+            .clip(
+                RoundedCornerShape(
+                    topEnd = 40.dp,
+                    bottomStart = 40.dp
+                )
+            )
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(Color(0xFF1E2678), Color(0xFF756EF3)) // Deep blue to violet
+                )
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Image(
+                painter = painterResource(id = weatherIcon),
+                contentDescription = "Weather Icon",
+                modifier = Modifier
+                    .size(56.dp)
+                    .padding(top = 2.dp)
+            )
+            Text(
+                text = condition,
+                color = Color.White,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                //modifier = Modifier.padding(top = 2.dp)
+            )
+            Text(
+                text = "$temperature°C",
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
+            )
+        }
+    }
+}
+
 
 
 // Appointment Data Class
@@ -648,3 +753,5 @@ fun rebookAppointment(
         }
     }
 }
+
+
