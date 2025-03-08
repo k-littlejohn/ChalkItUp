@@ -40,6 +40,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -104,6 +105,14 @@ fun ProfileScreen(
     ) {
         // Display user information (common for both students and tutors)
 
+        // Edit Profile Button
+        Button(onClick = { navController.navigate("editProfile") },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.align(Alignment.Start)
+        ) {
+            Text("Edit Profile")
+        }
         // Display profile picture with a default avatar if none exists.
         AsyncImage(
             model = profilePictureUrl ?: R.drawable.baseline_person_24, // Use default avatar
@@ -113,15 +122,24 @@ fun ProfileScreen(
                 .clip(CircleShape)
                 .border(2.dp, Color.Gray, CircleShape)
         )
-
+        Spacer(modifier = Modifier.height(8.dp))
         // Display user details.
         userProfile?.let {
-            Text("${it.firstName} ${it.lastName}")
+            Text(
+                text = "${it.firstName} ${it.lastName}",
+                fontSize = 30.sp, // Adjust the size as needed
+                fontWeight = FontWeight.Bold // Makes the text bold
+            )
             Text(it.email)
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text("Bio: ${it.bio.ifEmpty { "No bio available" }}")
+                Text(
+                    it.bio.ifEmpty { "" },
+                    modifier = Modifier.fillMaxWidth(), // Ensures text takes full width for centering
+                    textAlign = TextAlign.Center
+
+                )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -197,12 +215,18 @@ fun ProfileScreen(
             } else {
                 //------------------------------STUDENT-SPECIFIC---------------------------------------------
                 val addedProgress: MutableList<String> = mutableListOf()
-                Text("Academic Performance:")
                 userProfile?.let {
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Interests:")
-                    it.progress.forEachIndexed{ _, progress ->
-                        addedProgress.add(progress.title+": "+progress.grade)}
+                    Text(
+                        "Academic Performance:",
+                        fontSize = 15.sp, // Adjust the size as needed
+                        fontWeight = FontWeight.Bold // Makes the text bold
+                    )
+                    it.progress.forEachIndexed { _, progress ->
+                        if (progress.title.isNotEmpty() && progress.grade.isNotEmpty()) {
+                            addedProgress.add(progress.title + ": " + progress.grade)
+                        }
+                    }
                 if (addedProgress.isNotEmpty()) {
                     ItemGrid(addedProgress, 1)
                 }
@@ -217,7 +241,10 @@ fun ProfileScreen(
             // Display user's interests.
             userProfile?.let {
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Interests:")
+                Text("Interests:",
+                    fontSize = 15.sp, // Adjust the size as needed
+                    fontWeight = FontWeight.Bold // Makes the text bold
+                    )
                 it.interests.forEachIndexed{ _, interest ->
                     if (interest.isSelected){
                         addedInterests.add(interest.name)
@@ -231,15 +258,6 @@ fun ProfileScreen(
                 Text("No Interests Have been Listed")
             }
             //-----------------end of interest display
-
-            Spacer(modifier = Modifier.height(16.dp))
-            // Edit Profile Button
-            Button(onClick = { navController.navigate("editProfile") },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Edit Profile")
-            }
         }
     }
 
