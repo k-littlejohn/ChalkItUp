@@ -770,7 +770,7 @@ fun SignupScreen(
                 termsError = false
             }
 
-            Spacer(modifier = Modifier.height(50.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             // Sign-up button that validates input and triggers the signup process.
             Button(

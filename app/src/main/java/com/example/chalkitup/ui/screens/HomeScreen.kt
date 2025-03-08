@@ -43,20 +43,40 @@ import androidx.compose.ui.*
 import java.time.LocalDate
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material.icons.filled.*
+import androidx.compose.ui.graphics.Brush
+import java.util.Locale
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 
 
 @Composable
 fun HomeScreen(navController: NavController) {
     var selectedAppointment by remember { mutableStateOf<Appointment?>(null) }
+    var userName by remember { mutableStateOf("User") }
+
+    // Username from Firebase Database
+    LaunchedEffect(Unit) {
+        val currentUserID = FirebaseAuth.getInstance().currentUser?.uid
+        currentUserID?.let {
+            val db = FirebaseFirestore.getInstance()
+            val userRef = db.collection("users").document(it)
+            val snapshot = userRef.get().await()
+            userName = snapshot.getString("firstName") ?: "User"
+        }
+    }
 
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
     ) {
         Column(
             modifier = Modifier.verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.height(20.dp))
+            GreetingSection(userName)
+            Spacer(modifier = Modifier.height(26.dp))
             CalendarScreen()
             UpcomingAppointments { appointment ->
                 selectedAppointment = appointment
@@ -64,7 +84,7 @@ fun HomeScreen(navController: NavController) {
         }
     }
 
-    // Appointment with details popup
+    // Appointment With More Details Popup
     selectedAppointment?.let { appointment ->
         AppointmentPopup(
             appointment = appointment,
@@ -72,6 +92,28 @@ fun HomeScreen(navController: NavController) {
         )
     }
 }
+
+// User Greeting Above Calendar Based On Time of Day.
+@Composable
+fun GreetingSection(userName: String) {
+    val greetingText = when (java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)) {
+        in 0..11 -> "Good Morning"
+        in 12..17 -> "Good Afternoon"
+        else -> "Good Evening"
+    }
+
+    Box(
+        modifier = Modifier.fillMaxSize().padding(16.dp)
+    ) {
+        Text(
+            text = "$greetingText, \n$userName",
+            style = MaterialTheme.typography.headlineMedium,
+            color = Color.Black,
+            modifier = Modifier.align(Alignment.TopStart)
+        )
+    }
+}
+
 
 // Appointment Data Class
 data class Appointment(
@@ -87,18 +129,12 @@ data class Appointment(
     val comments: String = ""
 )
 
-
+// Calendar Screen Shows Appointments For Both User Types
 @Composable
 fun CalendarScreen() {
     var bookedDates by remember { mutableStateOf(emptyList<String>()) }
-    // Grabs usersID (UID) from firebase, this allows appointments to show uniquely to user.
     val currentUserID = FirebaseAuth.getInstance().currentUser?.uid
 
-    // Used to Test ; shows your current user ID.
-    println("User ID: $currentUserID")
-
-
-    // Firebase cross references appointments with users.
     LaunchedEffect(currentUserID) {
         if (currentUserID != null) {
             val db = FirebaseFirestore.getInstance()
@@ -115,15 +151,8 @@ fun CalendarScreen() {
                     .get()
                     .await()
 
-                // Debugging logs. Shows how many appointments you have
-                println("User Appointments: ${userAppointments.documents.size}")
-                println("Tutor Appointments: ${tutorAppointments.documents.size}")
-
                 bookedDates = (userAppointments.documents + tutorAppointments.documents)
                     .mapNotNull { it.getString("date")?.replace("\"", "") }
-
-                // More Error handling, ensures the booked dates are listed correctly to match calender.
-                println("Booked Dates: $bookedDates")
 
             } catch (e: Exception) {
                 println("Error fetching appointments: ${e.message}")
@@ -131,80 +160,109 @@ fun CalendarScreen() {
         }
     }
 
-    val currentMonth = remember { YearMonth.now() }
-    val daysOfWeek = remember { daysOfWeek() }
-    val dateFormatter = remember { DateTimeFormatter.ofPattern("yyyy-MM-dd") }
-
-    // Calendar is currently available for three months prior and the next three months
+    // Current Visibility Set Up Is 3 Months Prior and 3 Months Forward
     val calendarState = rememberCalendarState(
-        startMonth = currentMonth.minusMonths(3),
-        endMonth = currentMonth.plusMonths(3),
-        firstVisibleMonth = currentMonth,
+        startMonth = YearMonth.now().minusMonths(3),
+        endMonth = YearMonth.now().plusMonths(3),
+        firstVisibleMonth = YearMonth.now(),
     )
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
-            .background(Color.White)
-            .border(1.dp, Color.Gray.copy(alpha = 0.15f), shape = RoundedCornerShape(6.dp)),
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = calendarState.firstVisibleMonth.yearMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier
-                .padding(16.dp)
-                .align(Alignment.Start)
-        )
-
-        Row(
+        // Calendars UI Full Gradient
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .offset(x = (-5).dp),
-            horizontalArrangement = Arrangement.Center
+                .clip(RoundedCornerShape(12.dp))
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(Color(0xFFE3F2FD), Color(0xFFF1F8E9))
+                    )
+                )
+                .padding(16.dp)
         ) {
-            daysOfWeek.forEach { day ->
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // Month Title Inside of Calendar
                 Text(
-                    text = day.name.take(3),
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center,
-                    color = Color.DarkGray
+                    text = calendarState.firstVisibleMonth.yearMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = Color.Black
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Day Labels (n:2 = SU, MO, TU, etc.), Considered Sun, Mon etc, However Looked Crowded.
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    daysOfWeek().forEach { day ->
+                        Text(
+                            text = day.name.take(2).uppercase(),
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.weight(1f),
+                            textAlign = TextAlign.Center,
+                            color = Color.DarkGray
+                        )
+                    }
+                }
+
+                // Calendar Grid Showcasing Booked Days Along With Current Day Outlined
+                HorizontalCalendar(
+                    state = calendarState,
+                    dayContent = { day ->
+                        val formattedDate = day.date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                        val isBooked = bookedDates.contains(formattedDate)
+                        val isToday = day.date == LocalDate.now()
+                        val isCurrentMonth = YearMonth.from(day.date) == calendarState.firstVisibleMonth.yearMonth
+
+                        // UI , Rounded Corners, Filled isBooked Appointments, Outlined Day
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(
+                                    when {
+                                        isBooked -> Color(0xFF06C59C)
+                                        else -> Color.Transparent
+                                    }
+                                )
+                                .border(
+                                    width = if (isToday) 2.dp else 0.dp,
+                                    color = if (isToday) Color(0xFF06C59C) else Color.Transparent,
+                                    shape = RoundedCornerShape(8.dp)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = day.date.dayOfMonth.toString(),
+                                color = when {
+                                    isBooked -> Color.White
+                                    isCurrentMonth -> Color.Black
+                                    else -> Color.LightGray
+                                },
+                            )
+                        }
+                    }
                 )
             }
         }
-
-        HorizontalCalendar(
-            state = calendarState,
-            dayContent = { day ->
-                val formattedDate = day.date.format(dateFormatter)
-                val isBooked = bookedDates.contains(formattedDate)
-                val isCurrentMonth = YearMonth.from(day.date) == calendarState.firstVisibleMonth.yearMonth
-
-                Box(
-                    modifier = Modifier
-                        .size(45.dp, 35.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(if (isBooked) Color(0xFF06C59C) else Color.Transparent),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = day.date.dayOfMonth.toString(),
-                        color = when {
-                            isBooked -> Color.White
-                            isCurrentMonth -> Color.Black
-                            else -> Color.LightGray
-                        },
-                    )
-                }
-            }
-        )
     }
 }
 
 
-
+// Display Of Upcoming Appointments in Database, The Current Goal Is To Remove Days That Have Passed,
+// Displaying Days in Order From Soonest to Latest.
 @Composable
 fun UpcomingAppointments(onAppointmentClick: (Appointment) -> Unit) {
     val currentUserID = FirebaseAuth.getInstance().currentUser?.uid
@@ -248,7 +306,20 @@ fun UpcomingAppointments(onAppointmentClick: (Appointment) -> Unit) {
                     }
                 }
 
+                // Filter Out Past Appointments and Sort By Date (Earliest First)
+                val today = LocalDate.now()
                 appointments = allAppointments
+                    .filter { appointment ->
+                        val appointmentDate = try {
+                            LocalDate.parse(appointment.date, DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US))
+                        } catch (e: Exception) {
+                            null
+                        }
+                        appointmentDate != null && appointmentDate.isAfter(today.minusDays(1)) // Excludes past appointments
+                    }
+                    .sortedBy { appointment ->
+                        LocalDate.parse(appointment.date, DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US))
+                    }
 
             } catch (e: Exception) {
                 println("Error fetching appointments: ${e.message}")
@@ -256,29 +327,156 @@ fun UpcomingAppointments(onAppointmentClick: (Appointment) -> Unit) {
         }
     }
 
+    //Start of UI for Upcoming Appointments
     Column(modifier = Modifier.padding(16.dp)) {
-        Text(text = "Upcoming Appointments", style = MaterialTheme.typography.headlineSmall)
+        Text(
+            text = "Upcoming Appointments",
+            fontSize = 20.sp,
+            color = Color.Black
+        )
 
         appointments.forEach { appointment ->
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-                    .clickable { onAppointmentClick(appointment) },
-                shape = RoundedCornerShape(10.dp),
-                colors = CardDefaults.cardColors(Color.LightGray)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = "Tutor: ${appointment.tutorName}", fontWeight = FontWeight.Bold)
-                    Text(text = "Date: ${appointment.date}")
-                    Text(text = "Time: ${appointment.time}")
-                    Text(text = "Subject: ${appointment.subject}")
-                    Text(text = "Location: ${appointment.mode}")
-                }
+            // Format the date properly using "MMM d"
+            val formattedDate = try {
+                val date = LocalDate.parse(appointment.date, DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US))
+                date.format(DateTimeFormatter.ofPattern("MMM d", Locale.US)) // Outputs "Mar 6"
+            } catch (e: Exception) {
+                "Invalid Date"
             }
+
+            UpcomingAppointmentItem(
+                title = appointment.subject,
+                date = formattedDate,
+                tutor = appointment.tutorName,
+                mode = appointment.mode,
+                time = appointment.time,
+                backgroundColor = Color.White,
+                onClick = { onAppointmentClick(appointment) }
+            )
         }
     }
 }
+
+// UI for Upcoming Appointments
+@Composable
+fun UpcomingAppointmentItem(
+    title: String,
+    date: String,
+    tutor: String,
+    mode: String,
+    time: String,
+    backgroundColor: Color,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .clickable { onClick() }
+    ) {
+        Card(
+            shape = RoundedCornerShape(10.dp),
+            colors = CardDefaults.cardColors(containerColor = backgroundColor),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+                    .height(90.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Extracting Day and Month for UI
+                val dateParts = date.split(" ")
+                val month = dateParts.getOrNull(0)?.uppercase(Locale.ROOT) ?: "--"
+                val day = dateParts.getOrNull(1) ?: "--"
+
+                // Vertical Line Beside Appointment
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(end = 16.dp)
+                ) {
+                    // Line Beside Date is Currently Green
+                    Box(
+                        modifier = Modifier
+                            .width(4.dp)
+                            .height(70.dp)
+                            .background(Color(0xFF06C59C), RoundedCornerShape(4.dp))
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = day,
+                            fontSize = 34.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF06C59C)
+                        )
+                        Text(
+                            text = month,
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF06C59C)
+                        )
+                    }
+                }
+
+                // Appointment Details Column
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = title,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = Color(0xFF54A4FF)
+                    )
+                    Text(
+                        text = tutor, // Tutor's Name Below Subject,  ( May Remove, Looking Crowded)
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                    Text(
+                        text = mode, // Online/In-Person
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                    Text(
+                        text = time, // Time of Appointment
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                }
+
+                // Right Arrow Icon
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                    contentDescription = "More",
+                    tint = Color.Gray,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+
+        // Bottom shadow effect
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .height(10.dp)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.1f))
+                    )
+                )
+        )
+    }
+}
+
+
+
+
 
 
 @Composable
@@ -289,14 +487,14 @@ fun AppointmentPopup(appointment: Appointment, onDismiss: () -> Unit) {
 
     AlertDialog(
         onDismissRequest = {
-            rebooking = false // Reset on dismiss
+            rebooking = false // Reset
             onDismiss()
         },
         title = { Text(text = "Appointment Details") },
         text = {
             Column {
                 Text(text = "Tutor: ${appointment.tutorName}")
-                Text(text = "Date: ${selectedDate}")
+                Text(text = "Date: $selectedDate")
                 Text(text = "Time: ${appointment.time}")
                 Text(text = "Subject: ${appointment.subject}")
                 Text(text = "Location: ${appointment.mode}")
@@ -316,7 +514,7 @@ fun AppointmentPopup(appointment: Appointment, onDismiss: () -> Unit) {
                 Button(
                     onClick = {
                         cancelAppointment(appointment) {
-                            rebooking = false // Reset after cancelling
+                            rebooking = false // Reset After Cancelling
                             onDismiss()
                         }
                     },
@@ -356,7 +554,8 @@ fun AppointmentPopup(appointment: Appointment, onDismiss: () -> Unit) {
     }
 }
 
-
+// This Is A Placeholder, I Am Waiting For Booking to Be Fully Functional
+// Once Booking is Functional With Tutors Availability This Will Need To Be Changed
 @Composable
 fun SelectDates(
     currentAppointmentDate: String,
@@ -404,7 +603,9 @@ fun SelectDates(
     )
 }
 
-
+// When Cancelling and Rebooking The Tutors Availability Will Need To Be Returned Back To Selection
+// The Following cancelAppointment and rebookAppointment Is Also A Placeholder For Now.
+// They Work Just Not In The Context We Need
 fun cancelAppointment(appointment: Appointment, onComplete: () -> Unit) {
     val db = FirebaseFirestore.getInstance()
     val appointmentRef = db.collection("appointments").document(appointment.appointmentID)
