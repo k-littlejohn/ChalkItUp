@@ -79,4 +79,7 @@ dependencies {
     implementation(libs.androidx.material)
     implementation(libs.places)
     implementation(libs.places.compose)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.androidx.lifecycle.runtime.ktx.v262)
 }
