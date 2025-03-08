@@ -4,6 +4,7 @@ coilCompose = "2.4.0"
 compose = "2.0.0"
 converterGson = "2.9.0"
 desugar_jdk_libs = "2.1.5"
+firebaseDatabaseKtxVersion = "20.2.1"
 firebaseFirestoreKtx = "25.1.2"
 foundation = "1.7.8"
 foundationVersion = "1.7.8"
@@ -60,12 +61,14 @@ compose = { module = "com.kizitonwose.calendar:compose", version.ref = "compose"
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
+firebase-database-ktx-v2021 = { module = "com.google.firebase:firebase-database-ktx", version.ref = "firebaseDatabaseKtxVersion" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 androidx-navigation-runtime-android = { group = "androidx.navigation", name = "navigation-runtime-android", version.ref = "navigationRuntimeAndroid" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx" }
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "composeFoundation" }
+google-firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx" }
 google-firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 junit = { module = "junit:junit", version.ref = "junit" }
 places-compose = { module = "com.google.maps.android:places-compose", version.ref = "placesCompose" }
