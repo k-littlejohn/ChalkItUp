@@ -32,7 +32,7 @@ fun MyTopBar(
     // screen the user is on
     val backgroundColor = when (currentRoute) {
         //"home" -> Color(0xFFFFFFFF)//MaterialTheme.colorScheme.primary
-        "home", "start", "login", "signup", "forgotPassword" -> Color(0xFF54A4FF) // Fill top-screen white space
+        "profile", "home", "start", "login", "signup", "forgotPassword" -> Color(0xFF54A4FF) // Fill top-screen white space
         "checkEmail" -> Color(0xFF06C59C) // Fill top-screen white space
         else -> MaterialTheme.colorScheme.primaryContainer
     }
@@ -98,9 +98,9 @@ fun MyTopBar(
                 "profile" -> {
                     IconButton(onClick = { navController.navigate("editProfile") }) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_edit), // Replace with your edit icon
+                            painter = painterResource(id = R.drawable.ic_edit),
                             contentDescription = "Edit Profile",
-                            tint = Color(0xFF000080) // Adjust to match your design
+                            tint = Color(0xFF000080)
                         )
                     }
                 }
