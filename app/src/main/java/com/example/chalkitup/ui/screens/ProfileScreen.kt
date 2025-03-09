@@ -53,6 +53,9 @@ import com.example.chalkitup.ui.viewmodel.Certification
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
 import com.example.chalkitup.ui.viewmodel.ProfileViewModel
 import com.google.firebase.firestore.AggregateField.count
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.graphics.Brush
+
 
 /**
  * Composable function for the Profile Screen.
@@ -115,7 +118,7 @@ fun ProfileScreen(
         }
         // Display profile picture with a default avatar if none exists.
         AsyncImage(
-            model = profilePictureUrl ?: R.drawable.baseline_person_24, // Use default avatar
+            model = profilePictureUrl ?: R.drawable.chalkitup, // Use default avatar
             contentDescription = "Profile Picture",
             modifier = Modifier
                 .size(100.dp)
@@ -128,21 +131,37 @@ fun ProfileScreen(
             Text(
                 text = "${it.firstName} ${it.lastName}",
                 fontSize = 30.sp, // Adjust the size as needed
-                fontWeight = FontWeight.Bold // Makes the text bold
+                fontWeight = FontWeight.SemiBold // Makes the text bold
             )
             Text(it.email)
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .border(
+                        width = 3.dp,
+                        brush = Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, Color(0xFF2196F3))
+                        ),
+                        shape = RoundedCornerShape(bottomStart = 14.dp, bottomEnd = 12.dp)
+                    )
+                    .padding(14.dp)
+            ) {
                 Text(
-                    it.bio.ifEmpty { "" },
-                    modifier = Modifier.fillMaxWidth(), // Ensures text takes full width for centering
-                    textAlign = TextAlign.Center
-
+                    text = it.bio.ifEmpty { "" },
+                    textAlign = TextAlign.Center,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    fontStyle = FontStyle.Italic,
+                    color = Color.Black,
+                    modifier = Modifier.fillMaxWidth()
                 )
+            }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
         Column(
             verticalArrangement = Arrangement.Top,
@@ -237,6 +256,8 @@ fun ProfileScreen(
                     }
                 }
                 //------------------------------STUDENT-SPECIFIC-END--------------------------------------------
+
+            // ------------------------------ INTERESTS ----------------------------------------------
             val addedInterests: MutableList<String> = mutableListOf()
             // Display user's interests.
             userProfile?.let {
@@ -289,6 +310,9 @@ fun ProfileScreen(
  * @param certifications List of certifications to be displayed.
  * @param onItemClick Function to handle click events on certification items.
  */
+
+
+
 @Composable
 fun CertificationGrid(
     certifications: List<Certification>,
@@ -401,6 +425,7 @@ fun CertificationItem(
         }
     }
 }
+
 
 
 
