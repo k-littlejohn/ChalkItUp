@@ -12,6 +12,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.compose.ui.res.painterResource
+import com.example.chalkitup.R
 
 // Top app bar
 
@@ -91,6 +93,15 @@ fun MyTopBar(
                 "home" -> {
                     IconButton(onClick = { navController.navigate("settings") }) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings")
+                    }
+                }
+                "profile" -> {
+                    IconButton(onClick = { navController.navigate("editProfile") }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_edit), // Replace with your edit icon
+                            contentDescription = "Edit Profile",
+                            tint = Color(0xFF000080) // Adjust to match your design
+                        )
                     }
                 }
             }
