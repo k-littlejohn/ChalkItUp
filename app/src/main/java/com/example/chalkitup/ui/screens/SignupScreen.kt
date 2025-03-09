@@ -65,6 +65,8 @@ import com.example.chalkitup.ui.components.SubjectGradeItem
 import com.example.chalkitup.ui.components.TutorSubject
 import com.example.chalkitup.ui.components.TutorSubjectError
 import com.example.chalkitup.ui.components.validateTutorSubjects
+import android.util.Log
+
 
 /**
  * Composable function for the Signup Screen.
@@ -782,6 +784,15 @@ fun SignupScreen(
                 onClick = {
                     errorMessage = ""
 
+                    // Had to do some debugging, signup was not working for me - Kaitlyn
+                    Log.d("SignupDebug", "Email: $email")
+                    Log.d("SignupDebug", "First Name: $firstName")
+                    Log.d("SignupDebug", "Last Name: $lastName")
+                    Log.d("SignupDebug", "Password Length: ${password.length}")
+                    Log.d("SignupDebug", "Confirm Password: $confirmPassword")
+                    Log.d("SignupDebug", "User Type: $userType")
+                    Log.d("SignupDebug", "Has Agreed to Terms: $hasAgreedToTerms")
+
                     // Validate fields before attempting signup
                     emailError = email.isEmpty()
                     firstNameError = firstName.isEmpty()
@@ -826,6 +837,7 @@ fun SignupScreen(
                 Text("SIGN UP", color = Color.White, fontSize = 16.sp)
             }
             Spacer(modifier = Modifier.height(16.dp))
+
         }
     }
 }
@@ -835,3 +847,4 @@ enum class UserType {
     Student,
     Tutor
 }
+
