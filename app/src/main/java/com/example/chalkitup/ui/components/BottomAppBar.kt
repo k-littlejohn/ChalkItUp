@@ -2,7 +2,6 @@ package com.example.chalkitup.ui.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
@@ -20,6 +19,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import androidx.compose.material.icons.automirrored.filled.Message
 
 // Bottom App Bar
 
@@ -50,14 +50,14 @@ fun BottomNavigationBar(
             // List of the items that are displayed on the Bottom Bar for Tutors
             BottomNavItem("home", Icons.Default.Home, "Home"),         // Home icon with label "Home"
             BottomNavItem("tutorAvailability", Icons.Default.Add, "Availability"),       // Availability icon with label "Availability"
-            BottomNavItem("messages", Icons.Default.Face, "Messages"), // Messages icon with label "Messages"
+            BottomNavItem("messages", Icons.AutoMirrored.Filled.Message, "Messages"),// Messages icon with label "Messages"
             BottomNavItem("profile", Icons.Default.Person, "Profile")  // Profile icon with label "Profile"
         )
         // List of the items that are displayed on the Bottom Bar for Students
         "Student" -> listOf(
             BottomNavItem("home", Icons.Default.Home, "Home"),         // Home icon with label "Home"
             BottomNavItem("booking", Icons.Default.Add, "Book"),       // Book icon with label "Book"
-            BottomNavItem("messages", Icons.Default.Face, "Messages"), // Messages icon with label "Messages"
+            BottomNavItem("messages", Icons.AutoMirrored.Filled.Message, "Messages"), // Messages icon with label "Messages"
             BottomNavItem("profile", Icons.Default.Person, "Profile")  // Profile icon with label "Profile"
         )
         else -> emptyList()
