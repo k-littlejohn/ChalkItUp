@@ -34,7 +34,7 @@ fun MyTopBar(
         //"home" -> Color(0xFFFFFFFF)//MaterialTheme.colorScheme.primary
         "profile", "home", "start", "login", "signup", "forgotPassword" -> Color(0xFF54A4FF) // Fill top-screen white space
         "checkEmail" -> Color(0xFF06C59C) // Fill top-screen white space
-        else -> MaterialTheme.colorScheme.primaryContainer
+        else -> Color.White
     }
 
     // Change text dynamically
