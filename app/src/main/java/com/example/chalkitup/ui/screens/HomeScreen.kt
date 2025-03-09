@@ -18,11 +18,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.navigation.NavController
 import androidx.compose.runtime.*
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
 import androidx.compose.ui.graphics.Color
-import com.kizitonwose.calendar.compose.*
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.daysOfWeek
@@ -36,30 +33,28 @@ import androidx.compose.ui.unit.sp
 import java.lang.Exception
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.clickable
-import androidx.compose.ui.*
 import java.time.LocalDate
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.Brush
 import java.util.Locale
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.chalkitup.ui.viewmodel.Appointment
+import com.example.chalkitup.ui.viewmodel.HomeViewModel
 import com.example.chalkitup.ui.viewmodel.WeatherViewModel
-
 
 @Composable
 fun HomeScreen(
     navController: NavController,
+    homeViewModel: HomeViewModel = viewModel(),
     weatherViewModel: WeatherViewModel = viewModel()
 ) {
     var selectedAppointment by remember { mutableStateOf<Appointment?>(null) }
-    var userName by remember { mutableStateOf("User") }
+    val userName by homeViewModel.userName.collectAsState()
 
     // Observe Weather Data
     val weatherState by weatherViewModel.weather
@@ -75,17 +70,6 @@ fun HomeScreen(
             Color.White, Color.White
         )
     )
-
-    // Username from Firebase Database
-    LaunchedEffect(Unit) {
-        val currentUserID = FirebaseAuth.getInstance().currentUser?.uid
-        currentUserID?.let {
-            val db = FirebaseFirestore.getInstance()
-            val userRef = db.collection("users").document(it)
-            val snapshot = userRef.get().await()
-            userName = snapshot.getString("firstName") ?: "User"
-        }
-    }
 
     Box(
         modifier = Modifier
@@ -108,7 +92,7 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                GreetingSection(userName)
+                GreetingSection(userName!!)
 
                 Spacer(modifier = Modifier.weight(4f))
 
@@ -218,52 +202,12 @@ fun WeatherWidget(temperature: String, condition: String, modifier: Modifier = M
     }
 }
 
-
-
-// Appointment Data Class
-data class Appointment(
-    val appointmentID: String = "",
-    val studentID: String = "",
-    val tutorID: String = "",
-    val tutorName: String = "",
-    val studentName: String = "",
-    val date: String = "",
-    val time: String = "",
-    val subject: String = "",
-    val mode: String = "",
-    val comments: String = ""
-)
-
 // Calendar Screen Shows Appointments For Both User Types
 @Composable
-fun CalendarScreen() {
-    var bookedDates by remember { mutableStateOf(emptyList<String>()) }
-    val currentUserID = FirebaseAuth.getInstance().currentUser?.uid
-
-    LaunchedEffect(currentUserID) {
-        if (currentUserID != null) {
-            val db = FirebaseFirestore.getInstance()
-            val appointmentsRef = db.collection("appointments")
-
-            try {
-                val userAppointments = appointmentsRef
-                    .whereEqualTo("studentID", currentUserID)
-                    .get()
-                    .await()
-
-                val tutorAppointments = appointmentsRef
-                    .whereEqualTo("tutorID", currentUserID)
-                    .get()
-                    .await()
-
-                bookedDates = (userAppointments.documents + tutorAppointments.documents)
-                    .mapNotNull { it.getString("date")?.replace("\"", "") }
-
-            } catch (e: Exception) {
-                println("Error fetching appointments: ${e.message}")
-            }
-        }
-    }
+fun CalendarScreen(
+    homeViewModel: HomeViewModel = viewModel()
+) {
+    val bookedDates by homeViewModel.bookedDates.collectAsState()
 
     // Current Visibility Set Up Is 3 Months Prior and 3 Months Forward
     val calendarState = rememberCalendarState(
@@ -369,68 +313,11 @@ fun CalendarScreen() {
 // Display Of Upcoming Appointments in Database, The Current Goal Is To Remove Days That Have Passed,
 // Displaying Days in Order From Soonest to Latest.
 @Composable
-fun UpcomingAppointments(onAppointmentClick: (Appointment) -> Unit) {
-    val currentUserID = FirebaseAuth.getInstance().currentUser?.uid
-    var appointments by remember { mutableStateOf(emptyList<Appointment>()) }
-
-    LaunchedEffect(currentUserID) {
-        if (currentUserID != null) {
-            val db = FirebaseFirestore.getInstance()
-            val appointmentsRef = db.collection("appointments")
-            val usersRef = db.collection("users")
-
-            try {
-                val userAppointments = appointmentsRef
-                    .whereEqualTo("studentID", currentUserID)
-                    .get()
-                    .await()
-                    .documents
-
-                val tutorAppointments = appointmentsRef
-                    .whereEqualTo("tutorID", currentUserID)
-                    .get()
-                    .await()
-                    .documents
-
-                val allAppointments = (userAppointments + tutorAppointments).mapNotNull { doc ->
-                    val appointment = doc.toObject(Appointment::class.java)?.copy(appointmentID = doc.id)
-
-                    appointment?.let {
-                        val tutorSnapshot = usersRef.document(it.tutorID).get().await()
-                        val tutorFirstName = tutorSnapshot.getString("firstName") ?: "Unknown"
-                        val tutorLastName = tutorSnapshot.getString("lastName") ?: ""
-
-                        val studentSnapshot = usersRef.document(it.studentID).get().await()
-                        val studentFirstName = studentSnapshot.getString("firstName") ?: "Unknown"
-                        val studentLastName = studentSnapshot.getString("lastName") ?: ""
-
-                        it.copy(
-                            tutorName = "$tutorFirstName $tutorLastName",
-                            studentName = "$studentFirstName $studentLastName"
-                        )
-                    }
-                }
-
-                // Filter Out Past Appointments and Sort By Date (Earliest First)
-                val today = LocalDate.now()
-                appointments = allAppointments
-                    .filter { appointment ->
-                        val appointmentDate = try {
-                            LocalDate.parse(appointment.date, DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US))
-                        } catch (e: Exception) {
-                            null
-                        }
-                        appointmentDate != null && appointmentDate.isAfter(today.minusDays(1)) // Excludes past appointments
-                    }
-                    .sortedBy { appointment ->
-                        LocalDate.parse(appointment.date, DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US))
-                    }
-
-            } catch (e: Exception) {
-                println("Error fetching appointments: ${e.message}")
-            }
-        }
-    }
+fun UpcomingAppointments(
+    homeViewModel: HomeViewModel = viewModel(),
+    onAppointmentClick: (Appointment) -> Unit
+) {
+    val appointments by homeViewModel.appointments.collectAsState()
 
     //Start of UI for Upcoming Appointments
     Column(modifier = Modifier.padding(16.dp)) {
@@ -579,11 +466,6 @@ fun UpcomingAppointmentItem(
     }
 }
 
-
-
-
-
-
 @Composable
 fun AppointmentPopup(appointment: Appointment, onDismiss: () -> Unit) {
     var rebooking by remember { mutableStateOf(false) }
@@ -724,7 +606,6 @@ fun cancelAppointment(appointment: Appointment, onComplete: () -> Unit) {
     }
 }
 
-
 fun rebookAppointment(
     appointment: Appointment,
     newDate: String,
@@ -753,5 +634,3 @@ fun rebookAppointment(
         }
     }
 }
-
-

@@ -1,18 +1,14 @@
 package com.example.chalkitup.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
@@ -206,7 +202,7 @@ fun SubjectGradeItem(
         Spacer(modifier = Modifier.width(8.dp))
 
         // Specialization Selection Button and Dropdown (only for grades 10, 11, or 12)
-        if (tutorSubject.grade == "10" || tutorSubject.grade == "11" || tutorSubject.grade == "12") {
+        if (tutorSubject.grade == "10" || tutorSubject.grade == "20" || tutorSubject.grade == "30") {
             // Specialization Selection Button
             Box(modifier = Modifier.weight(2.9f)) {
                 Button(
@@ -229,7 +225,7 @@ fun SubjectGradeItem(
                 // Determine the list of available specializations based on the grade
                 val specList = when (tutorSubject.grade) {
                     "10" -> grade10Specs
-                    "11", "12" -> grade1112Specs
+                    "20", "30" -> grade1112Specs
                     else -> emptyList() // No specializations for non-grade 10-12
                 }
 

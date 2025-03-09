@@ -64,8 +64,6 @@ import com.example.chalkitup.ui.viewmodel.Interest
 import com.example.chalkitup.ui.viewmodel.InterestItem
 import com.example.chalkitup.ui.viewmodel.ProgressInput
 import com.example.chalkitup.ui.viewmodel.ProgressItem
-import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 
 /**
  * EditProfileScreen
@@ -118,8 +116,8 @@ fun EditProfileScreen(
 
     // Lists for available subjects and grade levels.
     val availableSubjects = listOf("Math", "Science", "English", "Social", "Biology", "Physics", "Chemistry")
-    val availableGradeLevels = listOf("7","8","9","10","11","12")
-    val availableGradeLevelsBPC = listOf("11","12")
+    val availableGradeLevels = listOf("7","8","9","10","20","30")
+    val availableGradeLevelsBPC = listOf("20","30")
     val grade10Specs = listOf("- 1","- 2","Honours")
     val grade1112Specs = listOf("- 1","- 2","AP","IB")
     val availablePrice = listOf("$20/hr", "$25/hr", "$30/hr", "$35/hr", "$40/hr", "$45/hr", "$50/hr", "$55/hr", "$60/hr", "$65/hr", "$70/hr", "$75/hr", "$80/hr", "$85/hr", "$90/hr", "$95/hr", "$100/hr", "$105/hr", "$110/hr", "$115/hr", "$120/hr")
@@ -129,8 +127,6 @@ fun EditProfileScreen(
     var firstNameError by remember { mutableStateOf(false) }
     var lastNameError by remember { mutableStateOf(false) }
     var subjectError by remember { mutableStateOf(false) }
-    var locationError by remember { mutableStateOf(false) }
-    //var originalProfilePictureUrl by remember { mutableStateOf<String?>(null) }
     //val progress_item = remember { mutableListOf<String>()}
     //val progress_grade =remember { mutableListOf<String>() }
     val mainHandler= Handler(Looper.getMainLooper())
@@ -138,6 +134,7 @@ fun EditProfileScreen(
     var progress = remember { mutableStateListOf<ProgressItem>() }
     var interests = remember { mutableStateListOf<Interest>() }
     //var interests by remember { mutableStateOf<List<Interest>>(emptyList()) }
+
     // Initialize profile fields when the user profile data changes.
     LaunchedEffect(userProfile) {
         userProfile?.let {
