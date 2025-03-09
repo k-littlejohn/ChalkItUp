@@ -107,21 +107,13 @@ fun ProfileScreen(
         verticalArrangement = Arrangement.Top
     ) {
         // Display user information (common for both students and tutors)
-
-        // Edit Profile Button
-        Button(onClick = { navController.navigate("editProfile") },
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier.align(Alignment.Start)
-        ) {
-            Text("Edit Profile")
-        }
+        Spacer(modifier = Modifier.height(8.dp))
         // Display profile picture with a default avatar if none exists.
         AsyncImage(
-            model = profilePictureUrl ?: R.drawable.chalkitup, // Use default avatar
+            model = profilePictureUrl ?: R.drawable.chalkitup,
             contentDescription = "Profile Picture",
             modifier = Modifier
-                .size(100.dp)
+                .size(130.dp) // og 100
                 .clip(CircleShape)
                 .border(2.dp, Color.Gray, CircleShape)
         )
