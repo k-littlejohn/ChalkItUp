@@ -169,13 +169,13 @@ fun EnterTutorAvailability(
                                 .background(
                                     when {
                                         isSelected -> Color(0xfffad96e) // Yellow for selected day
-                                        hasAvailability -> Color(0xFFc183d4) // Green if availability exists
+                                        hasAvailability -> Color(0xFF54A4FF) // Green if availability exists
                                         else -> Color.Transparent
                                     }
                                 )
                                 .border(
                                     width = if (isToday) 2.dp else 0.dp,
-                                    color = if (isToday) Color(0xFFc183d4) else Color.Transparent,
+                                    color = if (isToday) Color(0xfffad96e) else Color.Transparent,
                                     shape = RoundedCornerShape(8.dp)
                                 )
                                 .clickable {
