@@ -3,7 +3,6 @@ package com.example.chalkitup.ui.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.chalkitup.ui.screens.TutorAvailability
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -166,7 +165,7 @@ class HomeViewModel : ViewModel() {
                     val timeSlots = parseTimeRangeExcludingLast(timeRange)
 
                     // Add the time slots back to the tutor's availability
-                    addTimeSlotsToAvailability(tutorId, date, timeSlots)
+                    markTimesAsAvailable(tutorId, date, timeSlots)
 
                     // Reduce Session Count by 1
                     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -198,48 +197,45 @@ class HomeViewModel : ViewModel() {
             }
     }
 
-    /**
-     * Adds the given time slots to the tutor's availability for the specified date.
-     */
-    private fun addTimeSlotsToAvailability(tutorId: String, date: String, timeSlots: List<String>) {
+    private fun markTimesAsAvailable(tutorId: String, date: String, timeSlots: List<String>) {
         val db = FirebaseFirestore.getInstance()
         val monthYear = date.substring(0, 7) // Extract "yyyy-MM" from the date
 
-        // Fetch the current availability for the tutor
-        db.collection("availability")
+        val availabilityRef = db.collection("availability")
             .document(monthYear)
             .collection(tutorId)
             .document("availabilityData")
-            .get()
+
+        // Fetch the current availability for the tutor
+        availabilityRef.get()
             .addOnSuccessListener { document ->
                 if (document != null && document.exists()) {
                     val availabilityWrapper = document.toObject(TutorAvailabilityWrapper::class.java)
                     val availabilityList = availabilityWrapper?.availability ?: emptyList()
 
-                    // Find the availability entry for the specified date
-                    val existingEntry = availabilityList.find { it.day == date }
+                    // Find the entry for the specified date
+                    val dayIndex = availabilityList.indexOfFirst { it.day == date }
+                    if (dayIndex == -1) return@addOnSuccessListener // No entry for this date, exit
 
-                    // Update the availability list
                     val updatedList = availabilityList.toMutableList()
-                    if (existingEntry != null) {
-                        // Add the new time slots to the existing entry
-                        val updatedTimeSlots = existingEntry.timeSlots.toMutableList().apply {
-                            addAll(timeSlots)
+                    val dayEntry = updatedList[dayIndex]
+
+                    // Update only the matching time slots to set booked = false
+                    val updatedTimeSlots = dayEntry.timeSlots.map { timeSlot ->
+                        if (timeSlot.time in timeSlots) {
+                            timeSlot.copy(booked = false)
+                        } else {
+                            timeSlot
                         }
-                        updatedList[updatedList.indexOf(existingEntry)] = existingEntry.copy(timeSlots = updatedTimeSlots)
-                    } else {
-                        // Create a new availability entry for the date
-                        updatedList.add(TutorAvailability(day = date, timeSlots = timeSlots))
                     }
 
-                    // Save the updated availability list to Firestore
-                    db.collection("availability")
-                        .document(monthYear)
-                        .collection(tutorId)
-                        .document("availabilityData")
-                        .set(TutorAvailabilityWrapper(updatedList))
+                    // Replace the modified day entry
+                    updatedList[dayIndex] = dayEntry.copy(timeSlots = updatedTimeSlots)
+
+                    // Save the updated availability back to Firestore
+                    availabilityRef.set(TutorAvailabilityWrapper(updatedList))
                         .addOnSuccessListener {
-                            Log.d("Availability", "Time slots added back to availability")
+                            Log.d("Availability", "Time slots marked as available")
                         }
                         .addOnFailureListener { e ->
                             Log.e("Availability", "Error updating availability", e)
@@ -265,7 +261,7 @@ class HomeViewModel : ViewModel() {
 
             var currentTime = start
             while (currentTime.isBefore(end)) {
-                times.add(currentTime.format(DateTimeFormatter.ofPattern("H:mm"))) // Format as "H:mm"
+                times.add(currentTime.format(DateTimeFormatter.ofPattern("h:mm a")))
                 currentTime = currentTime.plusMinutes(30)
             }
         } catch (e: Exception) {

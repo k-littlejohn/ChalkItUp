@@ -69,7 +69,7 @@ fun EnterTutorAvailability(
     val scrollState = rememberScrollState()
 
     // Collecting states from ViewModel
-    val bookedAppointments by viewModel.bookedAppointments.collectAsState()
+    //val bookedAppointments by viewModel.bookedAppointments.collectAsState()
     val tutorAvailability by viewModel.tutorAvailabilityList.collectAsState() // List of tutor's available time slots
     val selectedDay by viewModel.selectedDay.collectAsState() // Currently selected day
     val selectedTimeSlots by viewModel.selectedTimeSlots.collectAsState() // Selected time slots for the chosen day
@@ -147,8 +147,10 @@ fun EnterTutorAvailability(
                     state = calendarState,
                     dayContent = { day ->
                         val formattedDate = day.date.format(dateFormatter)
-                        val hasAvailability = tutorAvailability.any { it.day == formattedDate } // Check if day has availability
-                        val hasBooking = bookedAppointments.any { it.day == formattedDate } // Check if day has a booking
+                        val hasAvailability =
+                            tutorAvailability.any { it.day == formattedDate } // Check if day has availability
+//                        val hasBooking =
+//                            bookedAppointments.any { it.day == formattedDate } // Check if day has a booking
                         val isSelected = selectedDay == formattedDate // Check if day is selected
 
                         Box(
@@ -159,7 +161,7 @@ fun EnterTutorAvailability(
                                     when {
                                         isSelected -> Color(0xfffad96e) // Yellow for selected day
                                         hasAvailability -> Color(0xFF06C59C) // Green if availability exists
-                                        hasBooking -> Color(0xFFc183d4) // Pink if booked
+                                        //hasBooking -> Color(0xFFc183d4) // Pink if booked
                                         else -> Color.Transparent
                                     }
                                 )
@@ -170,7 +172,7 @@ fun EnterTutorAvailability(
                         ) {
                             Text(
                                 text = day.date.dayOfMonth.toString(),
-                                color = Color.White.takeIf { isSelected || hasAvailability || hasBooking }
+                                color = Color.White.takeIf { isSelected || hasAvailability }
                                     ?: Color.Black // Adjust text color based on background
                             )
                         }
@@ -244,7 +246,7 @@ fun EnterTutorAvailability(
             }
         }
 
-        // Surface for displaying time slots and selection boxes
+        // Time slot selection UI (updated)
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -253,27 +255,27 @@ fun EnterTutorAvailability(
             shape = RoundedCornerShape(16.dp),
             shadowElevation = 4.dp
         ) {
-            // Availability selection
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                // Box to define the height of the availability selection area
-                Box(modifier = Modifier.height(400.dp))
-                {
+                Box(modifier = Modifier.height(400.dp)) {
                     LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                        //.weight(1f)
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        // Iterate through the list of time intervals from the ViewModel
-                        items(viewModel.timeIntervals) { timeSlot ->
-                            // Row layout to display each time slot with a selection box
+                        items(viewModel.timeIntervals) { time ->
+                            // Find the corresponding TimeSlot object (if it exists)
+                            val timeSlot = selectedTimeSlots.find { it.time == time }
+
+                            // Check if the time slot is booked
+                            val isBooked = timeSlot?.booked ?: false
+
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.Top
                             ) {
+                                // Time slot label
                                 Card(
                                     modifier = Modifier.width(50.dp),
                                     colors = CardColors(
@@ -283,39 +285,50 @@ fun EnterTutorAvailability(
                                         disabledContainerColor = Color.White
                                     )
                                 ) {
-                                    Text(text = timeSlot)
+                                    Text(text = time)
                                 }
 
-                                // Check if the time slot is selected
-                                val isSelected = selectedTimeSlots.contains(timeSlot)
-
-                                // Check if the time slot is booked for the selected day
-//                                val isBooked = bookedAppointments.any { it.day == selectedDay && it.timeSlots.contains(timeSlot) }
-                                val isBooked = selectedDay?.let { day ->
-                                    bookedAppointments.any { it.day == day && it.timeSlots.contains(timeSlot) }
-                                } ?: false
-
-                                // Clickable Box to act as a selectable time slot
+                                // Online selection box
                                 Box(
                                     modifier = Modifier
+                                        .weight(1f)
                                         .height(50.dp)
-                                        .fillMaxWidth()
-                                        .background(when {
-                                            isBooked -> Color(0xFFc183d4) // Pink if booked
-                                            isSelected && isEditing -> Color(0xFF54A4FF) // Blue when selected in edit mode
-                                            isSelected -> Color(0xFF06C59C) // Green when selected in view mode
-                                            else -> Color.White // Default white background when unselected
-                                        })
-                                        .clickable(enabled = isEditing && !isBooked) { // Clickable only when in edit mode and not booked
-                                            viewModel.toggleTimeSlotSelection(timeSlot) // Toggles selection state
-                                        }
-                                )
+                                        .padding(end = 4.dp)
+                                        .background(
+                                            if (isBooked) Color(0xFFc183d4) // Pink if booked
+                                            else if (timeSlot?.online == true) Color(0xFF54A4FF) // Blue if online is selected
+                                            else Color.White // White if unselected
+                                        )
+                                        .clickable(enabled = isEditing && !isBooked) {
+                                            viewModel.toggleTimeSlotSelection(time, "online")
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(text = "Online")
+                                }
+
+                                // In-Person selection box
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(50.dp)
+                                        .padding(start = 4.dp)
+                                        .background(
+                                            if (isBooked) Color(0xFFc183d4) // Pink if booked
+                                            else if (timeSlot?.inPerson == true) Color(0xFF54A4FF) // Blue if inPerson is selected
+                                            else Color.White // White if unselected
+                                        )
+                                        .clickable(enabled = isEditing && !isBooked) {
+                                            viewModel.toggleTimeSlotSelection(time, "inPerson")
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(text = "In-Person")
+                                }
                             }
 
-                            // Separator Row to visually divide time slots (thin white line)
+                            // Separator Row
                             Row {
-                                // This box is redundant currently but takes up space underneath the time slot text
-                                // Useful if we want to change the line colors between the text and selection boxes
                                 Box(
                                     modifier = Modifier
                                         .height(1.dp)
@@ -337,8 +350,95 @@ fun EnterTutorAvailability(
     }
 }
 
-// Data model for storing tutor availability
-data class TutorAvailability(
-    val day: String = "", // Selected day
-    val timeSlots: List<String> = emptyList() // List of available time slots for that day
-)
+//        // Surface for displaying time slots and selection boxes
+//        Surface(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(16.dp),
+//            color = Color.White,
+//            shape = RoundedCornerShape(16.dp),
+//            shadowElevation = 4.dp
+//        ) {
+//            // Availability selection
+//            Column(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(16.dp)
+//            ) {
+//                // Box to define the height of the availability selection area
+//                Box(modifier = Modifier.height(400.dp))
+//                {
+//                    LazyColumn(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                        //.weight(1f)
+//                    ) {
+//                        // Iterate through the list of time intervals from the ViewModel
+//                        items(viewModel.timeIntervals) { timeSlot ->
+//                            // Row layout to display each time slot with a selection box
+//                            Row(
+//                                modifier = Modifier.fillMaxWidth(),
+//                                verticalAlignment = Alignment.Top
+//                            ) {
+//                                Card(
+//                                    modifier = Modifier.width(50.dp),
+//                                    colors = CardColors(
+//                                        disabledContentColor = Color.Black,
+//                                        containerColor = Color.White,
+//                                        contentColor = Color.Black,
+//                                        disabledContainerColor = Color.White
+//                                    )
+//                                ) {
+//                                    Text(text = timeSlot)
+//                                }
+//
+//                                // Check if the time slot is selected
+//                                val isSelected = selectedTimeSlots.contains(timeSlot)
+//
+//                                // Check if the time slot is booked for the selected day
+////                                val isBooked = bookedAppointments.any { it.day == selectedDay && it.timeSlots.contains(timeSlot) }
+//                                val isBooked = selectedDay?.let { day ->
+//                                    bookedAppointments.any { it.day == day && it.timeSlots.contains(timeSlot) }
+//                                } ?: false
+//
+//                                // Clickable Box to act as a selectable time slot
+//                                Box(
+//                                    modifier = Modifier
+//                                        .height(50.dp)
+//                                        .fillMaxWidth()
+//                                        .background(when {
+//                                            isBooked -> Color(0xFFc183d4) // Pink if booked
+//                                            isSelected && isEditing -> Color(0xFF54A4FF) // Blue when selected in edit mode
+//                                            isSelected -> Color(0xFF06C59C) // Green when selected in view mode
+//                                            else -> Color.White // Default white background when unselected
+//                                        })
+//                                        .clickable(enabled = isEditing && !isBooked) { // Clickable only when in edit mode and not booked
+//                                            viewModel.toggleTimeSlotSelection(timeSlot) // Toggles selection state
+//                                        }
+//                                )
+//                            }
+//
+//                            // Separator Row to visually divide time slots (thin white line)
+//                            Row {
+//                                // This box is redundant currently but takes up space underneath the time slot text
+//                                // Useful if we want to change the line colors between the text and selection boxes
+//                                Box(
+//                                    modifier = Modifier
+//                                        .height(1.dp)
+//                                        .width(50.dp)
+//                                        .background(Color.White)
+//                                )
+//                                Box(
+//                                    modifier = Modifier
+//                                        .height(1.dp)
+//                                        .fillMaxWidth()
+//                                        .background(Color.White)
+//                                )
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
