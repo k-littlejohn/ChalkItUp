@@ -146,8 +146,8 @@ fun SignupScreen(
 
     // Lists for subject and grade level selections.
     val availableSubjects = listOf("Math", "Science", "English", "Social", "Biology", "Physics", "Chemistry")
-    val availableGradeLevels = listOf("7", "8", "9", "10", "11", "12")
-    val availableGradeLevelsBPC = listOf("11", "12")
+    val availableGradeLevels = listOf("7", "8", "9", "10", "20", "30")
+    val availableGradeLevelsBPC = listOf("20", "30")
     val grade10Specs = listOf("- 1", "- 2", "Honours")
     val grade1112Specs = listOf("- 1", "- 2", "AP", "IB")
     val availablePrice = listOf("$20/hr", "$25/hr", "$30/hr", "$35/hr", "$40/hr", "$45/hr", "$50/hr", "$55/hr", "$60/hr", "$65/hr", "$70/hr", "$75/hr", "$80/hr", "$85/hr", "$90/hr", "$95/hr", "$100/hr", "$105/hr", "$110/hr", "$115/hr", "$120/hr")
