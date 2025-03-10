@@ -130,6 +130,11 @@ class BookingViewModel : ViewModel() {
 
     // ------------------- EMAIL NOTIFICATIONS FOR BOOKING END---------------------------
 
+//    private val _rebooking = MutableStateFlow(false)
+//    val rebooking: StateFlow<Boolean> get() = _rebooking
+//
+//    private val _rebookingSubject = MutableStateFlow<TutorSubject?>(null)
+//    val rebookingSubject: StateFlow<TutorSubject?> get() = _rebookingSubject
 
     // State for tutors who can teach the selected subject
     private val _tutors = MutableStateFlow<List<String>>(emptyList())
@@ -650,7 +655,8 @@ class BookingViewModel : ViewModel() {
             "subject" to formattedSubject,
             "studentID" to studentId,
             "tutorName" to tutorFullName,
-            "studentName" to studentFullName
+            "studentName" to studentFullName,
+            "subjectObject" to subject
         )
 
         db.collection("appointments")
@@ -689,6 +695,29 @@ class BookingViewModel : ViewModel() {
             ""
         }
     }
+
+//    fun rebookAppointment(appointment: Appointment) {
+//        println("Rebooking appointment: $appointment")
+//        // Convert the Map back to TutorSubject
+//        val tutorSubject = TutorSubject(
+//            subject = appointment.subjectObject["subject"] as String,
+//            grade = appointment.subjectObject["grade"] as String,
+//            specialization = appointment.subjectObject["specialization"] as String,
+//            price = appointment.subjectObject["price"] as String,
+//        )
+//        _rebookingSubject.value = tutorSubject
+//        // Set subject
+//        setSubject(tutorSubject, 20f..120f)
+//        println("Rebooking subject: $tutorSubject")
+//
+//        // Set date from last date
+//        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+//        val localDate = LocalDate.parse(appointment.date, formatter)
+//        selectDay(localDate)
+//
+//        _rebooking.value = true
+//    }
+
 }
 
 // Email Class info
