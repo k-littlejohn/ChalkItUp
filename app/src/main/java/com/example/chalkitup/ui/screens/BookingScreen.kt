@@ -116,7 +116,7 @@ fun BookingScreen(
 //    val error by viewModel.error.collectAsState()
 
     var comments by remember { mutableStateOf("") }
-    var sessionType by remember { mutableStateOf("In-Person") } // Default to In-Person
+    var sessionType by remember { mutableStateOf("inPerson") } // Default to In-Person
 
     var continueSuccess by remember { mutableStateOf(false) }
 
@@ -150,14 +150,6 @@ fun BookingScreen(
         continueSuccess = false
     }
 
-//    val rebooking by viewModel.rebooking.collectAsState()
-//    val rebookingSubject by viewModel.rebookingSubject.collectAsState()
-//    println("Rebooking: $rebooking")
-//    if (rebooking) {
-//        userSubjects = listOf(rebookingSubject!!)
-//        continueSuccess = true
-//    }
-
     // Container for the subject selection.
     Column(
         modifier = Modifier
@@ -166,138 +158,140 @@ fun BookingScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
 
-                Text(
-                    text = "Subject",
-                    fontSize = 16.sp
-                )
+            Text(
+                text = "Subject",
+                fontSize = 16.sp
+            )
 
-                // Display list of selected subjects and their grade levels.
-                Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
-                    LazyColumn {
-                        itemsIndexed(userSubjects) { index, tutorSubject ->
-                            // Display each tutor subject item and its details.
-                            SubjectGradeItemNoPrice(
-                                tutorSubject = tutorSubject,
-                                availableSubjects = availableSubjects,
-                                availableGradeLevels = availableGradeLevels,
-                                availableGradeLevelsBPC = availableGradeLevelsBPC,
-                                grade10Specs = grade10Specs,
-                                grade1112Specs = grade1112Specs,
-                                onSubjectChange = { newSubject ->
-                                    userSubjects = userSubjects.toMutableList().apply {
-                                        this[index] = this[index].copy(subject = newSubject)
-                                    }
-                                },
-                                onGradeChange = { newGrade ->
-                                    userSubjects = userSubjects.toMutableList().apply {
-                                        this[index] = this[index].copy(grade = newGrade)
-                                    }
-                                },
-                                onSpecChange = { newSpec ->
-                                    userSubjects = userSubjects.toMutableList().apply {
-                                        this[index] = this[index].copy(specialization = newSpec)
-                                    }
-                                },
-                                subjectError = userSubjectErrors.getOrNull(index)?.subjectError
-                                    ?: false,
-                                gradeError = userSubjectErrors.getOrNull(index)?.gradeError
-                                    ?: false,
-                                specError = userSubjectErrors.getOrNull(index)?.specError
-                                    ?: false,
-                            )
-                        }
+            // Display list of selected subjects and their grade levels.
+            Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
+                LazyColumn {
+                    itemsIndexed(userSubjects) { index, tutorSubject ->
+                        // Display each tutor subject item and its details.
+                        SubjectGradeItemNoPrice(
+                            tutorSubject = tutorSubject,
+                            availableSubjects = availableSubjects,
+                            availableGradeLevels = availableGradeLevels,
+                            availableGradeLevelsBPC = availableGradeLevelsBPC,
+                            grade10Specs = grade10Specs,
+                            grade1112Specs = grade1112Specs,
+                            onSubjectChange = { newSubject ->
+                                userSubjects = userSubjects.toMutableList().apply {
+                                    this[index] = this[index].copy(subject = newSubject)
+                                }
+                            },
+                            onGradeChange = { newGrade ->
+                                userSubjects = userSubjects.toMutableList().apply {
+                                    this[index] = this[index].copy(grade = newGrade)
+                                }
+                            },
+                            onSpecChange = { newSpec ->
+                                userSubjects = userSubjects.toMutableList().apply {
+                                    this[index] = this[index].copy(specialization = newSpec)
+                                }
+                            },
+                            subjectError = userSubjectErrors.getOrNull(index)?.subjectError
+                                ?: false,
+                            gradeError = userSubjectErrors.getOrNull(index)?.gradeError
+                                ?: false,
+                            specError = userSubjectErrors.getOrNull(index)?.specError
+                                ?: false,
+                        )
                     }
                 }
             }
+        }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                // Price Range Slider
-                Text(
-                    text = "Price Range: \$${priceRange.start.toInt()} - \$${priceRange.endInclusive.toInt()}",
-                    fontSize = 16.sp
-                )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            // Price Range Slider
+            Text(
+                text = "Price Range: \$${priceRange.start.toInt()} - \$${priceRange.endInclusive.toInt()}",
+                fontSize = 16.sp
+            )
 
-                CustomRangeSlider(
-                    priceRange = priceRange,
-                    onValueChange = {
+            CustomRangeSlider(
+                priceRange = priceRange,
+                onValueChange = {
                         newRange -> priceRange = newRange
-                        continueSuccess = false} // Hide time selection on price range change
-                )
+                    continueSuccess = false} // Hide time selection on price range change
+            )
 
-                // Min/Max labels
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(text = "\$20")
-                    Text(text = "\$120")
-                }
+            // Min/Max labels
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(text = "\$20")
+                Text(text = "\$120")
             }
+        }
 
-            Column(
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            // Comments Box
+            Text(
+                text = "Additional Notes (Optional)",
+                fontSize = 16.sp
+            )
+            OutlinedTextField(
+                value = comments,
+                onValueChange = { comments = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(8.dp),
+                placeholder = { Text("Enter any additional notes here") }
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            // Session Type Selection
+            Text(
+                text = "Session Type",
+                fontSize = 16.sp
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                // Comments Box
-                Text(
-                    text = "Additional Notes (Optional)",
-                    fontSize = 16.sp
-                )
-                OutlinedTextField(
-                    value = comments,
-                    onValueChange = { comments = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    placeholder = { Text("Enter any additional notes here") }
-                )
+                Button(
+                    onClick = { sessionType = "inPerson"
+                        continueSuccess = false},
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (sessionType == "inPerson") Color(0xFF54A4FF)
+                        else Color.LightGray
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) { Text("In-Person", color = Color.White, fontSize = 16.sp)}
+
+                Button(
+                    onClick = { sessionType = "online"
+                        continueSuccess = false},
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (sessionType == "online") Color(0xFF54A4FF)
+                        else Color.LightGray
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) { Text("Online", color = Color.White, fontSize = 16.sp)}
+
             }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                // Session Type Selection
-                Text(
-                    text = "Session Type",
-                    fontSize = 16.sp
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    Button(
-                        onClick = { sessionType = "In-Person"},
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (sessionType == "In-Person") Color(0xFF54A4FF)
-                            else Color.LightGray
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) { Text("In-Person", color = Color.White, fontSize = 16.sp)}
-
-                    Button(
-                        onClick = { sessionType = "Online"},
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (sessionType == "Online") Color(0xFF54A4FF)
-                            else Color.LightGray
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) { Text("Online", color = Color.White, fontSize = 16.sp)}
-
-                }
-            }
+        }
 
         Button(
             onClick = {
@@ -312,7 +306,7 @@ fun BookingScreen(
                     // If no errors, set the subject in the ViewModel
                     val selectedSubject = userSubjects.firstOrNull()
                     if (selectedSubject != null) {
-                        viewModel.setSubject(selectedSubject, priceRange)
+                        viewModel.setSubject(selectedSubject, priceRange, sessionType)
                     }
                     continueSuccess = true
                 }
@@ -369,7 +363,7 @@ fun BookingScreen(
                             elevation = 3.dp, // Add elevation to the outer Box
                             shape = RoundedCornerShape(16.dp)
                         )
-                        //.padding(8.dp) // Add padding inside the Box
+                    //.padding(8.dp) // Add padding inside the Box
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -667,7 +661,8 @@ fun CustomRangeSlider(
                 inactiveTickColor = Color(0xFF54A4FF) // Color of inactive ticks (if any)
             ),
         )
-
+    }
+}
 //        // Custom Icons and Text Above the Slider
 //        Box(
 //            modifier = Modifier
@@ -726,5 +721,5 @@ fun CustomRangeSlider(
 //                }
 //            }
 //        }
-    }
-}
+//    }
+//}
