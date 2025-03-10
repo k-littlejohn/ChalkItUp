@@ -24,8 +24,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+//import androidx.compose.material3.Button
+//import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,9 +52,17 @@ import com.example.chalkitup.lifecycle.AppLifecycleObserver
 import com.example.chalkitup.ui.viewmodel.Certification
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
 import com.example.chalkitup.ui.viewmodel.ProfileViewModel
-import com.google.firebase.firestore.AggregateField.count
+//import com.google.firebase.firestore.AggregateField.count
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.foundation.Image
 
 
 /**
@@ -198,17 +206,99 @@ fun ProfileScreen(
                     }
                 }
 
-                // Display the subjects the tutor can teach.
+                // ------------- Subjects Offered (Now Swipe-able) -------------
                 userProfile?.let { profile ->
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Subjects Offered", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    Text("Subjects you can tutor:")
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(profile.subjects) { subject ->
+                            Box(
+                                modifier = Modifier
+                                    .size(90.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(Color.LightGray)
+                            ) {
+                                // Temporary icons for subjects
+                                val subjectIcon = when (subject.subject) {
+                                    "Math" -> R.drawable.ic_math
+                                    "Physics" -> R.drawable.ic_physics
+                                    "Chemistry" -> R.drawable.ic_chemistry
+                                    "Social" -> R.drawable.ic_social
+                                    "English" -> R.drawable.ic_english
+                                    "Science" -> R.drawable.ic_science
+                                    else -> R.drawable.chalkitup // havent chosen an icon yet.
+                                }
+
+                                Image(
+                                    painter = painterResource(id = subjectIcon),
+                                    contentDescription = subject.subject,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(Color.Black.copy(alpha = 0.7f))
+                                        .align(Alignment.BottomCenter)
+                                ) {
+                                    Text(
+                                        text = subject.subject,
+                                        color = Color.White,
+                                        fontSize = 14.sp,
+                                        modifier = Modifier.padding(4.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // ------------- Qualifications -------------
+                    Text("Qualifications", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+
+                    QualificationCard(
+                        icon = Icons.Default.CheckCircle,
+                        title = "Average Grade",
+                        value = "A",
+                        valueColor = Color(0xFF06C59C),
+                        cardColor = Color(0xFF42A5F5)
+                    )
+
+                    QualificationCard(
+                        icon = Icons.Default.Timer,
+                        title = "Total Tutor Hours",
+                        value = "168",
+                        valueColor = Color(0xFF06C59C),
+                        cardColor = Color(0xFF42A5F5)
+                    )
+
+                    QualificationCard(
+                        icon = Icons.Default.Star,
+                        title = "Overall Rating",
+                        value = "4.4/5",
+                        valueColor = Color(0xFF06C59C),
+                        cardColor = Color(0xFF42A5F5)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    //Will be moving to subjects offered, keeping for now.
+                    // ------------- Subjects Tutor Can Teach -------------
+                    Text("Subjects you can tutor:", fontWeight = FontWeight.Bold)
                     val formattedSubjects = profile.subjects.map { subject ->
                         listOf(subject.subject, subject.grade, subject.specialization)
                             .filter { it.isNotEmpty() }
                             .joinToString(" ") // Format subject info
                     }
-                    Box(modifier = Modifier.heightIn(20.dp,500.dp)) {
+                    Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
                         LazyColumn {
                             items(formattedSubjects) { subject ->
                                 Text(
@@ -293,15 +383,53 @@ fun ProfileScreen(
 //    { Text("Edit Profile") }
 }
 
-/**
- * Composable function to display a grid of certifications.
- *
- * This grid is displayed with three items per row. It allows users to view certifications
- * and click on them to initiate a download or open the file.
- *
- * @param certifications List of certifications to be displayed.
- * @param onItemClick Function to handle click events on certification items.
- */
+@Composable
+fun QualificationCard(
+    icon: ImageVector,
+    title: String,
+    value: String,
+    valueColor: Color,
+    cardColor: Color
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .background(cardColor, shape = RoundedCornerShape(8.dp))
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = title,
+            tint = Color.White,
+            modifier = Modifier.size(24.dp)
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Text(
+            text = title,
+            fontSize = 16.sp,
+            color = Color.White,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.weight(1f)
+        )
+
+        Box(
+            modifier = Modifier
+                .background(valueColor, shape = RoundedCornerShape(4.dp))
+                .padding(horizontal = 12.dp, vertical = 4.dp)
+        ) {
+            Text(
+                text = value,
+                color = Color.Black,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
 
 
 
