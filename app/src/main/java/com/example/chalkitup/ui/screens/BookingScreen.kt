@@ -150,6 +150,14 @@ fun BookingScreen(
         continueSuccess = false
     }
 
+//    val rebooking by viewModel.rebooking.collectAsState()
+//    val rebookingSubject by viewModel.rebookingSubject.collectAsState()
+//    println("Rebooking: $rebooking")
+//    if (rebooking) {
+//        userSubjects = listOf(rebookingSubject!!)
+//        continueSuccess = true
+//    }
+
     // Container for the subject selection.
     Column(
         modifier = Modifier

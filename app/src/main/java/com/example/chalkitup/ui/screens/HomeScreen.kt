@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.navigation.NavController
 import androidx.compose.runtime.*
-import com.google.firebase.firestore.FirebaseFirestore
 import androidx.compose.ui.graphics.Color
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
@@ -31,8 +30,6 @@ import androidx.compose.foundation.border
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import java.lang.Exception
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.clickable
 import java.time.LocalDate
@@ -117,6 +114,7 @@ fun HomeScreen(
     // Appointment With More Details Popup
     selectedAppointment?.let { appointment ->
         AppointmentPopup(
+            navController = navController,
             appointment = appointment,
             onDismiss = { selectedAppointment = null }
         )
@@ -340,6 +338,7 @@ fun UpcomingAppointments(
                 title = appointment.subject,
                 date = formattedDate,
                 tutor = appointment.tutorName,
+                student = appointment.studentName,
                 mode = appointment.mode,
                 time = appointment.time,
                 backgroundColor = Color.White,
@@ -352,14 +351,18 @@ fun UpcomingAppointments(
 // UI for Upcoming Appointments
 @Composable
 fun UpcomingAppointmentItem(
+    homeViewModel: HomeViewModel = viewModel(),
     title: String,
     date: String,
     tutor: String,
+    student: String,
     mode: String,
     time: String,
     backgroundColor: Color,
     onClick: () -> Unit
 ) {
+    val userType by homeViewModel.userType.collectAsState()
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -424,8 +427,9 @@ fun UpcomingAppointmentItem(
                         fontSize = 16.sp,
                         color = Color(0xFF54A4FF)
                     )
-                    Text(
-                        text = tutor, // Tutor's Name Below Subject,  ( May Remove, Looking Crowded)
+                    Text ( // Tutor's Name Below Subject,  ( May Remove, Looking Crowded)
+                        text = if (userType == "Tutor") student
+                        else tutor,
                         fontSize = 14.sp,
                         color = Color.Gray
                     )
@@ -467,21 +471,31 @@ fun UpcomingAppointmentItem(
 }
 
 @Composable
-fun AppointmentPopup(appointment: Appointment, onDismiss: () -> Unit) {
-    var rebooking by remember { mutableStateOf(false) }
-    var selectedDate by remember { mutableStateOf(appointment.date) }
-    var availableDates by remember { mutableStateOf(false) }
+fun AppointmentPopup(
+    navController: NavController,
+    homeViewModel: HomeViewModel = viewModel(),
+    appointment: Appointment, onDismiss: () -> Unit
+) {
+    val userType by homeViewModel.userType.collectAsState()
+
+    //var rebooking by remember { mutableStateOf(false) }
+//    var selectedDate by remember { mutableStateOf(appointment.date) }
+    //var availableDates by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = {
-            rebooking = false // Reset
+            //rebooking = false // Reset
             onDismiss()
         },
         title = { Text(text = "Appointment Details") },
         text = {
             Column {
-                Text(text = "Tutor: ${appointment.tutorName}")
-                Text(text = "Date: $selectedDate")
+                if (userType == "Tutor") {
+                    Text(text = "Student: ${appointment.studentName}")
+                } else {
+                    Text(text = "Tutor: ${appointment.tutorName}")
+                }
+                Text(text = "Date: ${appointment.date}")
                 Text(text = "Time: ${appointment.time}")
                 Text(text = "Subject: ${appointment.subject}")
                 Text(text = "Location: ${appointment.mode}")
@@ -491,7 +505,7 @@ fun AppointmentPopup(appointment: Appointment, onDismiss: () -> Unit) {
         confirmButton = {
             Button(
                 onClick = {
-                    rebooking = false // Reset
+                    //rebooking = false // Reset
                     onDismiss()
                 }
             ) { Text("Close") }
@@ -500,137 +514,146 @@ fun AppointmentPopup(appointment: Appointment, onDismiss: () -> Unit) {
             Column {
                 Button(
                     onClick = {
-                        cancelAppointment(appointment) {
-                            rebooking = false // Reset After Cancelling
+                        homeViewModel.cancelAppointment(appointment) {
+                            //rebooking = false // Reset After Cancelling
                             onDismiss()
+                            homeViewModel.fetchAppointments()
                         }
                     },
-                    enabled = !rebooking
+                    //enabled = !rebooking
                 ) {
                     Text("Cancel Appointment")
                 }
-                Button(
-                    onClick = {
-                        rebooking = true
-                        availableDates = true
-                    },
-                    enabled = !rebooking
-                ) {
-                    Text("Rebook Appointment")
+                if (userType == "Student") {
+                    Button(
+                        onClick = {
+//                            bookingViewModel.rebookAppointment(appointment)
+                            homeViewModel.cancelAppointment(appointment) {
+                                //rebooking = false // Reset After Cancelling
+                                onDismiss()
+                                navController.navigate("booking")
+                            }
+                            //rebooking = true
+                            //availableDates = true
+                        },
+                        //enabled = !rebooking
+                    ) {
+                        Text("Rebook Appointment")
+                    }
                 }
             }
         }
     )
 
-    if (availableDates) {
-        SelectDates(
-            currentAppointmentDate = selectedDate,
-            onDateUpdated = { newDate ->
-                selectedDate = newDate
-                rebookAppointment(appointment, newDate) {
-                    rebooking = false
-                    availableDates = false
-                    onDismiss()
-                }
-            },
-            onDismiss = {
-                rebooking = false
-                availableDates = false
-            }
-        )
-    }
+//    if (availableDates) {
+//        SelectDates(
+//            currentAppointmentDate = selectedDate,
+//            onDateUpdated = { newDate ->
+//                selectedDate = newDate
+//                rebookAppointment(appointment, newDate) {
+//                    rebooking = false
+//                    availableDates = false
+//                    onDismiss()
+//                }
+//            },
+//            onDismiss = {
+//                rebooking = false
+//                availableDates = false
+//            }
+//        )
+//    }
 }
 
 // This Is A Placeholder, I Am Waiting For Booking to Be Fully Functional
 // Once Booking is Functional With Tutors Availability This Will Need To Be Changed
-@Composable
-fun SelectDates(
-    currentAppointmentDate: String,
-    onDateUpdated: (String) -> Unit,
-    onDismiss: () -> Unit
-) {
-    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val today = remember { LocalDate.now() }
-    val selectedDate = remember { mutableStateOf(LocalDate.parse(currentAppointmentDate)) }
-
-    val availableDates = List(5) { today.plusDays(it.toLong()) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Select a New Date") },
-        text = {
-            Column {
-                Text("Selected Date: ${selectedDate.value.format(dateFormatter)}")
-                Spacer(modifier = Modifier.height(8.dp))
-                LazyColumn {
-                    items(availableDates) { date ->
-                        Button(
-                            onClick = { selectedDate.value = date },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(text = date.format(dateFormatter))
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            Button(onClick = {
-                onDateUpdated(selectedDate.value.format(dateFormatter))
-                onDismiss()
-            }) {
-                Text("Confirm")
-            }
-        },
-        dismissButton = {
-            Button(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
-}
+//@Composable
+//fun SelectDates(
+//    currentAppointmentDate: String,
+//    onDateUpdated: (String) -> Unit,
+//    onDismiss: () -> Unit
+//) {
+//    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+//    val today = remember { LocalDate.now() }
+//    val selectedDate = remember { mutableStateOf(LocalDate.parse(currentAppointmentDate)) }
+//
+//    val availableDates = List(5) { today.plusDays(it.toLong()) }
+//
+//    AlertDialog(
+//        onDismissRequest = onDismiss,
+//        title = { Text("Select a New Date") },
+//        text = {
+//            Column {
+//                Text("Selected Date: ${selectedDate.value.format(dateFormatter)}")
+//                Spacer(modifier = Modifier.height(8.dp))
+//                LazyColumn {
+//                    items(availableDates) { date ->
+//                        Button(
+//                            onClick = { selectedDate.value = date },
+//                            modifier = Modifier.fillMaxWidth()
+//                        ) {
+//                            Text(text = date.format(dateFormatter))
+//                        }
+//                    }
+//                }
+//            }
+//        },
+//        confirmButton = {
+//            Button(onClick = {
+//                onDateUpdated(selectedDate.value.format(dateFormatter))
+//                onDismiss()
+//            }) {
+//                Text("Confirm")
+//            }
+//        },
+//        dismissButton = {
+//            Button(onClick = onDismiss) {
+//                Text("Cancel")
+//            }
+//        }
+//    )
+//}
 
 // When Cancelling and Rebooking The Tutors Availability Will Need To Be Returned Back To Selection
 // The Following cancelAppointment and rebookAppointment Is Also A Placeholder For Now.
 // They Work Just Not In The Context We Need
-fun cancelAppointment(appointment: Appointment, onComplete: () -> Unit) {
-    val db = FirebaseFirestore.getInstance()
-    val appointmentRef = db.collection("appointments").document(appointment.appointmentID)
+//fun cancelAppointment(appointment: Appointment, onComplete: () -> Unit) {
+//    val db = FirebaseFirestore.getInstance()
+//    val appointmentRef = db.collection("appointments").document(appointment.appointmentID)
+//
+//    appointmentRef.delete().addOnSuccessListener {
+//        println("Appointment canceled successfully!")
+//        onComplete()
+//    }.addOnFailureListener { e ->
+//        println("Error canceling appointment: ${e.message}")
+//        onComplete()
+//    }
+//}
 
-    appointmentRef.delete().addOnSuccessListener {
-        println("Appointment canceled successfully!")
-        onComplete()
-    }.addOnFailureListener { e ->
-        println("Error canceling appointment: ${e.message}")
-        onComplete()
-    }
-}
-
-fun rebookAppointment(
-    appointment: Appointment,
-    newDate: String,
-    onComplete: () -> Unit
-) {
-    val db = FirebaseFirestore.getInstance()
-    val appointmentRef = db.collection("appointments").document(appointment.appointmentID)
-
-    appointmentRef.delete().addOnCompleteListener {
-        if (it.isSuccessful) {
-            println("Appointment deleted successfully, proceeding with rebook.")
-
-            val newAppointment = appointment.copy(date = newDate, appointmentID = "")
-            db.collection("appointments").add(newAppointment)
-                .addOnSuccessListener {
-                    println("Appointment rebooked successfully!")
-                    onComplete()
-                }
-                .addOnFailureListener { e ->
-                    println("Error rebooking appointment: ${e.message}")
-                    onComplete()
-                }
-        } else {
-            println("Error deleting appointment: ${it.exception?.message}")
-            onComplete()
-        }
-    }
-}
+//fun rebookAppointment(
+//    appointment: Appointment,
+//    newDate: String,
+//    onComplete: () -> Unit
+//) {
+//    val db = FirebaseFirestore.getInstance()
+//    val appointmentRef = db.collection("appointments").document(appointment.appointmentID)
+//
+//    appointmentRef.delete().addOnCompleteListener {
+//        if (it.isSuccessful) {
+//            println("Appointment deleted successfully, proceeding with rebook.")
+//
+//            val newAppointment = appointment.copy(date = newDate, appointmentID = "")
+//            db.collection("appointments").add(newAppointment)
+//                .addOnSuccessListener {
+//                    println("Appointment rebooked successfully!")
+//                    onComplete()
+//                }
+//                .addOnFailureListener { e ->
+//                    println("Error rebooking appointment: ${e.message}")
+//                    onComplete()
+//                }
+//        } else {
+//            println("Error deleting appointment: ${it.exception?.message}")
+//            onComplete()
+//        }
+//    }
+//}
