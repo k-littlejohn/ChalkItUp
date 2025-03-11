@@ -12,7 +12,20 @@
           "package_name": "com.example.chalkitup"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "708905206257-n90qg6vhugiabagjupfiljr3fmj77mtg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.chalkitup",
+            "certificate_hash": "b12bdc05d4ac5451f67d3397d88c80f8340d4248"
+          }
+        },
+        {
+          "client_id": "708905206257-ii8ejoledclpds756snrea0tm79dmu6n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB7fOL49BEt9IGuXSbY6IqBZYwUq0U9qBQ"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "708905206257-ii8ejoledclpds756snrea0tm79dmu6n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
