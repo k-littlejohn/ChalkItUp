@@ -84,5 +84,4 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx.v262)
     implementation(libs.firebase.database.ktx) // Check for latest version
 
-
 }
