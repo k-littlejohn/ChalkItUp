@@ -45,6 +45,7 @@ fun MessagesScreen(
 ) {
 
     // State to hold user type
+    val currentUserId = messageListViewModel.currentUserId
     var userInput by remember { mutableStateOf("") }
 
     // Collect the list of conversations from the ViewModel
@@ -54,7 +55,7 @@ fun MessagesScreen(
     val error by messageListViewModel.error.collectAsState()
 
     // Fetch conversations when the screen is launched
-    LaunchedEffect(Unit) {
+    LaunchedEffect(currentUserId) {
         messageListViewModel.fetchConversations()
     }
 

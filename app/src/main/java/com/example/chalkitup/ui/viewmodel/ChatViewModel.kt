@@ -25,11 +25,12 @@ class ChatViewModel : ViewModel() {
     val messages: StateFlow<List<Message>> = _messages.asStateFlow()
 
     val currentUserId = auth.currentUser?.uid ?: ""
-    private var messagesListener: ListenerRegistration? = null
+    var messagesListener: ListenerRegistration? = null
 
 
     /**
-     * Function to fetch information of a user     * @param userId: ID of a user
+     * Function to fetch information of a user
+     * @param userId: ID of a user
      * @return User data class
      */
     suspend fun fetchUser(userId: String): User {
@@ -73,14 +74,17 @@ class ChatViewModel : ViewModel() {
 
             val allResults = query1.documents + query2.documents
 
-            val correctConversation = allResults.find { document ->
-                val studentId = document.getString("studentId") ?: ""
-                val tutorId = document.getString("tutorId") ?: ""
-                (studentId == currentUserId && tutorId == selectedUserId) ||
-                        (studentId == selectedUserId && tutorId == currentUserId)
-            }
+            // Return the ID of the first matching conversation
+            allResults.firstOrNull()?.id
 
-            correctConversation?.id
+//            val correctConversation = allResults.find { document ->
+//                val studentId = document.getString("studentId") ?: ""
+//                val tutorId = document.getString("tutorId") ?: ""
+//                (studentId == currentUserId && tutorId == selectedUserId) ||
+//                        (studentId == selectedUserId && tutorId == currentUserId)
+//            }
+//
+//            correctConversation?.id
 
         } catch (e: Exception) {
             Log.e("Firestore", "Error getting conversation: ${e.message}")
@@ -250,6 +254,12 @@ class ChatViewModel : ViewModel() {
                 // Update messages state
                 _messages.value = messageList
             }
+    }
+
+    // Clear messages and remove the listener
+    fun clearMessages() {
+        _messages.value = emptyList()
+        messagesListener?.remove()
     }
 
     // Clear Firestore listener when the ViewModel is no longer used

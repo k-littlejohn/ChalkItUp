@@ -47,8 +47,11 @@ fun ChatScreen(
 
     // Fetch messages if conversation exists
     LaunchedEffect(conversationId) {
-        if (conversationId != null) {
+        if (conversationId != null && conversationId != "null") {
             chatViewModel.fetchMessages(conversationId)
+        } else {
+            // Clear messages if no conversation exists
+            chatViewModel.clearMessages()
         }
     }
 
