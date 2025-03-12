@@ -9,11 +9,8 @@ import com.google.gson.Gson
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import java.security.MessageDigest
-//import java.util.prefs.Preferences
 import androidx.datastore.preferences.core.Preferences
-
-
-
+import com.example.chalkitup.ui.viewmodel.UserProfile
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "secure_storage")
 
