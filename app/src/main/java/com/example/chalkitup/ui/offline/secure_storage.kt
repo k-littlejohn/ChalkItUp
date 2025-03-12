@@ -12,7 +12,7 @@ import java.security.MessageDigest
 import androidx.datastore.preferences.core.Preferences
 import com.example.chalkitup.ui.viewmodel.UserProfile
 
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "secure_storage")
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "secure_storage")
 
 class SecureStorage(private val context: Context) {
 
