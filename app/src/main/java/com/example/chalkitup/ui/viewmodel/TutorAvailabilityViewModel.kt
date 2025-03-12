@@ -32,9 +32,6 @@ class TutorAvailabilityViewModel : ViewModel() {
     private val _isEditing = MutableStateFlow(false)
     val isEditing: StateFlow<Boolean> = _isEditing
 
-
-
-
     // Holds the set of selected time slots for the selected day
     private val _selectedTimeSlots = MutableStateFlow<Set<TimeSlot>>(emptySet())
     val selectedTimeSlots: StateFlow<Set<TimeSlot>> = _selectedTimeSlots
@@ -42,11 +39,6 @@ class TutorAvailabilityViewModel : ViewModel() {
     // Holds the list of all availability entries for the tutor
     private val _tutorAvailabilityList = MutableStateFlow<List<TutorAvailability>>(emptyList())
     val tutorAvailabilityList: StateFlow<List<TutorAvailability>> = _tutorAvailabilityList
-
-    // Add a new StateFlow for booked appointments
-//    private val _bookedAppointments = MutableStateFlow<List<TutorAvailability>>(emptyList())
-//    val bookedAppointments: StateFlow<List<TutorAvailability>> = _bookedAppointments
-
 
     // Generates time intervals from 9:00 AM to 9:30 PM in 30-minute increments
     val timeIntervals = generateTimeIntervals()
@@ -72,72 +64,102 @@ class TutorAvailabilityViewModel : ViewModel() {
 
     init {
         fetchAvailabilityFromFirestore() // Automatically fetch on ViewModel creation
-        //fetchBookedAppointmentsFromFirestore() // Fetch booked appointments
     }
 
-//    private fun fetchBookedAppointmentsFromFirestore() {
-//        val tutorId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-//        val db = FirebaseFirestore.getInstance()
-//
-//        db.collection("appointments")
-//            .whereEqualTo("tutorID", tutorId) // Filter by tutorID
-//            .addSnapshotListener { querySnapshot, error ->
-//                if (error != null) {
-//                    // Handle the error
-//                    Log.e("FirestoreError", "Error fetching appointments", error)
-//                    return@addSnapshotListener
-//                }
-//
-//                val appointments = mutableListOf<TutorAvailability>()
-//
-//                querySnapshot?.documents?.forEach { document ->
-//                    val date = document.getString("date") ?: return@forEach // Skip if date is missing
-//                    val timeRange = document.getString("time") ?: return@forEach // Skip if time is missing
-//                    val mode = document.getString("mode") ?: return@forEach // Skip if time is missing
-//
-//                    // Parse the time range (e.g., "2:00 PM - 3:00 PM") into a list of TimeSlot objects
-//                    val timeSlots = parseTimeRangeToTimeSlots(timeRange,mode)
-//
-//                    // Add the appointment to the list
-//                    appointments.add(TutorAvailability(day = date, timeSlots = timeSlots))
-//                }
-//
-//                // Update the StateFlow with the fetched appointments
-//                _bookedAppointments.value = appointments
-//            }
-//    }
-//
-//    private fun parseTimeRangeToTimeSlots(timeRange: String,mode: String): List<TimeSlot> {
-//        val timeSlots = mutableListOf<TimeSlot>()
-//        val times = timeRange.split(" - ") // Split the range into start and end times
-//
-//        if (times.size != 2) return emptyList() // Invalid format
-//
-//        val startTime = times[0].trim() // Start time (e.g., "2:00 PM")
-//        val endTime = times[1].trim() // End time (e.g., "3:00 PM")
-//
-//        // Parse the start and end times into Calendar instances
-//        val dateFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
-//        val startCalendar = Calendar.getInstance().apply { time = dateFormat.parse(startTime)!! }
-//        val endCalendar = Calendar.getInstance().apply { time = dateFormat.parse(endTime)!! }
-//
-//        // Generate TimeSlot objects in 30-minute increments
-//        while (startCalendar.before(endCalendar)) {
-//            val time = dateFormat.format(startCalendar.time)
-//            if (mode == "online") {
-//                timeSlots.add(TimeSlot(time = time, online = true, inPerson = false, booked = true))
-//            }
-//            startCalendar.add(Calendar.MINUTE, 30) // Increment by 30 minutes
-//        }
-//
-//        return timeSlots
-//    }
 
+    fun selectAllOnline() {
+        _selectedTimeSlots.value = _selectedTimeSlots.value.toMutableSet().apply {
+            // Iterate through all time intervals
+            timeIntervals.forEach { time ->
+                // Skip if the time slot is booked
+                if (any { it.time == time && it.booked }) return@forEach
 
+                // Find the existing TimeSlot for this time
+                val existingTimeSlot = find { it.time == time }
+                if (existingTimeSlot != null) {
+                    // Update the existing TimeSlot to ensure `online = true`
+                    remove(existingTimeSlot)
+                    add(existingTimeSlot.copy(online = true))
+                } else {
+                    // Add a new TimeSlot with `online = true`
+                    add(TimeSlot(time = time, online = true))
+                }
+            }
+        }
+    }
+
+    fun clearAllOnline() {
+        _selectedTimeSlots.value = _selectedTimeSlots.value.toMutableSet().apply {
+            // Iterate through all time intervals
+            timeIntervals.forEach { time ->
+                // Skip if the time slot is booked
+                if (any { it.time == time && it.booked }) return@forEach
+
+                // Find the existing TimeSlot for this time
+                val existingTimeSlot = find { it.time == time }
+                if (existingTimeSlot != null) {
+                    // Update the existing TimeSlot to ensure `online = false`
+                    val updatedTimeSlot = existingTimeSlot.copy(online = false)
+                    remove(existingTimeSlot)
+
+                    // Only add the updated TimeSlot back if `inPerson` is true
+                    if (updatedTimeSlot.inPerson) {
+                        add(updatedTimeSlot)
+                    }
+                    // If both `online` and `inPerson` are false, the entry is removed
+                }
+            }
+        }
+    }
+
+    fun selectAllInPerson() {
+        _selectedTimeSlots.value = _selectedTimeSlots.value.toMutableSet().apply {
+            // Iterate through all time intervals
+            timeIntervals.forEach { time ->
+                // Skip if the time slot is booked
+                if (any { it.time == time && it.booked }) return@forEach
+
+                // Find the existing TimeSlot for this time
+                val existingTimeSlot = find { it.time == time }
+                if (existingTimeSlot != null) {
+                    // Update the existing TimeSlot to ensure `inPerson = true`
+                    remove(existingTimeSlot)
+                    add(existingTimeSlot.copy(inPerson = true))
+                } else {
+                    // Add a new TimeSlot with `inPerson = true`
+                    add(TimeSlot(time = time, inPerson = true))
+                }
+            }
+        }
+    }
+
+    fun clearAllInPerson() {
+        _selectedTimeSlots.value = _selectedTimeSlots.value.toMutableSet().apply {
+            // Iterate through all time intervals
+            timeIntervals.forEach { time ->
+                // Skip if the time slot is booked
+                if (any { it.time == time && it.booked }) return@forEach
+
+                // Find the existing TimeSlot for this time
+                val existingTimeSlot = find { it.time == time }
+                if (existingTimeSlot != null) {
+                    // Update the existing TimeSlot to ensure `inPerson = false`
+                    val updatedTimeSlot = existingTimeSlot.copy(inPerson = false)
+                    remove(existingTimeSlot)
+
+                    // Only add the updated TimeSlot back if `online` is true
+                    if (updatedTimeSlot.online) {
+                        add(updatedTimeSlot)
+                    }
+                    // If both `online` and `inPerson` are false, the entry is removed
+                }
+            }
+        }
+    }
 
 
     // Fetches the tutor's availability data from Firestore and updates the LiveData list
-    private fun fetchAvailabilityFromFirestore() {
+    fun fetchAvailabilityFromFirestore() {
         // Get the currently logged-in tutor's ID
         val tutorId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
@@ -280,9 +302,6 @@ class TutorAvailabilityViewModel : ViewModel() {
             ?.toSet()
             ?: emptySet()
     }
-
-
-
 
     // Toggles edit mode for modifying availability
     fun toggleEditMode() {
