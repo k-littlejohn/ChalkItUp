@@ -16,7 +16,7 @@
     </queries>
 
     <application
-        android:name=".OfflineFirebase"
+        android:name=".ui.offline.OfflineFirebase"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"

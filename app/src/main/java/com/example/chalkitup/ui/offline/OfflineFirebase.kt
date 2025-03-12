@@ -1,4 +1,4 @@
-package com.example.chalkitup
+package com.example.chalkitup.ui.offline
 
 import android.app.Application
 import com.google.firebase.database.FirebaseDatabase

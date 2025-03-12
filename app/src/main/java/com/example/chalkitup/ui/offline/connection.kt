@@ -1,4 +1,4 @@
-package com.example.chalkitup.ui
+package com.example.chalkitup.ui.offline
 
 import android.content.Context
 import android.net.ConnectivityManager
@@ -6,12 +6,12 @@ import android.net.NetworkCapabilities
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class Connection private constructor(context: Context) {
+class Connection constructor(context: Context) {
 
-    private val connectivityManager =
+    val connectivityManager =
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-    private val _connectionStatus = MutableStateFlow(checkConnectivity())
+    val _connectionStatus = MutableStateFlow(checkConnectivity())
     val connectionStatus: StateFlow<Boolean> get() = _connectionStatus
 
     companion object {
@@ -25,7 +25,7 @@ class Connection private constructor(context: Context) {
         }
     }
 
-    fun checkConnectivity(): Boolean {
+    private fun checkConnectivity(): Boolean {
         val network = connectivityManager.activeNetwork ?: return false
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
         return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||

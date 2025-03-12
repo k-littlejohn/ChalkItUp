@@ -1,4 +1,4 @@
-package com.example.chalkitup.ui
+package com.example.chalkitup.ui.offline
 
 import android.content.Context
 import android.util.Base64
