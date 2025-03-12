@@ -32,7 +32,7 @@ fun MyTopBar(
     // screen the user is on
     val backgroundColor = when (currentRoute) {
         //"home" -> Color(0xFFFFFFFF)//MaterialTheme.colorScheme.primary
-        "profile", "home", "start", "login", "signup", "forgotPassword" -> Color(0xFF54A4FF) // Fill top-screen white space
+        "profile","tutorAvailability", "home", "start", "login", "signup", "forgotPassword" -> Color(0xFF54A4FF) // Fill top-screen white space
         "checkEmail" -> Color(0xFF06C59C) // Fill top-screen white space
         else -> Color.White
     }
@@ -50,7 +50,7 @@ fun MyTopBar(
                     "booking" -> "Book a Session"
                     "messages" -> "Messages"
                     "newMessage" -> "New Chat"
-                    "start", "login", "signup", "forgotPassword", "checkEmail" -> ""
+                    "start", "login", "signup", "forgotPassword", "checkEmail", "tutorAvailability" -> ""
                     else -> "ChalkItUp Tutors"
                 }
             )
