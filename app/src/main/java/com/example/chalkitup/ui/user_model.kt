@@ -1,6 +1,8 @@
 package com.example.chalkitup.ui
 
-//import com.example.chalkitup.ui.components.TutorSubject
+import com.example.chalkitup.ui.components.TutorSubject
+import com.example.chalkitup.ui.viewmodel.Interest
+import com.example.chalkitup.ui.viewmodel.ProgressItem
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -29,9 +31,9 @@ data class UserProfile(
     val firstName: String = "", // First name of the user
     val lastName: String = "",  // Last name of the user
     val email: String = "",     // Email address of the user
-    val subjects: List<*>?, // List of subjects the user is associated with (for tutors)
+    val subjects: List<TutorSubject> = emptyList(), // List of subjects the user is associated with (for tutors)
     val bio: String = "",        // User's bio
-    val interests: List<*>? =listOf( Interest("Accounting", false), Interest("Agriculture", false),
+    val interests: List<Interest> =listOf( Interest("Accounting", false), Interest("Agriculture", false),
         Interest("Ancient History", false), Interest("Animal", false),
         Interest("Art", false), Interest("Art-History", false),
         Interest("Biology", false), Interest("Business", false),
@@ -46,17 +48,18 @@ data class UserProfile(
         Interest("Medical Science", false), Interest("Music", false),
         Interest("Nutrition", false), Interest("Physics", false),
         Interest("Psychology", false), Interest("Social Studies", false),
-        Interest("Physical Activity", false), Interest("Zoology", false)),
-    val progress: List<*>?
+        Interest("Physical Activity", false), Interest("Zoology", false)
+    ),
+    val progress: List<ProgressItem> =emptyList()
 ) {
     fun copyWith(
         userType: String = this.userType,
         firstName: String = this.firstName,
         lastName: String = this.lastName,
         email: String = this.email,
-        subjects: List<*>? = this.subjects,
-        interests: List<*>? = this.interests,
-        progress: List<*>? = this.progress
+        subjects: List<TutorSubject> = this.subjects,
+        interests: List<Interest> = this.interests,
+        progress: List<ProgressItem> = this.progress
     ): UserProfile {
         return copy(
             userType = userType,
@@ -94,9 +97,9 @@ data class UserProfile(
                         val lastName = document.getString("lastName") ?: ""
                         val email = user.email ?: ""
 
-                        val subjects = document.get("subjects") as? List<*> ?
-                        val interests = document.get("interests") as? List<*> ?
-                        val progress = document.get("progress") as? List<*> ?
+                        val subjects = document.get("subjects") as List<TutorSubject>
+                        val interests = document.get("interests") as List<Interest>
+                        val progress = document.get("progress") as List<ProgressItem>
 
                         onUserProfileLoaded(
                             UserProfile(
