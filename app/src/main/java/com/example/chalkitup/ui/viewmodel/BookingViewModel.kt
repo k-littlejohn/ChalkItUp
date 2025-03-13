@@ -178,6 +178,10 @@ class BookingViewModel : ViewModel() {
         _date.value = "Unknown"
     }
 
+    fun resetDay() {
+        _selectedDay.value = null
+    }
+
     fun getFirstDayOfMonth(currentDate: LocalDate): LocalDate {
         return currentDate.withDayOfMonth(1) // First day of the month
     }
@@ -660,10 +664,12 @@ class BookingViewModel : ViewModel() {
         _timeSlot.value = formattedTimeRange
         _date.value = day.toString()
 
+        val formattedSessionType = if (sessionType == "inPerson") "In Person" else "Online"
+
         val sessionData = hashMapOf(
             "tutorID" to tutorId,
             "comments" to comments,
-            "mode" to sessionType,
+            "mode" to formattedSessionType,
             "date" to day.toString(),
             "time" to formattedTimeRange,
             "status" to "booked",
