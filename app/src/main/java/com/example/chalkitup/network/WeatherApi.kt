@@ -1,6 +1,6 @@
 package com.example.chalkitup.network
 
-import com.example.chalkitup.model.WeatherResponse
+import com.example.chalkitup.domain.model.WeatherResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 

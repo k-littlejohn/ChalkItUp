@@ -1,6 +1,8 @@
-package com.example.chalkitup.ui.screens
+package com.example.chalkitup.ui.screens.chat
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,7 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.chalkitup.model.User
+import com.example.chalkitup.domain.model.User
 import com.example.chalkitup.ui.viewmodel.ChatViewModel
 import com.example.chalkitup.ui.viewmodel.MessageListViewModel
 import kotlinx.coroutines.launch
@@ -36,7 +38,6 @@ fun NewMessageScreen(
     messageListViewModel: MessageListViewModel,
     chatViewModel: ChatViewModel
     ) {
-
     // Collecting states from ViewModel
     val userList by messageListViewModel.users.collectAsState() // List of users with opposite user type as current user
     val profilePictures by messageListViewModel.profilePictures.collectAsState()
@@ -76,7 +77,6 @@ fun NewMessageScreen(
                 placeholder = { Text("Search") },
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Search Icon") },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(onSearch = {}),   // Trigger search when the user presses the search button
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
@@ -114,7 +114,7 @@ fun NewMessageScreen(
 }
 
 
-// UI Component for Displaying Each User
+// UI Component for displaying each user
 @Composable
 fun UserItem(
     user: User,
@@ -149,7 +149,7 @@ fun UserItem(
 }
 
 @Composable
-fun UserProfilePicture(profilePictureUrl: String?, firstName: String, lastName: String) {
+private fun UserProfilePicture(profilePictureUrl: String?, firstName: String, lastName: String) {
     if (profilePictureUrl.isNullOrEmpty()) {
         // Show a placeholder with initials
         Box(
@@ -167,12 +167,13 @@ fun UserProfilePicture(profilePictureUrl: String?, firstName: String, lastName: 
             )
         }
     } else {
-        // Show the user's profile picture
+        // Display user's profile picture
         AsyncImage(
             model = profilePictureUrl,
             contentDescription = "Profile Picture",
             modifier = Modifier
                 .size(40.dp)
+                .border(1.dp, Color.Gray, CircleShape)
                 .clip(CircleShape)
         )
     }

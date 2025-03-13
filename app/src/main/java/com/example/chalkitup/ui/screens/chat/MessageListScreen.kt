@@ -1,5 +1,6 @@
-package com.example.chalkitup.ui.screens
+package com.example.chalkitup.ui.screens.chat
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
@@ -27,40 +30,35 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.chalkitup.model.Conversation
+import com.example.chalkitup.domain.model.Conversation
 import com.example.chalkitup.ui.viewmodel.MessageListViewModel
 import java.util.concurrent.TimeUnit
 
 @Composable
-fun MessagesScreen(
+fun MessageListScreen(
     navController: NavController,
     messageListViewModel: MessageListViewModel
 ) {
+    // Scroll state for vertical scrolling
+    val scrollState = rememberLazyListState()
 
-    // State to hold user type
     val currentUserId = messageListViewModel.currentUserId
-    var userInput by remember { mutableStateOf("") }
-
-    // Collect the list of conversations from the ViewModel
-    val conversations by messageListViewModel.conversations.collectAsState()
+    val searchQuery by messageListViewModel.searchQuery.collectAsState()
+    val filteredConversations = messageListViewModel.getFilteredConversations()
 
     val isLoading by messageListViewModel.isLoading.collectAsState()
     val error by messageListViewModel.error.collectAsState()
 
-    // Fetch conversations when the screen is launched
+    // Fetch conversations when screen is launched
     LaunchedEffect(currentUserId) {
         messageListViewModel.fetchConversations()
     }
 
-//    // Scroll state for vertical scrolling
-//    val scrollState = rememberScrollState()
 
     Column(modifier = Modifier.fillMaxSize()) {
         // Search Bar and + Button in the same row
@@ -71,10 +69,11 @@ fun MessagesScreen(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             OutlinedTextField(
-                value = userInput,
-                onValueChange = { userInput = it }, // Update the state when user types
+                value = searchQuery,
+                onValueChange = { messageListViewModel.updateSearchQuery(it) },
                 placeholder = { Text("Search") },
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Search Icon") },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 modifier = Modifier.weight(1f)
             )
 
@@ -106,7 +105,7 @@ fun MessagesScreen(
                 CircularProgressIndicator()
             }
 
-        } else if (conversations.isEmpty()) {
+        } else if (filteredConversations.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -115,18 +114,20 @@ fun MessagesScreen(
                 Text("No conversations")
             }
         } else {
-            LazyColumn(modifier = Modifier.weight(1f)) {
-                items(conversations) { conversation ->
+            LazyColumn(
+                state = scrollState,
+                modifier = Modifier.weight(1f)
+            ) {
+                items(filteredConversations) { conversation ->
                     ConversationItem(
                         conversation = conversation,
-                        currentUserId = messageListViewModel.currentUserId,
+                        currentUserId = currentUserId,
                         onClick = {
-//                            navController.navigate("chat/${conversation.id}")
                             navController.navigate("chat/${conversation.id}/${
-                                if (conversation.studentId == messageListViewModel.currentUserId) conversation.tutorId 
-                                else conversation.studentId}"
-                            )
-
+                                if (conversation.studentId == currentUserId) 
+                                    conversation.tutorId 
+                                else conversation.studentId
+                            }" )
                         }
                     )
                 }
@@ -149,7 +150,9 @@ fun ConversationItem(
             .fillMaxWidth()
             .padding(8.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)) {
             // Display the other user's name
             Text(
                 text = if (conversation.studentId == currentUserId) {
@@ -177,7 +180,7 @@ fun ConversationItem(
 }
 
 // Helper function to format the timestamp
-fun formatTimestamp(timestamp: Long): String {
+private fun formatTimestamp(timestamp: Long): String {
     val currentTime = System.currentTimeMillis()
     val difference = currentTime - timestamp
     return when {

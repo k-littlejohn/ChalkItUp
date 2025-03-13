@@ -11,10 +11,10 @@ import com.example.chalkitup.ui.screens.CheckEmailScreen
 import com.example.chalkitup.ui.screens.EditProfileScreen
 import com.example.chalkitup.ui.screens.HomeScreen
 import com.example.chalkitup.ui.screens.LoginScreen
-import com.example.chalkitup.ui.screens.MessagesScreen
-import com.example.chalkitup.ui.screens.ChatScreen
+import com.example.chalkitup.ui.screens.chat.MessageListScreen
+import com.example.chalkitup.ui.screens.chat.ChatScreen
 import com.example.chalkitup.ui.screens.EnterTutorAvailability
-import com.example.chalkitup.ui.screens.NewMessageScreen
+import com.example.chalkitup.ui.screens.chat.NewMessageScreen
 import com.example.chalkitup.ui.screens.ProfileScreen
 import com.example.chalkitup.ui.screens.SettingsScreen
 import com.example.chalkitup.ui.screens.SignupScreen
@@ -81,7 +81,7 @@ fun NavGraph(navController: NavHostController) {
 
         // Messages Screen
         composable("messages") {
-            MessagesScreen(
+            MessageListScreen(
                 navController = navController,
                 messageListViewModel
             )
