@@ -1,4 +1,4 @@
-package com.example.chalkitup.ui.screens
+package com.example.chalkitup.ui.screens.chat
 
 import android.util.Log
 import androidx.compose.foundation.layout.Box
@@ -12,7 +12,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Surface
@@ -37,30 +36,29 @@ import kotlinx.coroutines.launch
 fun ChatScreen(
     navController: NavController,
     chatViewModel: ChatViewModel,
-    selectedUserId: String,
-    conversationId: String?
+    conversationId: String?,
+    selectedUserId: String
 ) {
 
     val messages by chatViewModel.messages.collectAsState()
     var text by remember { mutableStateOf("") }
-    val scrollState = rememberLazyListState()
+    val scrollState = rememberLazyListState(initialFirstVisibleItemIndex = messages.size)
 
-    // Fetch messages if conversation exists
     LaunchedEffect(conversationId) {
-        if (conversationId != null && conversationId != "null") {
-            chatViewModel.fetchMessages(conversationId)
-        } else {
-            // Clear messages if no conversation exists
+        if (conversationId.isNullOrBlank()) {
             chatViewModel.clearMessages()
+        } else {
+            chatViewModel.setConversationId(conversationId)
         }
     }
 
-//    // Scroll to bottom when a new message is added
-//    LaunchedEffect(messages) {
-//        if (messages.isNotEmpty()) {
-//            scrollState.animateScrollToItem(messages.size - 1)
-//        }
-//    }
+    // Auto scroll to most recent message
+    LaunchedEffect(messages) {
+        if (messages.isNotEmpty()) {
+            scrollState.animateScrollToItem(index = messages.size - 1)
+        }
+    }
+
 
     Column(
         modifier = Modifier
@@ -69,6 +67,7 @@ fun ChatScreen(
     ) {
         // Display chat messages
         LazyColumn(
+            state = scrollState,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
@@ -77,7 +76,7 @@ fun ChatScreen(
                 ChatBubble(
                     message = message.text,
                     isCurrentUser = message.senderId == chatViewModel.currentUserId
-                    )
+                )
             }
         }
 
@@ -94,13 +93,13 @@ fun ChatScreen(
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 8.dp),
-                placeholder = { Text("Type a message...") }
+                placeholder = { Text("Message...") }
             )
 
             Button(onClick = {
                 if (text.isNotBlank()) {
-                    if (conversationId.isNullOrEmpty()) {
-                        chatViewModel.viewModelScope.launch {
+                    chatViewModel.viewModelScope.launch {
+                        if (conversationId.isNullOrEmpty()) {
                             // Fetch user details
                             val currentUser = chatViewModel.fetchUser(chatViewModel.currentUserId)
                             val selectedUser = chatViewModel.fetchUser(selectedUserId)
@@ -109,26 +108,26 @@ fun ChatScreen(
                             val newConversationId = chatViewModel.createConversation(currentUser, selectedUser)
 
                             // If the conversation was successfully created, send the message
-                            if (newConversationId != null) {
-                                chatViewModel.sendMessage(newConversationId, selectedUserId, text)
+                            if (!newConversationId.isNullOrEmpty()) {
+                                chatViewModel.setConversationId(newConversationId)
+                                chatViewModel.sendMessage(newConversationId, text)
                                 text = ""
                             } else {
                                 Log.e("Chat", "Failed to create a new conversation.")
                             }
+                        } else {
+                            chatViewModel.sendMessage(conversationId, text)
+                            text = ""
                         }
-                    } else {
-                        // If conversationId is not null, send the message directly
-                        chatViewModel.sendMessage(conversationId, selectedUserId, text)
-                        text = ""
                     }
                 }
             }) {
                 Text("Send")
-                }
             }
-
         }
     }
+
+}
 
 
 

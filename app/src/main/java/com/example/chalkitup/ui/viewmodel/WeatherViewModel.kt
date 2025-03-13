@@ -3,7 +3,7 @@ package com.example.chalkitup.ui.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.chalkitup.model.WeatherResponse
+import com.example.chalkitup.domain.model.WeatherResponse
 import com.example.chalkitup.network.WeatherApi
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit

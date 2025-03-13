@@ -1,4 +1,4 @@
-package com.example.chalkitup.model
+package com.example.chalkitup.domain.model
 
 
 data class Message(

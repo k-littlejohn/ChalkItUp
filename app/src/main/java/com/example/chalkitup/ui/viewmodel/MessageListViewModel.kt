@@ -3,9 +3,9 @@ package com.example.chalkitup.ui.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.chalkitup.model.Conversation
-import com.example.chalkitup.model.Message
-import com.example.chalkitup.model.User
+import com.example.chalkitup.domain.model.Conversation
+import com.example.chalkitup.domain.model.Message
+import com.example.chalkitup.domain.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -15,6 +15,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+/**
+ * ViewModel for managing conversations.
+ *
+ * This ViewModel handles the selection, storage, and retrieval of ongoing conversations.
+ * It allows users to select users who they want create a conversation with or view an ongoing conversation.
+ * Conversation data is automatically fetched from Firestore upon ViewModel initialization.
+ *
+ */
 class MessageListViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
@@ -22,11 +30,10 @@ class MessageListViewModel : ViewModel() {
     // Holds info of current user
     val currentUser = auth.currentUser
     val currentUserId: String
-        get() = auth.currentUser?.uid ?: ""
+        get() = currentUser?.uid ?: ""
 
     // Holds the current user's type (e.g., "Student" or "Tutor")
     private val _currentUserType = MutableStateFlow<String?>(null)
-//    val currentUserType: StateFlow<String?> = _currentUserType.asStateFlow()
 
     // Holds a list of users with opposite user type as current user
     private val _users = MutableStateFlow<List<User>>(emptyList())
@@ -49,8 +56,7 @@ class MessageListViewModel : ViewModel() {
 
     // State for the search query
     private val _searchQuery = MutableStateFlow("")
-    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
-
+    val searchQuery: StateFlow<String> = _searchQuery
 
 
     init {
@@ -60,31 +66,25 @@ class MessageListViewModel : ViewModel() {
         }
     }
 
-        /** For MessagesScreen */
-        // Function to insert message to Firebase
-        // Function to load messages from Firebase
-        // Function to load profile of other sender from Firebase
-        // Function to block user from Firebase
-        // Function to report user
 
-        fun fetchCurrentUserType(onComplete: () -> Unit) {
-            viewModelScope.launch {
-                if (currentUser != null) {
-                    try {
-                        val userDoc = db.collection("users").document(currentUser.uid).get().await()
-                        _currentUserType.value = userDoc.getString("userType")
-                    } catch (e: Exception) {
-                        Log.e("Firestore", "Error fetching current user type: ${e.message}")
-                        _error.value = "Failed to load current user type"
-                    } finally {
-                        onComplete() // Execute the callback
-                    }
-                } else {
-                    _error.value = "No current user found"
-                    onComplete() // Execute the callback even if there's no user
+    private fun fetchCurrentUserType(onComplete: () -> Unit) {
+        viewModelScope.launch {
+            if (currentUser != null) {
+                try {
+                    val userDoc = db.collection("users").document(currentUser.uid).get().await()
+                    _currentUserType.value = userDoc.getString("userType")
+                } catch (e: Exception) {
+                    Log.e("Firestore", "Error fetching current user type: ${e.message}")
+                    _error.value = "Failed to load current user type"
+                } finally {
+                    onComplete() // Execute the callback
                 }
+            } else {
+                _error.value = "No current user found"
+                onComplete() // Execute the callback even if there's no user
             }
         }
+    }
 
     // Fetch users with the opposite user type
     fun fetchUsers() {
@@ -166,6 +166,10 @@ class MessageListViewModel : ViewModel() {
                 }
                 _conversations.value = updatedConversations
 
+                // Extract user IDs and load profile pictures
+                val userIds = updatedConversations.flatMap { listOf(it.studentId, it.tutorId) }.distinct()
+                loadProfilePictures(userIds)
+
             } catch (e: Exception) {
                 Log.e("Firestore", "Error fetching conversations: ${e.message}")
                 _error.value = "Failed to load conversations"
@@ -203,13 +207,29 @@ class MessageListViewModel : ViewModel() {
         _searchQuery.value = query
     }
 
-    // Get filtered users based on the search query
+    // Filter users based on the search query
     fun getFilteredUsers(): List<User> {
         return users.value.filter { user ->
             user.firstName.contains(searchQuery.value, ignoreCase = true) ||
                     user.lastName.contains(searchQuery.value, ignoreCase = true)
         }
             .sortedWith(compareBy({ it.firstName.lowercase() }, { it.lastName.lowercase() }))
+    }
+
+    // Filter existing conversations based on the search query
+    fun getFilteredConversations(): List<Conversation> {
+        val query = searchQuery.value.trim().lowercase()
+
+        return conversations.value
+            .filter { conversation ->
+                val otherUserName = if (conversation.studentId == currentUserId) {
+                    conversation.tutorName
+                } else {
+                    conversation.studentName
+                }
+                otherUserName.lowercase().contains(query)
+            }
+            .sortedByDescending { it.timestamp }
     }
 
     fun loadProfilePictures(userIds: List<String>) {
