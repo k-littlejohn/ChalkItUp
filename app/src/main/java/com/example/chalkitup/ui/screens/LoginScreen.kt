@@ -20,8 +20,6 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import com.example.chalkitup.R
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 // import androidx.compose.ui.layout.matchParentSize
 // import androidx.compose.foundation.layout.windowInsetsPadding // newly added
 // import androidx.compose.foundation.layout.WindowInsets // newly added
@@ -157,6 +155,7 @@ fun LoginScreen(
                                 email, password,
                                 onSuccess = { navController.navigate("home") },
                                 onEmailError = { navController.navigate("checkEmail/verify") },
+                                onTermsError = { navController.navigate("termsAndCond") },
                                 onError = { errorMessage = it }
                             )
                         }

@@ -19,6 +19,7 @@ import com.example.chalkitup.ui.screens.ProfileScreen
 import com.example.chalkitup.ui.screens.SettingsScreen
 import com.example.chalkitup.ui.screens.SignupScreen
 import com.example.chalkitup.ui.screens.StartScreen
+import com.example.chalkitup.ui.screens.TermsAndCond
 import com.example.chalkitup.ui.viewmodel.AuthViewModel
 import com.example.chalkitup.ui.viewmodel.BookingViewModel
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
@@ -61,6 +62,15 @@ fun NavGraph(navController: NavHostController) {
             SignupScreen(
                 navController = navController,
                 certificationViewModel = certificationViewModel,
+                authViewModel = authViewModel
+            )
+        }
+
+        // TermsAndCond Screen
+        composable("termsAndCond") {
+            val authViewModel: AuthViewModel = viewModel()
+            TermsAndCond(
+                navController = navController,
                 authViewModel = authViewModel
             )
         }

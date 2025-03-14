@@ -1,6 +1,5 @@
 package com.example.chalkitup.ui.screens
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,15 +25,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.TabRowDefaults.Divider
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.SliderDefaults
@@ -56,7 +51,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
@@ -72,7 +66,6 @@ import com.example.chalkitup.ui.viewmodel.BookingViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import java.util.Locale
@@ -584,8 +577,7 @@ fun BookingScreen(
                                                 color = if (day == selectedDay) Color.White else Color.Black,
                                             )
                                             Text(
-                                                text = day.month.toString().take(3)
-                                                    .toUpperCase(Locale.ROOT),
+                                                text = day.month.toString().take(3).uppercase(),
                                                 color = if (day == selectedDay) Color.White else Color.Black,
                                                 fontSize = 10.sp
                                             )
@@ -626,7 +618,7 @@ fun BookingScreen(
                     println("Available times for $day: $availableTimes")
 
                     if (availableTimes.isNotEmpty()) {
-                        Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
+                        Box(modifier = Modifier.heightIn(20.dp, 275.dp)) {
                             Column {
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
@@ -676,7 +668,7 @@ fun BookingScreen(
                     println("Valid end times for $startTime: $validEndTimes")
 
                     if (validEndTimes.isNotEmpty()) {
-                        Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
+                        Box(modifier = Modifier.heightIn(20.dp, 275.dp)) {
                             Column {
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
