@@ -55,7 +55,7 @@ fun MainScreen() {
     }
 
     // List of routes where the bottom bar should be hidden.
-    val hideBottomBarRoutes = listOf("start","login", "signup","forgotPassword")
+    val hideBottomBarRoutes = listOf("start","login", "signup","forgotPassword","termsAndCond")
     // Determine whether to show the bottom bar based on the current route.
     val showBottomBar = currentRoute !in hideBottomBarRoutes
 
