@@ -18,7 +18,7 @@ fun AdminHome(
 
 
     // List of all active (already approved) tutors
-    // Filter options (by subject, hours/session count, search)
+    // Filter options (by subject, hours/session count/current month, search)
     // clickable to view the tutors profile
     // remove button to remove the tutor from the app
     // email notification for removed tutors (account should be deleted after)
