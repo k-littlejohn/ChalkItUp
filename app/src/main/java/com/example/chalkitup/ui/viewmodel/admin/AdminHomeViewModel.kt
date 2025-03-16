@@ -30,6 +30,7 @@ class AdminHomeViewModel : ViewModel() {
     fun fetchUnapprovedTutors() {
         viewModelScope.launch {
             try {
+                _unapprovedTutors.value = emptyList() // Clear the list before fetching new data
                 val snapshot: QuerySnapshot = db.collection("users")
                     .whereEqualTo("userType", "Tutor") // Filter for tutors only
                     .whereEqualTo("adminApproved", false) // Filter for unapproved tutors
@@ -40,6 +41,13 @@ class AdminHomeViewModel : ViewModel() {
                     val tutor = doc.toObject(User::class.java)
                     tutor?.let {
                         tutor.id = doc.id
+//                        for (unapprovedTutor in _unapprovedTutors.value) {
+//                            if (unapprovedTutor.id == tutor.id) {
+//                                continue
+//                            } else {
+//                                _unapprovedTutors.value += tutor
+//                            }
+//                        }     // FIX this -- dont want list to clear everytime very ugly
                         _unapprovedTutors.value += tutor
                     }
                 }
@@ -53,6 +61,7 @@ class AdminHomeViewModel : ViewModel() {
     fun fetchApprovedTutors() {
         viewModelScope.launch {
             try {
+                _approvedTutors.value = emptyList() // Clear the list before fetching new data
                 val snapshot: QuerySnapshot = db.collection("users")
                     .whereEqualTo("userType", "Tutor") // Filter for tutors only
                     .whereEqualTo("adminApproved", true) // Filter for unapproved tutors
