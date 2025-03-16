@@ -7,6 +7,8 @@ import com.example.chalkitup.ui.components.TutorSubject
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 
 // AuthViewModel
 // Handles interactions for user:
@@ -33,6 +35,11 @@ class AuthViewModel : ViewModel() {
     private val _isUserLoggedIn = MutableLiveData<Boolean>()
     val isUserLoggedIn: LiveData<Boolean> = _isUserLoggedIn
 
+    // LiveData to track authentication state for Google login. Google does not need email verification
+    private val _isGoogleUserLoggedIn = MutableLiveData<Boolean>()
+    val isGoogleUserLoggedIn: LiveData<Boolean> = _isGoogleUserLoggedIn
+
+
     // Initializes the ViewModel and checks if a user is already logged in
     init {
         checkUserLoggedIn()
@@ -44,6 +51,7 @@ class AuthViewModel : ViewModel() {
         val currentUser = auth.currentUser
         // Set the LiveData value to true if a user is logged in and their email is verified, false otherwise
         _isUserLoggedIn.value = currentUser != null && currentUser.isEmailVerified
+        _isGoogleUserLoggedIn.value = currentUser != null
     }
 
     /**
@@ -80,6 +88,29 @@ class AuthViewModel : ViewModel() {
                 } else {
                     // Handle error if login fails
                     onError(task.exception?.message ?: "Login failed")
+                }
+            }
+    }
+
+
+    /**
+     * Signs in a new user using Googles email, password,
+     * and additional user information to grab users UID.
+     */
+    fun loginWithGoogle(
+        account: GoogleSignInAccount,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    _isGoogleUserLoggedIn.value = true
+                    onSuccess()
+                } else {
+                    onError(task.exception?.message ?: "Google login failed")
                 }
             }
     }
@@ -201,6 +232,7 @@ class AuthViewModel : ViewModel() {
      */
     fun signout() {
         auth.signOut() // Logs out the user from FirebaseAuth
+        _isUserLoggedIn.value = false
     }
 
     /**
