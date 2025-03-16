@@ -156,7 +156,9 @@ fun LoginScreen(
                                 onSuccess = { navController.navigate("home") },
                                 onEmailError = { navController.navigate("checkEmail/verify") },
                                 onTermsError = { navController.navigate("termsAndCond") },
-                                onError = { errorMessage = it }
+                                onError = { errorMessage = it },
+                                awaitingApproval = { navController.navigate("awaitingApproval") },
+                                isAdmin = { navController.navigate("adminHome") }
                             )
                         }
                     },

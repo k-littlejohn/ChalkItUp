@@ -67,7 +67,7 @@ fun BottomNavigationBar(
     var currentRoute = navController.currentDestination?.route
     currentRoute = currentRoute?.substringBefore("/")
 
-    val fillerBar = "checkEmail" == currentRoute
+    val fillerBar = ("checkEmail" == currentRoute) || ("awaitingApproval" == currentRoute)
 
     // Create the Bottom Navigation Bar
     NavigationBar (

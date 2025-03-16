@@ -32,8 +32,8 @@ fun MyTopBar(
     // screen the user is on
     val backgroundColor = when (currentRoute) {
         //"home" -> Color(0xFFFFFFFF)//MaterialTheme.colorScheme.primary
-        "profile","tutorAvailability","booking","home","start","login","signup","forgotPassword","termsAndCond" -> Color(0xFF54A4FF) // Fill top-screen white space
-        "checkEmail" -> Color(0xFF06C59C) // Fill top-screen white space
+        "profile","tutorAvailability","booking","home","start","login","signup","forgotPassword","termsAndCond","adminHome" -> Color(0xFF54A4FF) // Fill top-screen white space
+        "checkEmail","awaitingApproval" -> Color(0xFF06C59C) // Fill top-screen white space
         else -> Color.White
     }
 
@@ -50,7 +50,7 @@ fun MyTopBar(
                     "booking" -> ""
                     "messages" -> "Messages"
                     "newMessage" -> "New Chat"
-                    "start","login","signup","forgotPassword","checkEmail","tutorAvailability","termsAndCond" -> ""
+                    "start","login","signup","forgotPassword","checkEmail","tutorAvailability","termsAndCond","adminHome","awaitingApproval" -> ""
                     else -> "ChalkItUp Tutors"
                 }
             )
@@ -73,7 +73,7 @@ fun MyTopBar(
                 }
                 // On the login and signup page currently,          // Here are the alternative back buttons on login & signup screen
                 // there is a back button in the top left
-                "login","signup" -> {
+                "login","signup","awaitingApproval" -> {
                     IconButton(onClick = { navController.navigate("start") }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",

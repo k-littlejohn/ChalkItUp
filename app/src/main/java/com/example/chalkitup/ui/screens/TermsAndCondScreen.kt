@@ -256,7 +256,22 @@ fun TermsAndCond(
                         authViewModel.agreeToTerms()
 
                         if (authViewModel.checkEmailVerified()) {
-                            navController.navigate("login")
+                            // add approved check here
+                            authViewModel.isAdminApproved(
+                                onResult = {
+                                    if (it == true) {
+                                        navController.navigate("login")
+                                    } else {
+                                        navController.navigate("awaitingApproval")
+                                    }
+                                },
+                                isAdmin = {
+                                    if (it == true) {
+                                        navController.navigate("adminHome")
+                                    }
+                                }
+                            )
+                            //navController.navigate("login")
                         } else {
                             navController.navigate("checkEmail/verify")
                         }

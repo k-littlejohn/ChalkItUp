@@ -1,5 +1,6 @@
 package com.example.chalkitup.ui.screens
 
+import android.util.Log
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
@@ -69,8 +70,27 @@ fun MainScreen() {
 
     // Send the user to the home screen if they are already logged in
     LaunchedEffect(isUserLoggedIn) {
-        if (isUserLoggedIn) {
-            navController.navigate("home") // Navigate to the home screen
+        Log.e("MainScreen","checking approved status ${isUserLoggedIn}")
+        if (isUserLoggedIn) { // look into this again
+            Log.e("MainScreen","checking approved status")
+            authViewModel.isAdminApproved(
+                onResult = {
+                    if (it == true) {
+                        println("approved")
+                        navController.navigate("home")
+                    } else {
+                        println("awaitingApproval")
+                        navController.navigate("awaitingApproval")
+                        authViewModel.signout()
+                    }
+                },
+                isAdmin = {
+                    if (it == true) {
+                        println("admin here")
+                        navController.navigate("adminHome")
+                    }
+                }
+            )
         }
     }
 

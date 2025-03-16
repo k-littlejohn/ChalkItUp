@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.chalkitup.ui.screens.AwaitingApproval
 import com.example.chalkitup.ui.screens.BookingScreen
 import com.example.chalkitup.ui.screens.CheckEmailScreen
 import com.example.chalkitup.ui.screens.EditProfileScreen
@@ -20,6 +21,7 @@ import com.example.chalkitup.ui.screens.SettingsScreen
 import com.example.chalkitup.ui.screens.SignupScreen
 import com.example.chalkitup.ui.screens.StartScreen
 import com.example.chalkitup.ui.screens.TermsAndCond
+import com.example.chalkitup.ui.screens.admin.AdminHome
 import com.example.chalkitup.ui.viewmodel.AuthViewModel
 import com.example.chalkitup.ui.viewmodel.BookingViewModel
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
@@ -29,6 +31,7 @@ import com.example.chalkitup.ui.viewmodel.MessageListViewModel
 import com.example.chalkitup.ui.viewmodel.ProfileViewModel
 import com.example.chalkitup.ui.viewmodel.SettingsViewModel
 import com.example.chalkitup.ui.viewmodel.TutorAvailabilityViewModel
+import com.example.chalkitup.ui.viewmodel.admin.AdminHomeViewModel
 
 // Navigation Center, NavHost with navController
 // On app launch, opens startScreen
@@ -183,6 +186,27 @@ fun NavGraph(navController: NavHostController) {
                 viewModel = viewmodel
             )
         }
+
+        // -- Screen
+        composable("awaitingApproval") {
+            AwaitingApproval(
+                navController = navController,
+            )
+        }
+
+        // -- Screen
+        composable("adminHome") {
+            val viewmodel: AdminHomeViewModel = viewModel()
+            val certViewModel: CertificationViewModel = viewModel()
+            AdminHome(
+                navController = navController,
+                viewModel = viewmodel,
+                certificationViewModel = certViewModel
+            )
+        }
+
+
+
 
     }
 }
