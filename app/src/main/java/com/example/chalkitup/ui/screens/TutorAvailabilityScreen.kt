@@ -100,8 +100,8 @@ fun EnterTutorAvailability(
     // Select the first day of the month by default
     LaunchedEffect(calendarState.firstVisibleMonth) {
         //val firstDay = calendarState.firstVisibleMonth.yearMonth.atDay(1).format(dateFormatter)
-        val today = LocalDate.now()
-        viewModel.selectDay(today.toString())
+//        val today = LocalDate.now()
+//        viewModel.selectDay(today.toString())
         viewModel.fetchAvailabilityFromFirestore()
     }
 
@@ -122,7 +122,6 @@ fun EnterTutorAvailability(
         Column(
             modifier = Modifier
                 .verticalScroll(scrollState)
-                .padding(vertical = 32.dp),
         ) {
             Column(
                 modifier = Modifier
@@ -131,16 +130,14 @@ fun EnterTutorAvailability(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-//                Spacer(modifier = Modifier.height(15.dp))
-//                Row {
-//                    Text(
-//                        text = "Your Availability",
-//                        style = MaterialTheme.typography.headlineMedium,
-//                        color = Color.Black
-//                    )
-//                    Box(modifier = Modifier.weight(1f))
-//                }
-//                Spacer(modifier = Modifier.height(25.dp))
+                Text(
+                    "Your Availability",
+                    modifier = Modifier.padding(16.dp),
+                    fontSize = 25.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
 
                 Box(
                     modifier = Modifier
@@ -198,6 +195,7 @@ fun EnterTutorAvailability(
                                 val isToday = day.date == LocalDate.now()
                                 val isCurrentMonth =
                                     YearMonth.from(day.date) == calendarState.firstVisibleMonth.yearMonth
+                                val isPastDay = day.date < LocalDate.now()
 
                                 Box(
                                     modifier = Modifier
@@ -206,6 +204,7 @@ fun EnterTutorAvailability(
                                         .background(
                                             when {
                                                 isSelected -> Color.DarkGray // Gray for selected day
+                                                isPastDay -> Color(0x50000000) // Light gray for past days
                                                 hasAvailability -> Color(0xFF06C59C) // Green if availability exists
                                                 else -> Color.Transparent
                                             }
@@ -216,7 +215,9 @@ fun EnterTutorAvailability(
                                             shape = RoundedCornerShape(8.dp)
                                         )
                                         .clickable {
-                                            viewModel.selectDay(formattedDate) // Select day on click
+                                            if (isCurrentMonth) {
+                                                viewModel.selectDay(formattedDate) // Select day on click
+                                            }
                                         },
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -224,7 +225,7 @@ fun EnterTutorAvailability(
                                         text = day.date.dayOfMonth.toString(),
                                         color = when {
                                             isSelected || hasAvailability -> Color.White
-                                            isCurrentMonth -> Color.Black
+                                            isCurrentMonth || isPastDay -> Color.Black
                                             else -> Color.LightGray
                                         },
                                     )
@@ -236,9 +237,8 @@ fun EnterTutorAvailability(
 
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.Bottom,
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     // Action buttons (Edit, Save, Cancel)
@@ -330,7 +330,13 @@ fun EnterTutorAvailability(
                             }
                         }
 
-                    } else {
+                    } else if ((selectedDay?.toLocalDate() ?: LocalDate.now()) >= LocalDate.now()) {
+
+                        Text(
+                            text = "View and Edit your Availability",
+                            fontSize = 14.sp,
+                        )
+
                         Box(modifier = Modifier.weight(1f))
                         IconButton(onClick = { viewModel.toggleEditMode() }) {
                             Icon(
@@ -347,7 +353,7 @@ fun EnterTutorAvailability(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(modifier = Modifier
@@ -406,7 +412,7 @@ fun EnterTutorAvailability(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = "Online", color = Color.White, fontSize = 16.sp,
+                                        text = if (isBooked) "Booked" else "Online", color = Color.White, fontSize = 16.sp,
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
@@ -433,7 +439,7 @@ fun EnterTutorAvailability(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = "In Person", color = Color.White, fontSize = 16.sp,
+                                        text = if (isBooked) "Booked" else "In Person", color = Color.White, fontSize = 16.sp,
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
@@ -456,6 +462,13 @@ fun EnterTutorAvailability(
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(40.dp))
+
         }
     }
+}
+
+fun String.toLocalDate(): LocalDate {
+    return LocalDate.parse(this, DateTimeFormatter.ISO_LOCAL_DATE)
 }

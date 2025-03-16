@@ -440,8 +440,8 @@ fun SubjectGradeItemNoPrice(
     var expandedSpec by remember { mutableStateOf(false) }
 
     // Define colors for the buttons based on their state (selected, error, default)
-    val selectedButtonColor = Color(0xFF54A4FF)
-    val defaultButtonColor = Color.LightGray
+    val selectedButtonColor = Color(0xFF06C59C)
+    val defaultButtonColor = Color(0xFFd2e5fa)
     val errorButtonColor = Color.Red
 
     Row(
@@ -561,7 +561,7 @@ fun SubjectGradeItemNoPrice(
         Spacer(modifier = Modifier.width(8.dp))
 
         // Specialization Selection Button and Dropdown (only for grades 10, 11, or 12)
-        if (tutorSubject.grade == "10" || tutorSubject.grade == "11" || tutorSubject.grade == "12") {
+        if (tutorSubject.grade == "10" || tutorSubject.grade == "20" || tutorSubject.grade == "30") {
             // Specialization Selection Button
             Box(modifier = Modifier.weight(2.9f)) {
                 Button(
@@ -584,7 +584,7 @@ fun SubjectGradeItemNoPrice(
                 // Determine the list of available specializations based on the grade
                 val specList = when (tutorSubject.grade) {
                     "10" -> grade10Specs
-                    "11", "12" -> grade1112Specs
+                    "20", "30" -> grade1112Specs
                     else -> emptyList() // No specializations for non-grade 10-12
                 }
 

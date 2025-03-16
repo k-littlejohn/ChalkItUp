@@ -185,6 +185,8 @@ class HomeViewModel : ViewModel() {
                         .delete()
                         .addOnSuccessListener {
                             Log.d("Appointment", "Appointment canceled and time slots added back to availability")
+                            fetchAppointments()
+                            fetchBookedDates()
                             onComplete()
                         }
                         .addOnFailureListener { e ->

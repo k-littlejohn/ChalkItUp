@@ -11,14 +11,15 @@ import com.example.chalkitup.ui.screens.CheckEmailScreen
 import com.example.chalkitup.ui.screens.EditProfileScreen
 import com.example.chalkitup.ui.screens.HomeScreen
 import com.example.chalkitup.ui.screens.LoginScreen
-import com.example.chalkitup.ui.screens.MessagesScreen
-import com.example.chalkitup.ui.screens.ChatScreen
+import com.example.chalkitup.ui.screens.chat.MessageListScreen
+import com.example.chalkitup.ui.screens.chat.ChatScreen
 import com.example.chalkitup.ui.screens.EnterTutorAvailability
-import com.example.chalkitup.ui.screens.NewMessageScreen
+import com.example.chalkitup.ui.screens.chat.NewMessageScreen
 import com.example.chalkitup.ui.screens.ProfileScreen
 import com.example.chalkitup.ui.screens.SettingsScreen
 import com.example.chalkitup.ui.screens.SignupScreen
 import com.example.chalkitup.ui.screens.StartScreen
+import com.example.chalkitup.ui.screens.TermsAndCond
 import com.example.chalkitup.ui.viewmodel.AuthViewModel
 import com.example.chalkitup.ui.viewmodel.BookingViewModel
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
@@ -65,6 +66,15 @@ fun NavGraph(navController: NavHostController) {
             )
         }
 
+        // TermsAndCond Screen
+        composable("termsAndCond") {
+            val authViewModel: AuthViewModel = viewModel()
+            TermsAndCond(
+                navController = navController,
+                authViewModel = authViewModel
+            )
+        }
+
         // Home Screen
         composable("home") {
             HomeScreen(navController = navController)
@@ -81,7 +91,7 @@ fun NavGraph(navController: NavHostController) {
 
         // Messages Screen
         composable("messages") {
-            MessagesScreen(
+            MessageListScreen(
                 navController = navController,
                 messageListViewModel
             )
