@@ -4,5 +4,19 @@ plugins {
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.google.gms.google.services) apply false
+}
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath(libs.build.gradle.v7xx)
+        classpath(libs.google.services)
+        classpath(libs.gradle)
+        classpath(libs.kotlin.gradle.plugin)
+    }
 //    id("com.google.dagger.hilt.android") version "2.51.1" apply false
 }

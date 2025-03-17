@@ -52,7 +52,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.firebase.auth)
-    //implementation(libs.firebase.firestore)
+    implementation(libs.firebase.firestore)
     implementation(libs.androidx.navigation.runtime.android)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.firebase.storage)
@@ -75,6 +75,7 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     // Enable Java 8+ API desugaring (only if minSdk < 26)
     coreLibraryDesugaring(libs.desugar.jdk.libs) // Latest version//
+    coreLibraryDesugaring(libs.desugar.jdk.libs.v204)
     implementation(libs.google.firebase.firestore.ktx)
     implementation(libs.androidx.material)
     implementation(libs.places)
@@ -82,6 +83,24 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.androidx.lifecycle.runtime.ktx.v262)
-    implementation(libs.firebase.database.ktx) // Check for latest version
+
+    implementation(libs.firebase.database.ktx)
+    implementation(libs.play.services.auth)
+    implementation(libs.lifecycle.runtime.ktx.v262)
+    implementation(libs.androidx.runtime.livedata.v150)
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.play.services.auth.v2070)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.google.firebase.auth)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+    implementation(libs.androidx.appcompat.v120)
+    implementation(libs.androidx.emoji2)
+    implementation(libs.androidx.emoji2.bundled)
+    implementation(libs.play.services.auth)
+    implementation(libs.firebase.auth.v2100)
+    // Google Sign-in
+    implementation(libs.play.services.auth)
 
 }
