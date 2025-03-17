@@ -284,6 +284,8 @@ fun AdminHome(
                                     }
                                 }
                             ) {
+                                // profile picture
+                                // add profile viewmodel to get pfp -- functions have id input?
                                 Text(
                                     "${tutor.firstName} ${tutor.lastName}",
                                     modifier = Modifier.padding(vertical = 16.dp, horizontal = 20.dp),
