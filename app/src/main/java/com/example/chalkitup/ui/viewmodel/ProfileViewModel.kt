@@ -52,11 +52,15 @@ class ProfileViewModel : ViewModel() {
     }
 
     // Function to load the user profile when the ViewModel is initialized
-    fun loadUserProfile() {
-        val user = FirebaseAuth.getInstance().currentUser
-        if (user != null) {
-            val userId = user.uid
-            fetchUserProfile(userId)
+    fun loadUserProfile(targetedUser: String? = "") {
+        if (targetedUser.isNullOrEmpty()) {
+            val user = FirebaseAuth.getInstance().currentUser
+            if (user != null) {
+                val userId = user.uid
+                fetchUserProfile(userId)
+            }
+        } else { // Viewing another user
+            fetchUserProfile(targetedUser)
         }
     }
 

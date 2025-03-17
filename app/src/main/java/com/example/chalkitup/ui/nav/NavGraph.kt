@@ -128,13 +128,17 @@ fun NavGraph(navController: NavHostController) {
         }
 
         // Profile Screen
-        composable("profile") {
+        composable("profile/{targetedUser}") {backStackEntry ->
+            val targetedUser = backStackEntry.arguments?.getString("targetedUser") ?: ""
+            println("TARGETED USER $targetedUser")
             val certificationViewModel: CertificationViewModel = viewModel()
             val profileViewModel: ProfileViewModel = viewModel()
             ProfileScreen(
                 navController = navController,
                 certificationViewModel = certificationViewModel,
-                profileViewModel = profileViewModel)
+                profileViewModel = profileViewModel,
+                targetedUser = targetedUser
+            )
         }
 
         // Edit Profile Screen

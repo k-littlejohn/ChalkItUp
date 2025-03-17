@@ -3,6 +3,7 @@ package com.example.chalkitup.ui.screens.admin
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -46,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.chalkitup.R
 import com.example.chalkitup.lifecycle.AppLifecycleObserver
 import com.example.chalkitup.ui.screens.CertificationGrid
@@ -75,6 +78,8 @@ fun AdminHome(
     // remove button to remove the tutor from the app
     // email notification for removed tutors (account should be deleted after)
 
+    val profilePictures by viewModel.profilePictureUrls.collectAsState()
+
     val unapprovedTutors by viewModel.unapprovedTutors.collectAsState()
     val approvedTutors by viewModel.approvedTutors.collectAsState()
 
@@ -90,19 +95,20 @@ fun AdminHome(
             Color.White, Color.White
         )
     )
-    Column(
-        modifier = Modifier.fillMaxSize()
-            .verticalScroll(rememberScrollState())
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(gradientBrush),
+        contentAlignment = Alignment.TopCenter
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(gradientBrush),
-            contentAlignment = Alignment.TopCenter
+                .verticalScroll(rememberScrollState())
         ) {
-
             Column(
-                modifier = Modifier.padding(32.dp)
+                modifier = Modifier
+                    .padding(32.dp)
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -284,16 +290,31 @@ fun AdminHome(
                                     }
                                 }
                             ) {
-                                // profile picture
-                                // add profile viewmodel to get pfp -- functions have id input?
-                                Text(
-                                    "${tutor.firstName} ${tutor.lastName}",
-                                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 20.dp),
-                                    fontSize = 18.sp,
-                                )
-                                // clickable -> dropdown with information
-                                // clickable certifications
-                                // approve button -> dialog // remove button -> dialog
+                                Row (
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // profile picture
+                                    Spacer(modifier = Modifier.width(16.dp))
+                                    AsyncImage(
+                                        model = profilePictures[tutor.id] ?: R.drawable.chalkitup,
+                                        contentDescription = "Profile Picture",
+                                        modifier = Modifier
+                                            .size(50.dp)
+                                            .clip(CircleShape)
+                                            .border(2.dp, Color.Gray, CircleShape)
+                                    )
+
+                                    Text(
+                                        "${tutor.firstName} ${tutor.lastName}",
+                                        modifier = Modifier.padding(
+                                            vertical = 22.dp,
+                                            horizontal = 20.dp
+                                        ),
+                                        fontSize = 18.sp,
+                                    )
+
+                                    // approve button -> dialog // remove button -> dialog
+                                }
                             }
                         }
                         if (expandedTutorId.value == tutor.id) {
@@ -350,6 +371,7 @@ fun AdminHome(
                                                 ),
                                                 onClick = {
                                                     // go to tutors profile
+                                                    navController.navigate("profile/${tutor.id}")
                                                 }
                                             ) {
                                                 Text("View Profile", color = Color.White)
