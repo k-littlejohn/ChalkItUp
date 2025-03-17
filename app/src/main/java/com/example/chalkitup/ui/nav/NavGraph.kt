@@ -11,27 +11,33 @@ import com.example.chalkitup.ui.screens.CheckEmailScreen
 import com.example.chalkitup.ui.screens.EditProfileScreen
 import com.example.chalkitup.ui.screens.HomeScreen
 import com.example.chalkitup.ui.screens.LoginScreen
-import com.example.chalkitup.ui.screens.MessagesScreen
-import com.example.chalkitup.ui.screens.AskQuestionScreen
+import com.example.chalkitup.ui.screens.chat.MessageListScreen
+import com.example.chalkitup.ui.screens.chat.ChatScreen
 import com.example.chalkitup.ui.screens.EnterTutorAvailability
+import com.example.chalkitup.ui.screens.chat.NewMessageScreen
 import com.example.chalkitup.ui.screens.ProfileScreen
 import com.example.chalkitup.ui.screens.SettingsScreen
 import com.example.chalkitup.ui.screens.SignupScreen
 import com.example.chalkitup.ui.screens.StartScreen
+import com.example.chalkitup.ui.screens.TermsAndCond
 import com.example.chalkitup.ui.viewmodel.AuthViewModel
 import com.example.chalkitup.ui.viewmodel.BookingViewModel
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
+import com.example.chalkitup.ui.viewmodel.ChatViewModel
 import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
+import com.example.chalkitup.ui.viewmodel.MessageListViewModel
 import com.example.chalkitup.ui.viewmodel.ProfileViewModel
 import com.example.chalkitup.ui.viewmodel.SettingsViewModel
 import com.example.chalkitup.ui.viewmodel.TutorAvailabilityViewModel
-import com.google.firebase.auth.FirebaseAuth
 
 // Navigation Center, NavHost with navController
 // On app launch, opens startScreen
 
 @Composable
 fun NavGraph(navController: NavHostController) {
+
+    val messageListViewModel: MessageListViewModel = viewModel()
+    val chatViewModel: ChatViewModel = viewModel()
 
     NavHost(navController = navController, startDestination = "start") {
 
@@ -60,6 +66,15 @@ fun NavGraph(navController: NavHostController) {
             )
         }
 
+        // TermsAndCond Screen
+        composable("termsAndCond") {
+            val authViewModel: AuthViewModel = viewModel()
+            TermsAndCond(
+                navController = navController,
+                authViewModel = authViewModel
+            )
+        }
+
         // Home Screen
         composable("home") {
             HomeScreen(navController = navController)
@@ -76,18 +91,37 @@ fun NavGraph(navController: NavHostController) {
 
         // Messages Screen
         composable("messages") {
-            val user = FirebaseAuth.getInstance().currentUser
-            if (user != null) {
-                MessagesScreen(
-                    navController = navController,
-                    userId = user.uid
-                )
-            }
+            MessageListScreen(
+                navController = navController,
+                messageListViewModel
+            )
         }
 
-        // Ask Question Screen
-        composable("askQuestion") {
-            AskQuestionScreen(navController = navController)
+        // New Message Screen
+        composable("newMessage") {
+            NewMessageScreen(
+                navController = navController,
+                messageListViewModel,
+                chatViewModel
+            )
+        }
+
+        // Chat Screen
+        // Receives user Id from previous screen
+        composable("chat/{conversationId}/{selectedUserId}") { backStackEntry ->
+            val selectedUserId = backStackEntry.arguments?.getString("selectedUserId") ?: ""
+            val conversationIdArg = backStackEntry.arguments?.getString("conversationId") ?: ""
+
+            val conversationId =
+                if (conversationIdArg == "null") null
+                else conversationIdArg
+
+            ChatScreen(
+                navController = navController,
+                chatViewModel,
+                conversationId = conversationId,
+                selectedUserId = selectedUserId
+            )
         }
 
         // Profile Screen

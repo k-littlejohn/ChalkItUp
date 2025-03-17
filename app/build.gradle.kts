@@ -83,6 +83,7 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.androidx.lifecycle.runtime.ktx.v262)
+
     implementation(libs.firebase.database.ktx)
     implementation(libs.play.services.auth)
     implementation(libs.lifecycle.runtime.ktx.v262)

@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.chalkitup.ui.components.TutorSubject
-import com.example.chalkitup.ui.screens.TutorAvailability
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
@@ -16,7 +15,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -130,7 +128,6 @@ class BookingViewModel : ViewModel() {
 
     // ------------------- EMAIL NOTIFICATIONS FOR BOOKING END---------------------------
 
-
     // State for tutors who can teach the selected subject
     private val _tutors = MutableStateFlow<List<String>>(emptyList())
     val tutors: StateFlow<List<String>> get() = _tutors
@@ -181,6 +178,10 @@ class BookingViewModel : ViewModel() {
         _date.value = "Unknown"
     }
 
+    fun resetDay() {
+        _selectedDay.value = null
+    }
+
     fun getFirstDayOfMonth(currentDate: LocalDate): LocalDate {
         return currentDate.withDayOfMonth(1) // First day of the month
     }
@@ -190,12 +191,12 @@ class BookingViewModel : ViewModel() {
     }
 
     // Set the selected subject and fetch tutors
-    fun setSubject(subject: TutorSubject, priceRange: ClosedFloatingPointRange<Float>) {
-        fetchTutors(subject, priceRange)
+    fun setSubject(subject: TutorSubject, priceRange: ClosedFloatingPointRange<Float>,mode: String) {
+        fetchTutors(subject, priceRange,mode)
     }
 
     // Function to fetch tutors who can teach the selected subject
-    private fun fetchTutors(selectedSubject: TutorSubject, priceRange: ClosedFloatingPointRange<Float>) {
+    private fun fetchTutors(selectedSubject: TutorSubject, priceRange: ClosedFloatingPointRange<Float>,mode: String) {
         _isLoading.value = true
         viewModelScope.launch {
             try {
@@ -242,7 +243,7 @@ class BookingViewModel : ViewModel() {
 
                         println("Matched tutor IDs: $matchedTutorIds")
                         _tutors.value = matchedTutorIds
-                        fetchAvailabilityForTutors(matchedTutorIds) // Fetch availability for matched tutors
+                        fetchAvailabilityForTutors(matchedTutorIds,mode) // Fetch availability for matched tutors
                     }
                     .addOnFailureListener { e ->
                         println("Failed to fetch tutors: ${e.message}")
@@ -263,7 +264,7 @@ class BookingViewModel : ViewModel() {
     }
 
     // Fetch availability data for the selected tutors
-    private fun fetchAvailabilityForTutors(tutorIds: List<String>) {
+    private fun fetchAvailabilityForTutors(tutorIds: List<String>, mode: String) {
         _isLoading.value = true
         viewModelScope.launch {
             try {
@@ -295,18 +296,30 @@ class BookingViewModel : ViewModel() {
 
                         availabilityList?.forEach { tutorAvailability ->
                             val date = LocalDate.parse(tutorAvailability.day)
-                            val timeSlots = tutorAvailability.timeSlots.map { timeString ->
-                                // Pad single-digit hours with a leading zero (e.g., "9:00" → "09:00")
-                                val formattedTimeString = if (timeString.length == 4) "0$timeString" else timeString
-                                LocalTime.parse(formattedTimeString, DateTimeFormatter.ofPattern("HH:mm"))
+                            val timeSlots = tutorAvailability.timeSlots
+                            val times = timeSlots.mapNotNull { timeString ->
+                                // Determine if the time slot is valid for the current mode
+                                val correctMode = when (mode) {
+                                    "inPerson" -> timeString.inPerson && !timeString.booked
+                                    "online" -> timeString.online && !timeString.booked
+                                    else -> false
+                                }
+
+                                // Only return the time if it's in the correct mode
+                                if (correctMode) {
+                                    LocalTime.parse(timeString.time, DateTimeFormatter.ofPattern("h:mm a"))
+                                } else {
+                                    null  // This will effectively filter out invalid time slots
+                                }
                             }.sorted()
-                            println("Time slots for $date (tutor $tutorId): $timeSlots")
+
+                            println("Time slots for $date (tutor $tutorId): $times")
 
                             // Add time slots to the tutor-specific availability map
-                            tutorAvailabilityMap.getOrPut(tutorId) { mutableMapOf() }.getOrPut(date) { mutableListOf() }.addAll(timeSlots)
+                            tutorAvailabilityMap.getOrPut(tutorId) { mutableMapOf() }.getOrPut(date) { mutableListOf() }.addAll(times)
 
                             // Add time slots to the global availability map
-                            availabilityMap.getOrPut(date) { mutableListOf() }.addAll(timeSlots)
+                            availabilityMap.getOrPut(date) { mutableListOf() }.addAll(times)
                         }
                     } else {
                         println("No availability data found for tutor $tutorId")
@@ -478,7 +491,9 @@ class BookingViewModel : ViewModel() {
                 .await()
 
             // Remove the booked time slots from the tutor's availability
-            removeBookedTimesFromAvailability(tutorId, yearMonth, day, startTime, endTime)
+            //removeBookedTimesFromAvailability(tutorId, yearMonth, day, startTime, endTime)
+
+            markTimesAsBooked(tutorId, yearMonth, day, startTime, endTime)
 
             // Fetch tutor's full name
             val tutorFullName = fetchUserFullName(tutorId)
@@ -514,7 +529,6 @@ class BookingViewModel : ViewModel() {
             )
         }
     }
-
 
     private suspend fun fetchTutorPriceForSubject(tutorId: String, selectedSubject: TutorSubject): String? {
         return try {
@@ -558,7 +572,7 @@ class BookingViewModel : ViewModel() {
         }
     }
 
-    private suspend fun removeBookedTimesFromAvailability(
+    private suspend fun markTimesAsBooked(
         tutorId: String,
         yearMonth: String,
         day: LocalDate,
@@ -575,46 +589,55 @@ class BookingViewModel : ViewModel() {
         val availabilityList = availabilityDoc.get("availability") as? List<Map<String, Any>> ?: return
 
         // Find the entry where the "day" matches the selected date
-        val dayEntry = availabilityList.find { it["day"] == day.toString() } ?: return
+        val dayEntryIndex = availabilityList.indexOfFirst { it["day"] == day.toString() }
+        if (dayEntryIndex == -1) return // No entry for this day, exit
 
-        // Get the timeSlots array
-        val dayAvailability = dayEntry["timeSlots"] as? MutableList<String> ?: return
+        // Convert the entry's timeSlots into a mutable list of TimeSlot objects
+        val timeSlots = (availabilityList[dayEntryIndex]["timeSlots"] as? List<Map<String, Any>>)
+            ?.map { map ->
+                TimeSlot(
+                    time = map["time"] as String,
+                    inPerson = map["inPerson"] as Boolean,
+                    online = map["online"] as Boolean,
+                    booked = map["booked"] as Boolean
+                )
+            }?.toMutableList() ?: return
 
-        // Log the current time slots for the day
-        println("Current time slots for $day: $dayAvailability")
+        // Log current time slots before modification
+        println("Current time slots for $day: $timeSlots")
 
-        // Generate the list of time slots to remove (formatted to match Firestore)
-        val timeSlotsToRemove = mutableListOf<String>()
+        // Generate the list of time slots to mark as booked
         var currentTime = startTime
+        val formatter = DateTimeFormatter.ofPattern("h:mm a")
         while (currentTime < endTime) {
-            timeSlotsToRemove.add(currentTime.format(DateTimeFormatter.ofPattern("H:mm")))
+            val timeStr = currentTime.format(formatter)
+
+            // Find the matching time slot and mark it as booked
+            timeSlots.find { it.time == timeStr }?.let { it.booked = true }
+
             currentTime = currentTime.plusMinutes(30)
         }
 
-        // Log the time slots to remove
-        println("Time slots to remove: $timeSlotsToRemove")
+        // Log updated time slots
+        println("Updated time slots for $day: $timeSlots")
 
-        // Remove booked slots
-        val updatedAvailability = dayAvailability.filter { it !in timeSlotsToRemove }
-
-        // Update Firestore with the modified availability
-        val updatedAvailabilityList = availabilityList.toMutableList().apply {
-            // Find the index of the day entry
-            val dayIndex = indexOfFirst { it["day"] == day.toString() }
-            if (dayIndex != -1) {
-                if (updatedAvailability.isEmpty()) {
-                    // If no time slots are left, remove the entire day entry
-                    removeAt(dayIndex)
-                } else {
-                    // Otherwise, update the time slots for the day
-                    this[dayIndex] = this[dayIndex].toMutableMap().apply {
-                        this["timeSlots"] = updatedAvailability
-                    }
-                }
+        // Convert back to Firestore format
+        val updatedDayEntry = availabilityList[dayEntryIndex].toMutableMap().apply {
+            this["timeSlots"] = timeSlots.map { slot ->
+                mapOf(
+                    "time" to slot.time,
+                    "inPerson" to slot.inPerson,
+                    "online" to slot.online,
+                    "booked" to slot.booked
+                )
             }
         }
 
-        // Push the updated availability back to Firestore
+        // Update Firestore
+        val updatedAvailabilityList = availabilityList.toMutableList().apply {
+            this[dayEntryIndex] = updatedDayEntry
+        }
+
         availabilityRef.update("availability", updatedAvailabilityList).await()
     }
 
@@ -632,7 +655,8 @@ class BookingViewModel : ViewModel() {
     ) {
         val formattedSubject = "${subject.subject} ${subject.grade} ${subject.specialization}"
 
-        val formattedTimeRange = formatTimeRange(startTime.toString(), endTime.toString())
+        val formatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH)
+        val formattedTimeRange = "${startTime.format(formatter)} - ${endTime.format(formatter)}"
 
         _tutorName.value = tutorFullName
         _userSubject.value = subject
@@ -640,38 +664,25 @@ class BookingViewModel : ViewModel() {
         _timeSlot.value = formattedTimeRange
         _date.value = day.toString()
 
+        val formattedSessionType = if (sessionType == "inPerson") "In Person" else "Online"
+
         val sessionData = hashMapOf(
             "tutorID" to tutorId,
             "comments" to comments,
-            "mode" to sessionType,
+            "mode" to formattedSessionType,
             "date" to day.toString(),
             "time" to formattedTimeRange,
             "status" to "booked",
             "subject" to formattedSubject,
             "studentID" to studentId,
             "tutorName" to tutorFullName,
-            "studentName" to studentFullName
+            "studentName" to studentFullName,
+            "subjectObject" to subject
         )
 
         db.collection("appointments")
             .add(sessionData)
             .await()
-    }
-
-    private fun formatTimeRange(startTime: String, endTime: String): String {
-        val inputFormat = SimpleDateFormat("HH:mm", Locale.getDefault()) // 24-hour format
-        val outputFormat = SimpleDateFormat("h:mm a", Locale.getDefault()) // 12-hour format with AM/PM
-
-        // Parse the 24-hour format times to Date objects
-        val startDate = inputFormat.parse(startTime)
-        val endDate = inputFormat.parse(endTime)
-
-        // Format the Date objects to 12-hour format strings
-        val startFormatted = outputFormat.format(startDate!!)
-        val endFormatted = outputFormat.format(endDate!!)
-
-        // Return the formatted time range
-        return "$startFormatted - $endFormatted"
     }
 
     private suspend fun fetchUserFullName(userId: String): String {
@@ -689,10 +700,10 @@ class BookingViewModel : ViewModel() {
             ""
         }
     }
+
 }
 
 // Email Class info
-
 data class Email (
     var to: String = "",
     var message: EmailMessage

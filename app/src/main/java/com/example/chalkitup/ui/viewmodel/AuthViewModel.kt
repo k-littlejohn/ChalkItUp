@@ -3,12 +3,15 @@ package com.example.chalkitup.ui.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.chalkitup.ui.components.TutorSubject
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 // AuthViewModel
 // Handles interactions for user:
@@ -39,9 +42,11 @@ class AuthViewModel : ViewModel() {
     private val _isGoogleUserLoggedIn = MutableLiveData<Boolean>()
     val isGoogleUserLoggedIn: LiveData<Boolean> = _isGoogleUserLoggedIn
 
+    private val _agreedToTerms = MutableLiveData<Boolean>()
 
     // Initializes the ViewModel and checks if a user is already logged in
     init {
+        checkAgreedToTerms()
         checkUserLoggedIn()
     }
 
@@ -52,6 +57,23 @@ class AuthViewModel : ViewModel() {
         // Set the LiveData value to true if a user is logged in and their email is verified, false otherwise
         _isUserLoggedIn.value = currentUser != null && currentUser.isEmailVerified
         _isGoogleUserLoggedIn.value = currentUser != null
+        _isUserLoggedIn.value = currentUser != null && currentUser.isEmailVerified && _agreedToTerms.value == true
+    }
+
+    private fun checkAgreedToTerms() {
+        val userId = auth.currentUser?.uid
+        viewModelScope.launch {
+            if (userId != null) {
+                val snapshot = firestore.collection("users").document(userId)
+                    .get().await()
+                _agreedToTerms.value = snapshot.getBoolean("agreeToTerms") ?: false
+            }
+        }
+    }
+
+    fun checkEmailVerified(): Boolean {
+        val user = auth.currentUser
+        return user!!.isEmailVerified
     }
 
     /**
@@ -72,6 +94,7 @@ class AuthViewModel : ViewModel() {
         password: String,
         onSuccess: () -> Unit, // Callback for successful login
         onEmailError: () -> Unit, // Callback if email is not verified
+        onTermsError: () -> Unit,
         onError: (String) -> Unit // Callback for errors during login
     ) {
         // Sign in with the provided email and password
@@ -80,7 +103,12 @@ class AuthViewModel : ViewModel() {
                 if (task.isSuccessful) {
                     // If login is successful, check if the email is verified
                     val user = auth.currentUser
-                    if (user?.isEmailVerified == true) {
+
+                    checkAgreedToTerms()
+
+                    if (_agreedToTerms.value == false) {
+                        onTermsError()
+                    } else if (user?.isEmailVerified == true) {
                         onSuccess() // Proceed if email is verified
                     } else {
                         onEmailError() // Prompt user to verify email
@@ -163,6 +191,7 @@ class AuthViewModel : ViewModel() {
                                     "lastName" to lastName,
                                     "email" to email,
                                     "subjects" to subjects,
+                                    "agreeToTerms" to false,
                                 )
 
                                 // Save the user data in Firestore under their UID
@@ -261,6 +290,16 @@ class AuthViewModel : ViewModel() {
                     )
                 }
             }
+    }
+
+    fun agreeToTerms() {
+        val userId = auth.currentUser?.uid
+        viewModelScope.launch {
+            if (userId != null) {
+                firestore.collection("users").document(userId)
+                    .update("agreeToTerms", true)
+            }
+        }
     }
 
 }

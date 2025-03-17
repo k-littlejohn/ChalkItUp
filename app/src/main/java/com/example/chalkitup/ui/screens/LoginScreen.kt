@@ -143,6 +143,7 @@ fun LoginScreen(
                                 email, password,
                                 onSuccess = { navController.navigate("home") },
                                 onEmailError = { navController.navigate("checkEmail/verify") },
+                                onTermsError = { navController.navigate("termsAndCond") },
                                 onError = { errorMessage = it }
                             )
                         }

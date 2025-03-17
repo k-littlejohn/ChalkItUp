@@ -1,11 +1,14 @@
 package com.example.chalkitup.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,10 +21,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,12 +33,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.chalkitup.R
 import com.example.chalkitup.ui.viewmodel.TutorAvailabilityViewModel
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
@@ -69,7 +74,7 @@ fun EnterTutorAvailability(
     val scrollState = rememberScrollState()
 
     // Collecting states from ViewModel
-    val bookedAppointments by viewModel.bookedAppointments.collectAsState()
+    //val bookedAppointments by viewModel.bookedAppointments.collectAsState()
     val tutorAvailability by viewModel.tutorAvailabilityList.collectAsState() // List of tutor's available time slots
     val selectedDay by viewModel.selectedDay.collectAsState() // Currently selected day
     val selectedTimeSlots by viewModel.selectedTimeSlots.collectAsState() // Selected time slots for the chosen day
@@ -78,8 +83,8 @@ fun EnterTutorAvailability(
     // Get the current month and store necessary date formatters
     val currentMonth = remember { YearMonth.now() }// Stores the current month
     val daysOfWeek = remember { daysOfWeek() } // Gets a list of days in a week (Mon-Sun)
-    val dateFormatter = remember { DateTimeFormatter.ofPattern("yyyy-MM-dd") } // Formatter for database storage
-    val displayDateFormatter = remember { DateTimeFormatter.ofPattern("MMM d") } // Formatter for UI display (e.g., "Feb 11")
+    val dateFormatter =
+        remember { DateTimeFormatter.ofPattern("yyyy-MM-dd") } // Formatter for database storage
 
     // Calendar state for handling month navigation
     // Currently the user can only view & edit the current month
@@ -94,251 +99,376 @@ fun EnterTutorAvailability(
 
     // Select the first day of the month by default
     LaunchedEffect(calendarState.firstVisibleMonth) {
-        val firstDay = calendarState.firstVisibleMonth.yearMonth.atDay(1).format(dateFormatter)
-        viewModel.selectDay(firstDay)
+        //val firstDay = calendarState.firstVisibleMonth.yearMonth.atDay(1).format(dateFormatter)
+//        val today = LocalDate.now()
+//        viewModel.selectDay(today.toString())
+        viewModel.fetchAvailabilityFromFirestore()
     }
 
-    Column(
+    // Gradient Background
+    val gradientBrush = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF54A4FF), // 5% Blue
+            Color.White, Color.White
+        )
+    )
+
+    Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .verticalScroll(scrollState),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxSize()
+            .background(gradientBrush),
+        contentAlignment = Alignment.CenterEnd
     ) {
-        Surface(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            color = Color.White,
-            shape = RoundedCornerShape(16.dp),
-            shadowElevation = 4.dp
+                .verticalScroll(scrollState)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
+                    .padding(horizontal = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Display the current month and year
+
                 Text(
-                    text = calendarState.firstVisibleMonth.yearMonth.format(
-                        DateTimeFormatter.ofPattern(
-                            "MMMM yyyy"
-                        )
-                    ),
-                    style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.padding(16.dp)
+                    "Your Availability",
+                    modifier = Modifier.padding(16.dp),
+                    fontSize = 25.sp,
+                    fontWeight = FontWeight.SemiBold
                 )
-                // Display the days of the week headers (Mon-Sun)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Box(
+                    modifier = Modifier
+                        .padding(vertical = 16.dp)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(Color(0xFFE3F2FD), Color(0xFFF1F8E9))
+                            )
+                        )
+                        .padding(16.dp)
                 ) {
-                    daysOfWeek.forEach { day ->
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        // Display the current month and year
                         Text(
-                            text = day.name.take(3),
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.weight(1f),
-                            textAlign = TextAlign.Center,
-                            color = Color.DarkGray
+                            text = calendarState.firstVisibleMonth.yearMonth.format(
+                                DateTimeFormatter.ofPattern(
+                                    "MMMM yyyy"
+                                )
+                            ),
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = Color.Black
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Display the days of the week headers (Mon-Sun)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            daysOfWeek.forEach { day ->
+                                Text(
+                                    text = day.name.take(2),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier.weight(1f),
+                                    textAlign = TextAlign.Center,
+                                    color = Color.DarkGray
+                                )
+                            }
+                        }
+
+                        HorizontalCalendar(
+                            state = calendarState,
+                            dayContent = { day ->
+                                val formattedDate = day.date.format(dateFormatter)
+                                val hasAvailability =
+                                    tutorAvailability.any { it.day == formattedDate } // Check if day has availability
+                                val isSelected =
+                                    selectedDay == formattedDate // Check if day is selected
+                                val isToday = day.date == LocalDate.now()
+                                val isCurrentMonth =
+                                    YearMonth.from(day.date) == calendarState.firstVisibleMonth.yearMonth
+                                val isPastDay = day.date < LocalDate.now()
+
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(
+                                            when {
+                                                isSelected -> Color.DarkGray // Gray for selected day
+                                                isPastDay -> Color(0x50000000) // Light gray for past days
+                                                hasAvailability -> Color(0xFF06C59C) // Green if availability exists
+                                                else -> Color.Transparent
+                                            }
+                                        )
+                                        .border(
+                                            width = if (isToday) 2.dp else 0.dp,
+                                            color = if (isToday) Color.DarkGray else Color.Transparent,
+                                            shape = RoundedCornerShape(8.dp)
+                                        )
+                                        .clickable {
+                                            if (isCurrentMonth) {
+                                                viewModel.selectDay(formattedDate) // Select day on click
+                                            }
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = day.date.dayOfMonth.toString(),
+                                        color = when {
+                                            isSelected || hasAvailability -> Color.White
+                                            isCurrentMonth || isPastDay -> Color.Black
+                                            else -> Color.LightGray
+                                        },
+                                    )
+                                }
+                            }
                         )
                     }
                 }
 
-                HorizontalCalendar(
-                    state = calendarState,
-                    dayContent = { day ->
-                        val formattedDate = day.date.format(dateFormatter)
-                        val hasAvailability = tutorAvailability.any { it.day == formattedDate } // Check if day has availability
-                        val hasBooking = bookedAppointments.any { it.day == formattedDate } // Check if day has a booking
-                        val isSelected = selectedDay == formattedDate // Check if day is selected
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    // Action buttons (Edit, Save, Cancel)
+                    if (isEditing) {
+                        Column {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceEvenly
+                            ) {
+                                // Display Save and Cancel buttons in edit mode
+                                Button(
+                                    onClick = { viewModel.saveAvailability() },
+                                    shape = RoundedCornerShape(16.dp),
+                                    modifier = Modifier.width(140.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(
+                                            0xFF06C59C
+                                        )
+                                    )
+                                ) {
+                                    Text(text = "Save", color = Color.White)
+                                }
+                                Box(modifier = Modifier.width(20.dp))
+                                Button(
+                                    onClick = { viewModel.cancelEdit() },
+                                    shape = RoundedCornerShape(16.dp),
+                                    modifier = Modifier.width(140.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(
+                                            0xFF06C59C
+                                        )
+                                    )
+                                ) {
+                                    Text(text = "Cancel", color = Color.White)
+                                }
+                            }
 
-                        Box(
-                            modifier = Modifier
-                                .size(45.dp, 35.dp)
-                                .clip(RoundedCornerShape(50))
-                                .background(
-                                    when {
-                                        isSelected -> Color(0xfffad96e) // Yellow for selected day
-                                        hasAvailability -> Color(0xFF06C59C) // Green if availability exists
-                                        hasBooking -> Color(0xFFc183d4) // Pink if booked
-                                        else -> Color.Transparent
-                                    }
-                                )
-                                .clickable {
-                                    viewModel.selectDay(formattedDate) // Select day on click
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = day.date.dayOfMonth.toString(),
-                                color = Color.White.takeIf { isSelected || hasAvailability || hasBooking }
-                                    ?: Color.Black // Adjust text color based on background
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceEvenly
+                            ) {
+                                Box(modifier = Modifier.width(70.dp))
+                                // Buttons for Online
+                                IconButton(onClick = { viewModel.selectAllOnline() }) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.baseline_check_box_24),
+                                        contentDescription = "Select all online",
+                                        tint = Color.LightGray,
+                                        modifier = Modifier
+                                            .size(25.dp),
+                                    )
+                                }
+                                IconButton(onClick = { viewModel.clearAllOnline() }) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.baseline_cancel_24),
+                                        contentDescription = "Clear all online",
+                                        tint = Color.LightGray,
+                                        modifier = Modifier
+                                            .size(25.dp),
+                                    )
+                                }
+
+                                Box(modifier = Modifier.width(30.dp))
+
+                                IconButton(onClick = { viewModel.selectAllInPerson() }) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.baseline_check_box_24),
+                                        contentDescription = "Select all in Person",
+                                        tint = Color.LightGray,
+                                        modifier = Modifier
+                                            .size(25.dp),
+                                    )
+                                }
+                                IconButton(onClick = { viewModel.clearAllInPerson() }) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.baseline_cancel_24),
+                                        contentDescription = "Clear all in Person",
+                                        tint = Color.LightGray,
+                                        modifier = Modifier
+                                            .size(25.dp),
+                                    )
+                                }
+                            }
+                        }
+
+                    } else if ((selectedDay?.toLocalDate() ?: LocalDate.now()) >= LocalDate.now()) {
+
+                        Text(
+                            text = "View and Edit your Availability",
+                            fontSize = 14.sp,
+                        )
+
+                        Box(modifier = Modifier.weight(1f))
+                        IconButton(onClick = { viewModel.toggleEditMode() }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_edit),
+                                contentDescription = "Edit Profile",
+                                tint = Color(0xFF54A4FF),
+                                modifier = Modifier.size(25.dp)
                             )
                         }
                     }
-                )
-            }
-        }
-
-        // Surface for displaying selected day and action buttons
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            color = Color.White,
-            shape = RoundedCornerShape(16.dp),
-            shadowElevation = 4.dp
-        ) {
-            // Row for selected day text and buttons
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                // Display selected day in formatted text (e.g., "Feb 11")
-                selectedDay?.let { day ->
-                    val displayDate =
-                        LocalDate.parse(day, dateFormatter).format(displayDateFormatter)
-                    Text(
-                        text = displayDate,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.weight(1f) // Take up remaining space
-                    )
-                }
-
-                // Action buttons (Edit, Save, Cancel)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    if (isEditing) {
-                        // Display Save and Cancel buttons in edit mode
-                        Button(
-                            onClick = { viewModel.saveAvailability() },
-                            modifier = Modifier.padding(end = 8.dp),
-                            shape = RoundedCornerShape(8.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF54A4FF))
-                        ) {
-                            Text(text = "Save")
-                        }
-                        Button(
-                            onClick = { viewModel.cancelEdit() },
-                            shape = RoundedCornerShape(8.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF54A4FF))
-                        ) {
-                            Text(text = "Cancel")
-                        }
-                    } else {
-                        // Display Edit button in view mode
-                        Button(
-                            onClick = { viewModel.toggleEditMode() },
-                            shape = RoundedCornerShape(8.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C))
-                        ) {
-                            Text(text = "Edit")
-                        }
-                    }
                 }
             }
-        }
 
-        // Surface for displaying time slots and selection boxes
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            color = Color.White,
-            shape = RoundedCornerShape(16.dp),
-            shadowElevation = 4.dp
-        ) {
-            // Availability selection
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Box to define the height of the availability selection area
-                Box(modifier = Modifier.height(400.dp))
-                {
+                Box(modifier = Modifier
+                    .height(600.dp)
+                    .border(
+                        width = 2.dp,
+                        color = Color.LightGray,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                ) {
                     LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                        //.weight(1f)
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        // Iterate through the list of time intervals from the ViewModel
-                        items(viewModel.timeIntervals) { timeSlot ->
-                            // Row layout to display each time slot with a selection box
+                        items(viewModel.timeIntervals) { time ->
+                            // Find the corresponding TimeSlot object (if it exists)
+                            val timeSlot = selectedTimeSlots.find { it.time == time }
+
+                            // Check if the time slot is booked
+                            val isBooked = timeSlot?.booked ?: false
+
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.Top
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Card(
-                                    modifier = Modifier.width(50.dp),
-                                    colors = CardColors(
-                                        disabledContentColor = Color.Black,
-                                        containerColor = Color.White,
-                                        contentColor = Color.Black,
-                                        disabledContainerColor = Color.White
-                                    )
-                                ) {
-                                    Text(text = timeSlot)
-                                }
-
-                                // Check if the time slot is selected
-                                val isSelected = selectedTimeSlots.contains(timeSlot)
-
-                                // Check if the time slot is booked for the selected day
-//                                val isBooked = bookedAppointments.any { it.day == selectedDay && it.timeSlots.contains(timeSlot) }
-                                val isBooked = selectedDay?.let { day ->
-                                    bookedAppointments.any { it.day == day && it.timeSlots.contains(timeSlot) }
-                                } ?: false
-
-                                // Clickable Box to act as a selectable time slot
+                                // Time slot label
                                 Box(
                                     modifier = Modifier
+                                        .width(80.dp)
+                                        .height(50.dp),
+                                    contentAlignment = Alignment.CenterStart
+                                ) {
+                                    Text(text = time)
+                                }
+
+                                // Online selection box
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
                                         .height(50.dp)
-                                        .fillMaxWidth()
-                                        .background(when {
-                                            isBooked -> Color(0xFFc183d4) // Pink if booked
-                                            isSelected && isEditing -> Color(0xFF54A4FF) // Blue when selected in edit mode
-                                            isSelected -> Color(0xFF06C59C) // Green when selected in view mode
-                                            else -> Color.White // Default white background when unselected
-                                        })
-                                        .clickable(enabled = isEditing && !isBooked) { // Clickable only when in edit mode and not booked
-                                            viewModel.toggleTimeSlotSelection(timeSlot) // Toggles selection state
-                                        }
-                                )
+                                        .background(
+                                            if (isBooked) Color(0xfffad96e) // Pink if booked
+                                            else if (timeSlot?.online == true && isEditing) Color(
+                                                0xFF54A4FF
+                                            ) // Blue if online is selected
+                                            else if (timeSlot?.online == true && !isEditing) Color(
+                                                0xFF06C59C
+                                            )
+                                            else Color(0xFFd2e5fa) // unselected
+                                            , shape = RoundedCornerShape(16.dp)
+                                        )
+                                        .clickable(enabled = isEditing && !isBooked) {
+                                            viewModel.toggleTimeSlotSelection(time, "online")
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = if (isBooked) "Booked" else "Online", color = Color.White, fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+
+                                // In-Person selection box
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(50.dp)
+                                        .background(
+                                            if (isBooked) Color(0xfffad96e) // Pink if booked
+                                            else if (timeSlot?.inPerson == true && isEditing) Color(
+                                                0xFF54A4FF
+                                            ) // Blue if inPerson is selected
+                                            else if (timeSlot?.inPerson == true && !isEditing) Color(
+                                                0xFF06C59C
+                                            )
+                                            else Color(0xFFd2e5fa) // unselected
+                                            , shape = RoundedCornerShape(16.dp)
+                                        )
+                                        .clickable(enabled = isEditing && !isBooked) {
+                                            viewModel.toggleTimeSlotSelection(time, "inPerson")
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = if (isBooked) "Booked" else "In Person", color = Color.White, fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
 
-                            // Separator Row to visually divide time slots (thin white line)
+                            // Separator Row
                             Row {
-                                // This box is redundant currently but takes up space underneath the time slot text
-                                // Useful if we want to change the line colors between the text and selection boxes
                                 Box(
                                     modifier = Modifier
                                         .height(1.dp)
                                         .width(50.dp)
-                                        .background(Color.White)
                                 )
                                 Box(
                                     modifier = Modifier
                                         .height(1.dp)
                                         .fillMaxWidth()
-                                        .background(Color.White)
                                 )
                             }
                         }
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(40.dp))
+
         }
     }
 }
 
-// Data model for storing tutor availability
-data class TutorAvailability(
-    val day: String = "", // Selected day
-    val timeSlots: List<String> = emptyList() // List of available time slots for that day
-)
+fun String.toLocalDate(): LocalDate {
+    return LocalDate.parse(this, DateTimeFormatter.ISO_LOCAL_DATE)
+}
