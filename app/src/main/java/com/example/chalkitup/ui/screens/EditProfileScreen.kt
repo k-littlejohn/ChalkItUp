@@ -434,7 +434,7 @@ fun EditProfileScreen(
                     //val  finalInterests=updatedInterests.toList()
                     editProfileViewModel.updateProfile(firstName, lastName, tutorSubjects, bio, progress, interests)
                     certificationViewModel.updateCertifications(context)
-                    navController.navigate("profile") // Navigate back to profile
+                    navController.navigate("profile/") // Navigate back to profile
                 }
             },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
@@ -448,7 +448,7 @@ fun EditProfileScreen(
             Button(onClick = {
                 editProfileViewModel._profilePictureUrl.value =
                     originalProfilePictureUrl // Restore old picture
-                navController.navigate("profile") // Navigate back to profile
+                navController.navigate("profile/") // Navigate back to profile
             },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
                 shape = RoundedCornerShape(12.dp)

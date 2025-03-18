@@ -80,7 +80,8 @@ import androidx.compose.foundation.Image
 fun ProfileScreen(
     profileViewModel: ProfileViewModel,
     certificationViewModel: CertificationViewModel,
-    navController: NavController
+    navController: NavController,
+    targetedUser: String // To view another user's profile, other user's ID is passed
 ) {
     //------------------------------VARIABLES----------------------------------------------
 
@@ -103,7 +104,7 @@ fun ProfileScreen(
 
     // Trigger to reload user profile when the profile screen is launched.
     LaunchedEffect(Unit) {
-        profileViewModel.loadUserProfile() // Fetches the user profile when entering the profile screen
+        profileViewModel.loadUserProfile(targetedUser) // Fetches the user profile when entering the profile screen
     }
 
     Column(

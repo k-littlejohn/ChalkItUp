@@ -51,14 +51,14 @@ fun BottomNavigationBar(
             BottomNavItem("home", Icons.Default.Home, "Home"),         // Home icon with label "Home"
             BottomNavItem("tutorAvailability", Icons.Default.Add, "Availability"),       // Availability icon with label "Availability"
             BottomNavItem("messages", Icons.AutoMirrored.Filled.Message, "Messages"),// Messages icon with label "Messages"
-            BottomNavItem("profile", Icons.Default.Person, "Profile")  // Profile icon with label "Profile"
+            BottomNavItem("profile/", Icons.Default.Person, "Profile")  // Profile icon with label "Profile"
         )
         // List of the items that are displayed on the Bottom Bar for Students
         "Student" -> listOf(
             BottomNavItem("home", Icons.Default.Home, "Home"),         // Home icon with label "Home"
             BottomNavItem("booking", Icons.Default.Add, "Book"),       // Book icon with label "Book"
             BottomNavItem("messages", Icons.AutoMirrored.Filled.Message, "Messages"), // Messages icon with label "Messages"
-            BottomNavItem("profile", Icons.Default.Person, "Profile")  // Profile icon with label "Profile"
+            BottomNavItem("profile/", Icons.Default.Person, "Profile")  // Profile icon with label "Profile"
         )
         else -> emptyList()
     }
@@ -67,7 +67,7 @@ fun BottomNavigationBar(
     var currentRoute = navController.currentDestination?.route
     currentRoute = currentRoute?.substringBefore("/")
 
-    val fillerBar = "checkEmail" == currentRoute
+    val fillerBar = ("checkEmail" == currentRoute) || ("awaitingApproval" == currentRoute)
 
     // Create the Bottom Navigation Bar
     NavigationBar (
