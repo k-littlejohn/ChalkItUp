@@ -1,10 +1,6 @@
-/*
-Code will need to be updated once tutor availability is taken into consideration, for now it is
-based on the appointment database in firebase.
- */
-
 package com.example.chalkitup.ui.screens
 
+import android.widget.Space
 import androidx.compose.ui.res.painterResource
 import com.example.chalkitup.R
 import androidx.compose.foundation.Image
@@ -18,7 +14,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.navigation.NavController
 import androidx.compose.runtime.*
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 import androidx.compose.ui.graphics.Color
+import com.kizitonwose.calendar.compose.*
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.daysOfWeek
@@ -30,12 +30,18 @@ import androidx.compose.foundation.border
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import java.lang.Exception
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.*
 import java.time.LocalDate
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.Brush
 import java.util.Locale
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
@@ -80,7 +86,6 @@ fun HomeScreen(
                 .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            Spacer(modifier = Modifier.height(20.dp))
 
             Row(
                 modifier = Modifier
@@ -109,6 +114,7 @@ fun HomeScreen(
                 selectedAppointment = appointment
             }
         }
+
     }
 
     // Appointment With More Details Popup

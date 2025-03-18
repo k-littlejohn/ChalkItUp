@@ -63,6 +63,8 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.Image
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 
 
 /**
@@ -80,7 +82,8 @@ import androidx.compose.foundation.Image
 fun ProfileScreen(
     profileViewModel: ProfileViewModel,
     certificationViewModel: CertificationViewModel,
-    navController: NavController
+    navController: NavController,
+    targetedUser: String // To view another user's profile, other user's ID is passed
 ) {
     //------------------------------VARIABLES----------------------------------------------
 
@@ -103,7 +106,7 @@ fun ProfileScreen(
 
     // Trigger to reload user profile when the profile screen is launched.
     LaunchedEffect(Unit) {
-        profileViewModel.loadUserProfile() // Fetches the user profile when entering the profile screen
+        profileViewModel.loadUserProfile(targetedUser) // Fetches the user profile when entering the profile screen
     }
 
     Column(
@@ -159,6 +162,32 @@ fun ProfileScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
+        }
+
+
+        Spacer(modifier = Modifier.height(30.dp))
+
+        Button (
+            modifier = Modifier
+                .height(80.dp)
+                .width(400.dp)
+                .background(Color(0xFF06C59C), shape = RoundedCornerShape(18.dp))
+                .border(2.dp, Color.Black, shape = RoundedCornerShape(18.dp)),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF06C59C),
+                contentColor = Color.White
+            ),
+            onClick = {
+                navController.navigate("notifications")
+            }
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.notifications_foreground),
+                contentDescription = "Notification bell",
+                modifier = Modifier.size(90.dp)
+            )
+            Spacer(modifier = Modifier.width(30.dp))
+            Text("Notifications", fontSize = 30.sp, modifier = Modifier.padding(4.dp))
         }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -219,19 +248,20 @@ fun ProfileScreen(
                         items(profile.subjects) { subject ->
                             Box(
                                 modifier = Modifier
-                                    .size(90.dp)
+                                    .size(140.dp)
                                     .clip(RoundedCornerShape(8.dp))
                                     .background(Color.LightGray)
                             ) {
                                 // Temporary icons for subjects
                                 val subjectIcon = when (subject.subject) {
-                                    "Math" -> R.drawable.ic_math
-                                    "Physics" -> R.drawable.ic_physics
-                                    "Chemistry" -> R.drawable.ic_chemistry
-                                    "Social" -> R.drawable.ic_social
-                                    "English" -> R.drawable.ic_english
-                                    "Science" -> R.drawable.ic_science
-                                    else -> R.drawable.chalkitup // havent chosen an icon yet.
+                                    "Math" -> R.drawable.ic_math2
+                                    "Physics" -> R.drawable.ic_physics2
+                                    "Chemistry" -> R.drawable.ic_chemistry2
+                                    "Social" -> R.drawable.ic_social2
+                                    "English" -> R.drawable.ic_english2
+                                    "Science" -> R.drawable.ic_science2
+                                    "Biology" -> R.drawable.ic_biology
+                                    else -> R.drawable.chalkitup
                                 }
 
                                 Image(

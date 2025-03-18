@@ -1,5 +1,6 @@
 package com.example.chalkitup.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,6 +9,8 @@ import com.example.chalkitup.ui.components.TutorSubject
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -36,20 +39,29 @@ class AuthViewModel : ViewModel() {
     private val _isUserLoggedIn = MutableLiveData<Boolean>()
     val isUserLoggedIn: LiveData<Boolean> = _isUserLoggedIn
 
+    // LiveData to track authentication state for Google login. Google does not need email verification
+    private val _isGoogleUserLoggedIn = MutableLiveData<Boolean>()
+    val isGoogleUserLoggedIn: LiveData<Boolean> = _isGoogleUserLoggedIn
+
     private val _agreedToTerms = MutableLiveData<Boolean>()
 
     // Initializes the ViewModel and checks if a user is already logged in
     init {
-        checkAgreedToTerms()
+        //checkAgreedToTerms()
         checkUserLoggedIn()
     }
 
     // Function to check if the user is currently logged in
     // This is done by checking if the current user is non-null in FirebaseAuth
     private fun checkUserLoggedIn() {
+        //checkAgreedToTerms()
         val currentUser = auth.currentUser
         // Set the LiveData value to true if a user is logged in and their email is verified, false otherwise
-        _isUserLoggedIn.value = currentUser != null && currentUser.isEmailVerified && _agreedToTerms.value == true
+
+        _isUserLoggedIn.value = currentUser != null && currentUser.isEmailVerified //&& _agreedToTerms.value == true
+        Log.e("AuthViewModel","checkUserLoggedIn: ${_isUserLoggedIn.value}")
+        _isGoogleUserLoggedIn.value = currentUser != null
+       
     }
 
     private fun checkAgreedToTerms() {
@@ -87,6 +99,8 @@ class AuthViewModel : ViewModel() {
         onSuccess: () -> Unit, // Callback for successful login
         onEmailError: () -> Unit, // Callback if email is not verified
         onTermsError: () -> Unit,
+        awaitingApproval: () -> Unit,
+        isAdmin: () -> Unit,
         onError: (String) -> Unit // Callback for errors during login
     ) {
         // Sign in with the provided email and password
@@ -98,16 +112,54 @@ class AuthViewModel : ViewModel() {
 
                     checkAgreedToTerms()
 
-                    if (_agreedToTerms.value == false) {
+                    if (_agreedToTerms.value == false) { // check if this works timely
                         onTermsError()
                     } else if (user?.isEmailVerified == true) {
-                        onSuccess() // Proceed if email is verified
+                        // Proceed if email is verified
+                        isAdminApproved(
+                            onResult = {
+                                if (it == true) {
+                                    onSuccess()
+                                } else if (it == false) {
+                                    awaitingApproval()
+                                }
+                            },
+                            isAdmin = {
+                                if (it == true) {
+                                    isAdmin()
+                                }
+                            }
+                        )
                     } else {
                         onEmailError() // Prompt user to verify email
                     }
+
                 } else {
                     // Handle error if login fails
                     onError(task.exception?.message ?: "Login failed")
+                }
+            }
+    }
+
+
+    /**
+     * Signs in a new user using Googles email, password,
+     * and additional user information to grab users UID.
+     */
+    fun loginWithGoogle(
+        account: GoogleSignInAccount,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    _isGoogleUserLoggedIn.value = true
+                    onSuccess()
+                } else {
+                    onError(task.exception?.message ?: "Google login failed")
                 }
             }
     }
@@ -161,6 +213,7 @@ class AuthViewModel : ViewModel() {
                                     "email" to email,
                                     "subjects" to subjects,
                                     "agreeToTerms" to false,
+                                    "adminApproved" to false
                                 )
 
                                 // Save the user data in Firestore under their UID
@@ -230,6 +283,7 @@ class AuthViewModel : ViewModel() {
      */
     fun signout() {
         auth.signOut() // Logs out the user from FirebaseAuth
+        _isUserLoggedIn.value = false
     }
 
     /**
@@ -269,5 +323,27 @@ class AuthViewModel : ViewModel() {
             }
         }
     }
+
+    fun isAdminApproved(onResult: (Boolean?) -> Unit, isAdmin: (Boolean?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return
+        viewModelScope.launch {
+            try {
+                val documentSnapshot = firestore.collection("users").document(userId).get().await()
+                val userType = documentSnapshot.getString("userType")
+                if (userType == "Student") {
+                    onResult(true)
+                } else if (userType == "Admin"){
+                    isAdmin(true)
+                } else {
+                    val isApproved = documentSnapshot.getBoolean("adminApproved")
+                    onResult(isApproved)
+                }
+            } catch (e: Exception) {
+                println("Error fetching adminApproved status: ${e.message}")
+                onResult(null) // Return null in case of an error
+            }
+        }
+    }
+
 
 }

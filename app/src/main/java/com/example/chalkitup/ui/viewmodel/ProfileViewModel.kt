@@ -1,10 +1,8 @@
 package com.example.chalkitup.ui.viewmodel
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -56,11 +54,15 @@ class ProfileViewModel : ViewModel() {
     }
 
     // Function to load the user profile when the ViewModel is initialized
-    fun loadUserProfile() {
-        val user = FirebaseAuth.getInstance().currentUser
-        if (user != null) {
-            val userId = user.uid
-            fetchUserProfile(userId)
+    fun loadUserProfile(targetedUser: String? = "") {
+        if (targetedUser.isNullOrEmpty()) {
+            val user = FirebaseAuth.getInstance().currentUser
+            if (user != null) {
+                val userId = user.uid
+                fetchUserProfile(userId)
+            }
+        } else { // Viewing another user
+            fetchUserProfile(targetedUser)
         }
     }
 
