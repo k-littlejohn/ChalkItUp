@@ -1,5 +1,6 @@
 package com.example.chalkitup.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -46,18 +47,21 @@ class AuthViewModel : ViewModel() {
 
     // Initializes the ViewModel and checks if a user is already logged in
     init {
-        checkAgreedToTerms()
+        //checkAgreedToTerms()
         checkUserLoggedIn()
     }
 
     // Function to check if the user is currently logged in
     // This is done by checking if the current user is non-null in FirebaseAuth
     private fun checkUserLoggedIn() {
+        //checkAgreedToTerms()
         val currentUser = auth.currentUser
         // Set the LiveData value to true if a user is logged in and their email is verified, false otherwise
-        _isUserLoggedIn.value = currentUser != null && currentUser.isEmailVerified
+
+        _isUserLoggedIn.value = currentUser != null && currentUser.isEmailVerified //&& _agreedToTerms.value == true
+        Log.e("AuthViewModel","checkUserLoggedIn: ${_isUserLoggedIn.value}")
         _isGoogleUserLoggedIn.value = currentUser != null
-        _isUserLoggedIn.value = currentUser != null && currentUser.isEmailVerified && _agreedToTerms.value == true
+       
     }
 
     private fun checkAgreedToTerms() {
@@ -95,6 +99,8 @@ class AuthViewModel : ViewModel() {
         onSuccess: () -> Unit, // Callback for successful login
         onEmailError: () -> Unit, // Callback if email is not verified
         onTermsError: () -> Unit,
+        awaitingApproval: () -> Unit,
+        isAdmin: () -> Unit,
         onError: (String) -> Unit // Callback for errors during login
     ) {
         // Sign in with the provided email and password
@@ -106,13 +112,28 @@ class AuthViewModel : ViewModel() {
 
                     checkAgreedToTerms()
 
-                    if (_agreedToTerms.value == false) {
+                    if (_agreedToTerms.value == false) { // check if this works timely
                         onTermsError()
                     } else if (user?.isEmailVerified == true) {
-                        onSuccess() // Proceed if email is verified
+                        // Proceed if email is verified
+                        isAdminApproved(
+                            onResult = {
+                                if (it == true) {
+                                    onSuccess()
+                                } else if (it == false) {
+                                    awaitingApproval()
+                                }
+                            },
+                            isAdmin = {
+                                if (it == true) {
+                                    isAdmin()
+                                }
+                            }
+                        )
                     } else {
                         onEmailError() // Prompt user to verify email
                     }
+
                 } else {
                     // Handle error if login fails
                     onError(task.exception?.message ?: "Login failed")
@@ -192,6 +213,7 @@ class AuthViewModel : ViewModel() {
                                     "email" to email,
                                     "subjects" to subjects,
                                     "agreeToTerms" to false,
+                                    "adminApproved" to false
                                 )
 
                                 // Save the user data in Firestore under their UID
@@ -301,5 +323,27 @@ class AuthViewModel : ViewModel() {
             }
         }
     }
+
+    fun isAdminApproved(onResult: (Boolean?) -> Unit, isAdmin: (Boolean?) -> Unit) {
+        val userId = auth.currentUser?.uid ?: return
+        viewModelScope.launch {
+            try {
+                val documentSnapshot = firestore.collection("users").document(userId).get().await()
+                val userType = documentSnapshot.getString("userType")
+                if (userType == "Student") {
+                    onResult(true)
+                } else if (userType == "Admin"){
+                    isAdmin(true)
+                } else {
+                    val isApproved = documentSnapshot.getBoolean("adminApproved")
+                    onResult(isApproved)
+                }
+            } catch (e: Exception) {
+                println("Error fetching adminApproved status: ${e.message}")
+                onResult(null) // Return null in case of an error
+            }
+        }
+    }
+
 
 }

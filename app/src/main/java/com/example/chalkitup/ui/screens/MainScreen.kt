@@ -1,5 +1,6 @@
 package com.example.chalkitup.ui.screens
 
+import android.util.Log
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
@@ -46,18 +47,41 @@ fun MainScreen() {
 
     // State for tracking the current route to conditionally hide/show bars.
     var currentRoute by remember { mutableStateOf<String?>(null) }
+    var targetedProfileView by remember { mutableStateOf(false) }
 
     // Observe route changes and update the current route when navigation destination changes.
     LaunchedEffect(navController) {
         navController.addOnDestinationChangedListener { _, destination, _ ->
+            currentRoute = destination.route
+
+            if (currentRoute != null) {
+                if (currentRoute!!.contains("/")) {
+                    val currentRouteSpecifier = currentRoute!!.substringAfter("/")
+                    if (currentRouteSpecifier != "{checkType}" && currentRouteSpecifier.isNotBlank()) {
+                        val specificKeyCheck = navController.currentBackStackEntry?.arguments?.getString("targetedUser")
+                        if (specificKeyCheck.isNullOrBlank()) {
+                            targetedProfileView = false
+                        } else {
+                            // The specifier is to view another users profile
+                            targetedProfileView = true
+                        }
+                    } else {
+                        targetedProfileView = false
+                    }
+                } else {
+                    targetedProfileView = false
+                }
+            }
+
             currentRoute = destination.route?.substringBefore("/")
+
         }
     }
 
     // List of routes where the bottom bar should be hidden.
-    val hideBottomBarRoutes = listOf("start","login", "signup","forgotPassword","termsAndCond")
+    val hideBottomBarRoutes = listOf("start","login", "signup","forgotPassword","termsAndCond","adminHome")
     // Determine whether to show the bottom bar based on the current route.
-    val showBottomBar = currentRoute !in hideBottomBarRoutes
+    val showBottomBar = (currentRoute !in hideBottomBarRoutes) && !targetedProfileView
 
 //    // List of routes where the top bar should be hidden.
 //    val hideTopBarRoutes = listOf("start","login","signup","checkEmail","forgotPassword")
@@ -71,9 +95,28 @@ fun MainScreen() {
 
 
     // Send the user to the home screen if they are already logged in
-    LaunchedEffect(isUserLoggedIn, isGoogleUserLoggedIn) {
-        if (isUserLoggedIn || isGoogleUserLoggedIn) {
-            navController.navigate("home") // Navigate to the home screen
+    LaunchedEffect(isUserLoggedIn) {
+        Log.e("MainScreen","checking approved status ${isUserLoggedIn}")
+        if (isUserLoggedIn) { // look into this again
+            Log.e("MainScreen","checking approved status")
+            authViewModel.isAdminApproved(
+                onResult = {
+                    if (it == true) {
+                        println("approved")
+                        navController.navigate("home")
+                    } else {
+                        println("awaitingApproval")
+                        navController.navigate("awaitingApproval")
+                        authViewModel.signout()
+                    }
+                },
+                isAdmin = {
+                    if (it == true) {
+                        println("admin here")
+                        navController.navigate("adminHome")
+                    }
+                }
+            )
         }
     }
 

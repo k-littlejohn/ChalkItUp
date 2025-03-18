@@ -1,8 +1,3 @@
-/*
-Code will need to be updated once tutor availability is taken into consideration, for now it is
-based on the appointment database in firebase.
- */
-
 package com.example.chalkitup.ui.screens
 
 import android.widget.Space
