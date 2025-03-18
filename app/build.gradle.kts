@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.firebase.storage)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.androidx.room.ktx)
     testImplementation(libs.testng)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
