@@ -83,6 +83,7 @@ fun AdminHome(
             Color.White, Color.White
         )
     )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
