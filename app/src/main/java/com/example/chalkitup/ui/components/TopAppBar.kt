@@ -49,6 +49,7 @@ fun MyTopBar(
                     "settings" -> "Settings"
                     "booking" -> ""
                     "messages" -> "Messages"
+                    "notifications" -> "Notifications"
                     "newMessage" -> "New Chat"
                     "start","login","signup","forgotPassword","checkEmail","tutorAvailability","termsAndCond" -> ""
                     else -> "ChalkItUp Tutors"
