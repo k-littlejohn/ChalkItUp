@@ -1,20 +1,13 @@
 package com.example.chalkitup.ui.viewmodel.admin
 
-import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.chalkitup.ui.components.TutorSubject
-import com.google.android.gms.tasks.Task
-import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.IgnoreExtraProperties
 import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -137,101 +130,6 @@ class AdminHomeViewModel : ViewModel() {
             _profilePictureUrls.value = profileUrls
         }
     }
-
-
-
-
-//    /**
-//     * Removes a user based on their user ID.
-//     * Deletes authentication account, Firestore document, and all user files from storage.
-//     */
-//    fun removeUser(userId: String, onComplete: (Boolean, String) -> Unit) {
-//        // Step 1: Delete the user's Firestore document
-//        db.collection("users").document(userId)
-//            .delete()
-//            .addOnSuccessListener {
-//                Log.d("Firestore", "Successfully deleted user document.")
-//
-//                // Step 2: Delete all user's files from Storage
-//                deleteStorageFiles(userId,
-//                    onSuccess = {
-//                        // Step 3: Delete user from Authentication
-//                        //deleteAuthUser(userId, onComplete)!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//                    },
-//                    onError = {
-//                        onComplete(false, "Failed to delete user's files from storage.")
-//                    }
-//                )
-//            }
-//            .addOnFailureListener { e ->
-//                Log.e("Firestore", "Failed to delete Firestore document: ${e.message}")
-//                onComplete(false, "Failed to delete Firestore document.")
-//            }
-//    }
-//
-//    /**
-//     * Deletes all user files stored in Firebase Storage.
-//     */
-//    private fun deleteStorageFiles(userId: String, onSuccess: () -> Unit, onError: () -> Unit) {
-//        val storageRef = storage.reference.child("$userId/")
-//
-//        fun deleteDirectory(ref: StorageReference, onComplete: () -> Unit) {
-//            ref.listAll()
-//                .addOnSuccessListener { listResult ->
-//                    val deleteTasks = mutableListOf<Task<Void>>()
-//
-//                    // Delete all files in the directory
-//                    deleteTasks.addAll(listResult.items.map { it.delete() })
-//
-//                    // Recursively delete subdirectories
-//                    listResult.prefixes.forEach { subDir ->
-//                        deleteDirectory(subDir) {}  // Recursive call
-//                    }
-//
-//                    // Wait for all deletions to complete
-//                    Tasks.whenAllComplete(deleteTasks)
-//                        .addOnSuccessListener { onComplete() }
-//                        .addOnFailureListener { onError() }
-//                }
-//                .addOnFailureListener {
-//                    Log.e("Storage", "Failed to list files: ${it.message}")
-//                    onError()
-//                }
-//        }
-//
-//        deleteDirectory(storageRef) {
-//            Log.d("Storage", "Successfully deleted all user files.")
-//            onSuccess()
-//        }
-//    }
-
-//    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-//    /**
-//     * Deletes a user from Firebase Authentication (Admin Only).
-//     */
-//    private fun deleteAuthUser(userId: String, onComplete: (Boolean, String) -> Unit) {
-//        auth.getUser(userId)
-//            .addOnSuccessListener { firebaseUser ->
-//                firebaseUser.delete()
-//                    .addOnSuccessListener {
-//                        Log.d("Authentication", "User successfully removed from Firebase Authentication.")
-//                        onComplete(true, "User removed successfully.")
-//                    }
-//                    .addOnFailureListener { authError ->
-//                        Log.e("Authentication", "Failed to delete user: ${authError.message}")
-//                        onComplete(false, "Failed to remove user from Authentication.")
-//                    }
-//            }
-//            .addOnFailureListener { e ->
-//                Log.e("Authentication", "Failed to fetch user: ${e.message}")
-//                onComplete(false, "Failed to retrieve user from Authentication.")
-//            }
-//    }
-
-
-
-
-
 
     fun signout() {
         FirebaseAuth.getInstance().signOut()

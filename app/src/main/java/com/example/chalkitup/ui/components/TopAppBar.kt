@@ -31,12 +31,10 @@ fun MyTopBar(
 
     // Holds the value of the current screen the user is on
     var currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-    println("CURRENT ROUTE $currentRoute")
-    //val currentRouteSpecifier = currentRoute?.substringAfter("/")
+
     if (currentRoute != null) {
         if (currentRoute.contains("/")) {
             val currentRouteSpecifier = currentRoute.substringAfter("/")
-            println("ROUTE SPECIFIER $currentRouteSpecifier")
             if (currentRouteSpecifier != "{checkType}" && currentRouteSpecifier.isNotBlank()) {
                 val specificKeyCheck = navController.currentBackStackEntry?.arguments?.getString("targetedUser")
                 if (specificKeyCheck.isNullOrBlank()) {

@@ -62,21 +62,9 @@ fun AdminHome(
     viewModel: AdminHomeViewModel,
     certificationViewModel: CertificationViewModel,
 ) {
-    // Side drawer?
-    // logout button at the bottom of drawer
-    // Tutors, app insights/stats
-
-    // Newly created tutors at the top
-    // Priority -- need to be approved before accessing the app
-    // have new field in tutor users -> adminApproved: true/false
-    // have page for waiting to be approved tutors
-
-
-    // List of all active (already approved) tutors
+    // TODO Nice to haves:
     // Filter options (by subject, hours/session count/current month, search)
-    // clickable to view the tutors profile
-    // remove button to remove the tutor from the app
-    // email notification for removed tutors (account should be deleted after)
+    // App insights
 
     val profilePictures by viewModel.profilePictureUrls.collectAsState()
 
@@ -86,7 +74,7 @@ fun AdminHome(
     val expandedTutorId = remember { mutableStateOf<String?>(null) }
 
     val showDialog = remember { mutableStateOf(false) }
-    val tutorToRemove = remember { mutableStateOf<User?>(null) }
+    val tutorToApprove = remember { mutableStateOf<User?>(null) }
 
     // Gradient Background
     val gradientBrush = Brush.verticalGradient(
@@ -161,12 +149,11 @@ fun AdminHome(
                             ) {
                                 Text(
                                     "${tutor.firstName} ${tutor.lastName}",
-                                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 20.dp),
+                                    modifier = Modifier.padding(
+                                        vertical = 22.dp,
+                                        horizontal = 20.dp),
                                     fontSize = 18.sp,
                                 )
-                                // clickable -> dropdown with information
-                                // clickable certifications
-                                // approve button -> dialog // remove button -> dialog
                             }
                         }
                         if (expandedTutorId.value == tutor.id) {
@@ -214,7 +201,10 @@ fun AdminHome(
 
                                         Spacer(modifier = Modifier.height(16.dp))
 
-                                        Row {
+                                        Row (
+                                            horizontalArrangement = Arrangement.Center,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
                                             Button(
                                                 modifier = Modifier.weight(0.6f),
                                                 shape = RoundedCornerShape(8.dp),
@@ -222,27 +212,14 @@ fun AdminHome(
                                                     containerColor = Color(0xFF06C59C),
                                                 ),
                                                 onClick = {
-                                                    viewModel.approveTutor(tutor.id)
-                                                    viewModel.fetchUnapprovedTutors()
-                                                    viewModel.fetchApprovedTutors()
-
+                                                    showDialog.value = true
+                                                    tutorToApprove.value = tutor
+//                                                    viewModel.approveTutor(tutor.id)
+//                                                    viewModel.fetchUnapprovedTutors()
+//                                                    viewModel.fetchApprovedTutors()
                                                 }
                                             ) {
                                                 Text("Approve", color = Color.White)
-                                            }
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                            Button(
-                                                modifier = Modifier.weight(0.4f),
-                                                shape = RoundedCornerShape(8.dp),
-                                                colors = ButtonDefaults.buttonColors(
-                                                    containerColor = Color(0xFFc93636),
-                                                ),
-                                                onClick = {
-                                                    tutorToRemove.value = tutor
-                                                    showDialog.value = true
-                                                }
-                                            ) {
-                                                Text("Remove", color = Color.White)
                                             }
                                         }
                                     }
@@ -261,11 +238,6 @@ fun AdminHome(
                     Text("${approvedTutors.size} Tutors currently having sessions")
 
                     approvedTutors.forEach { tutor ->
-
-                        // profile picture
-
-
-
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -312,8 +284,6 @@ fun AdminHome(
                                         ),
                                         fontSize = 18.sp,
                                     )
-
-                                    // approve button -> dialog // remove button -> dialog
                                 }
                             }
                         }
@@ -362,7 +332,10 @@ fun AdminHome(
 
                                         Spacer(modifier = Modifier.height(16.dp))
 
-                                        Row {
+                                        Row (
+                                            horizontalArrangement = Arrangement.Center,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
                                             Button(
                                                 modifier = Modifier.weight(0.6f),
                                                 shape = RoundedCornerShape(8.dp),
@@ -376,38 +349,31 @@ fun AdminHome(
                                             ) {
                                                 Text("View Profile", color = Color.White)
                                             }
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                            Button(
-                                                modifier = Modifier.weight(0.4f),
-                                                shape = RoundedCornerShape(8.dp),
-                                                colors = ButtonDefaults.buttonColors(
-                                                    containerColor = Color(0xFFc93636),
-                                                ),
-                                                onClick = {
-                                                    tutorToRemove.value = tutor
-                                                    showDialog.value = true
-                                                }
-                                            ) {
-                                                Text("Remove", color = Color.White)
-                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                        // clickable -> dropdown with information
-                        // clickable certifications
-                        // view profile button // remove this tutor button -> dialog
                     }
+                }
 
-                    Button(onClick = {
-                        viewModel.signout()
-                        navController.navigate("start")
-                    }) {
+                Row (
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(
+                        modifier = Modifier.padding(40.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF2196F3),
+                        ),
+                        onClick = {
+                            viewModel.signout()
+                            navController.navigate("start")
+                        }
+                    ) {
                         Text("Logout")
                     }
-
-
                 }
 
 
@@ -421,26 +387,33 @@ fun AdminHome(
                 showDialog.value = false
             },
             title = {
-                Text("Confirm Deletion")
+                Text("Confirm Approval")
             },
             text = {
-                Text("Are you sure you want to remove this tutor? All of this tutor's data will be removed from ChalkItUp.")
+                Text("Are you sure you want to approve this tutor? This tutor will have full access to ChalkItUp and will be matched to sessions.")
             },
             confirmButton = {
                 Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF06C59C),
+                    ),
                     onClick = {
-                        tutorToRemove.value?.let { tutor ->
-                            //viewModel.removeTutor(tutor.id)
+                        tutorToApprove.value?.let { tutor ->
+                            viewModel.approveTutor(tutor.id)
                             viewModel.fetchUnapprovedTutors()
+                            viewModel.fetchApprovedTutors()
                         }
                         showDialog.value = false
                     }
                 ) {
-                    Text("Remove")
+                    Text("Approve")
                 }
             },
             dismissButton = {
                 Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF2196F3),
+                    ),
                     onClick = {
                         showDialog.value = false
                     }
