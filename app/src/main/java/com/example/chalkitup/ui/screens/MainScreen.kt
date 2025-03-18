@@ -90,6 +90,9 @@ fun MainScreen() {
 
     // Observe the user's authentication state to determine whether they are logged in.
     val isUserLoggedIn by authViewModel.isUserLoggedIn.observeAsState(initial = false)
+    val isGoogleUserLoggedIn by authViewModel.isGoogleUserLoggedIn.observeAsState(initial = false)
+
+
 
     // Send the user to the home screen if they are already logged in
     LaunchedEffect(isUserLoggedIn) {

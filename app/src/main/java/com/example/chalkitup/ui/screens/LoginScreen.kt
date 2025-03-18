@@ -20,9 +20,9 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import com.example.chalkitup.R
-// import androidx.compose.ui.layout.matchParentSize
-// import androidx.compose.foundation.layout.windowInsetsPadding // newly added
-// import androidx.compose.foundation.layout.WindowInsets // newly added
+import com.example.chalkitup.ui.screens.GoogleSignInScreen
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 
 val AtkinsonFont = FontFamily(
     Font(R.font.atkinson_regular, FontWeight.Normal),
@@ -40,7 +40,7 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
 
-    // Gradient Background
+// Gradient Background
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
             Color(0xFF54A4FF), // 5% Blue
@@ -67,18 +67,6 @@ fun LoginScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start
         ) {
-            // Back Button
-//            IconButton(
-//                onClick = { navController.navigate("start") },
-//                modifier = Modifier.size(36.dp)
-//            ) {
-//                Icon(
-//                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-//                    contentDescription = "Back",
-//                    tint = Color.Black
-//                )
-//            }
-
             Spacer(modifier = Modifier.height(16.dp))
 
             Column(
@@ -178,22 +166,25 @@ fun LoginScreen(
                 }
 
                 // Divider
-                Spacer(modifier = Modifier.height(26.dp))
+                Spacer(modifier = Modifier.height(32.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     HorizontalDivider(modifier = Modifier.weight(1f), color = Color.Gray)
                     Text(
-                        text = " or sign in with ",
+                        text = " or ",
                         color = Color.Gray,
                         fontSize = 14.sp,
                         modifier = Modifier.padding(horizontal = 8.dp)
                     )
                     HorizontalDivider(modifier = Modifier.weight(1f), color = Color.Gray)
                 }
-
                 Spacer(modifier = Modifier.height(16.dp))
+                // Google Sign-In Button
+                GoogleSignInScreen()
+                //Spacer(modifier = Modifier.height(16.dp)) // Keep if we are placing other logins
+
             }
         }
     }
