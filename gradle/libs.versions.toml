@@ -56,6 +56,7 @@ placesCompose = "0.1.2"
 places = "4.1.0"
 firebaseDatabaseKtx = "21.0.0"
 appcompat = "1.7.0"
+roomKtx = "2.6.1"
 
 [libraries]
 androidx-appcompat-v120 = { module = "androidx.appcompat:appcompat", version.ref = "appcompatVersion" }
@@ -122,6 +123,7 @@ androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtim
 places = { group = "com.google.android.libraries.places", name = "places", version.ref = "places" }
 firebase-database-ktx = { group = "com.google.firebase", name = "firebase-database-ktx", version.ref = "firebaseDatabaseKtx" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

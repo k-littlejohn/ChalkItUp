@@ -16,6 +16,7 @@ import com.example.chalkitup.ui.screens.chat.MessageListScreen
 import com.example.chalkitup.ui.screens.chat.ChatScreen
 import com.example.chalkitup.ui.screens.EnterTutorAvailability
 import com.example.chalkitup.ui.screens.chat.NewMessageScreen
+import com.example.chalkitup.ui.screens.NotificationScreen
 import com.example.chalkitup.ui.screens.ProfileScreen
 import com.example.chalkitup.ui.screens.SettingsScreen
 import com.example.chalkitup.ui.screens.SignupScreen
@@ -28,9 +29,11 @@ import com.example.chalkitup.ui.viewmodel.CertificationViewModel
 import com.example.chalkitup.ui.viewmodel.ChatViewModel
 import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
 import com.example.chalkitup.ui.viewmodel.MessageListViewModel
+import com.example.chalkitup.ui.viewmodel.NotificationViewModel
 import com.example.chalkitup.ui.viewmodel.ProfileViewModel
 import com.example.chalkitup.ui.viewmodel.SettingsViewModel
 import com.example.chalkitup.ui.viewmodel.TutorAvailabilityViewModel
+import com.google.firebase.auth.FirebaseAuth
 import com.example.chalkitup.ui.viewmodel.admin.AdminHomeViewModel
 
 // Navigation Center, NavHost with navController
@@ -81,6 +84,19 @@ fun NavGraph(navController: NavHostController) {
         // Home Screen
         composable("home") {
             HomeScreen(navController = navController)
+        }
+
+        // Notification Screen
+        composable("notifications") {
+            val user = FirebaseAuth.getInstance().currentUser
+            val viewModel: NotificationViewModel = viewModel()
+            if (user != null) {
+                NotificationScreen(
+                    navController = navController,
+                    viewModel = viewModel,
+                    userId = user.uid
+                )
+            }
         }
 
         // Booking Screen
