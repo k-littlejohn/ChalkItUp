@@ -30,6 +30,7 @@ import com.example.chalkitup.ui.viewmodel.ChatViewModel
 import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
 import com.example.chalkitup.ui.viewmodel.MessageListViewModel
 import com.example.chalkitup.ui.viewmodel.NotificationViewModel
+import com.example.chalkitup.ui.viewmodel.OfflineDataManager
 import com.example.chalkitup.ui.viewmodel.ProfileViewModel
 import com.example.chalkitup.ui.viewmodel.SettingsViewModel
 import com.example.chalkitup.ui.viewmodel.TutorAvailabilityViewModel
@@ -57,7 +58,8 @@ fun NavGraph(navController: NavHostController) {
             val authViewModel: AuthViewModel = viewModel()
             LoginScreen(
                 navController = navController,
-                viewModel = authViewModel
+                viewModel = authViewModel,
+                offlineViewModel= OfflineDataManager
             )
         }
 

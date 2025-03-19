@@ -1,37 +1,17 @@
-package com.example.chalkitup.ui.viewmodel
-
-import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.chalkitup.ui.components.TutorSubject
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-//import kotlinx.coroutines.flow.internal.NoOpContinuation.context
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import org.json.JSONObject
-import java.io.File
-//import kotlin.coroutines.jvm.internal.CompletedContinuation.context
 
-// AuthViewModel
-// Handles interactions for user:
-// - signup
-// - login
-// - logout
-// - email confirmation
-// - forgot password
-
-/**
- * ViewModel for handling authentication-related operations using Firebase.
- * This class includes functions for logging in, signing up, verifying email,
- * resetting password, and managing the user session.
- */
 class AuthViewModel : ViewModel() {
 
     // FirebaseAuth instance for authentication operations
@@ -66,7 +46,7 @@ class AuthViewModel : ViewModel() {
         _isUserLoggedIn.value = currentUser != null && currentUser.isEmailVerified //&& _agreedToTerms.value == true
         Log.e("AuthViewModel","checkUserLoggedIn: ${_isUserLoggedIn.value}")
         _isGoogleUserLoggedIn.value = currentUser != null
-       
+
     }
 
     private fun checkAgreedToTerms() {
@@ -99,7 +79,6 @@ class AuthViewModel : ViewModel() {
      * @param onError Callback invoked if there's an error during the login process.
      */
     fun loginWithEmail(
-        context: Context,
         email: String,
         password: String,
         onSuccess: () -> Unit, // Callback for successful login
@@ -125,16 +104,13 @@ class AuthViewModel : ViewModel() {
                         isAdminApproved(
                             onResult = {
                                 if (it == true) {
-                                    OfflineDataManager.logUser(context, email, password, "true", "User")
                                     onSuccess()
                                 } else if (it == false) {
-                                    OfflineDataManager.logUser(context, email, password, "need_approval", "User")
                                     awaitingApproval()
                                 }
                             },
                             isAdmin = {
                                 if (it == true) {
-                                    OfflineDataManager.logUser(context, email, password, "true", "Admin")
                                     isAdmin()
                                 }
                             }
@@ -149,7 +125,53 @@ class AuthViewModel : ViewModel() {
                 }
             }
     }
+    fun offlineloginWithEmail(
+        email: String,
+        password: String,
+        onSuccess: () -> Unit, // Callback for successful login
+        onEmailError: () -> Unit, // Callback if email is not verified
+        onTermsError: () -> Unit,
+        awaitingApproval: () -> Unit,
+        isAdmin: () -> Unit,
+        onError: (String) -> Unit // Callback for errors during login
+    ) {
+        // Sign in with the provided email and password
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // If login is successful, check if the email is verified
+                    val user = auth.currentUser
 
+                    checkAgreedToTerms()
+
+                    if (_agreedToTerms.value == false) { // check if this works timely
+                        onTermsError()
+                    } else if (user?.isEmailVerified == true) {
+                        // Proceed if email is verified
+                        isAdminApproved(
+                            onResult = {
+                                if (it == true) {
+                                    onSuccess()
+                                } else if (it == false) {
+                                    awaitingApproval()
+                                }
+                            },
+                            isAdmin = {
+                                if (it == true) {
+                                    isAdmin()
+                                }
+                            }
+                        )
+                    } else {
+                        onEmailError() // Prompt user to verify email
+                    }
+
+                } else {
+                    // Handle error if login fails
+                    onError(task.exception?.message ?: "Login failed")
+                }
+            }
+    }
 
     /**
      * Signs in a new user using Googles email, password,
@@ -354,99 +376,5 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-
-}
-
-
-
-object OfflineDataManager {
-    private const val FILE_NAME = "user_data.json"
-
-    fun logUser(context: Context, username: String, password: String, status: String, userType: String) {
-        val userData = JSONObject().apply {
-            put("username", username)
-            put("password", password)
-            put("status", status)
-            put("type", userType)
-        }
-        writeToFile(context, userData.toString())
-    }
-
-    fun changeStatus(context: Context, newStatus: String) {
-        val userData = readFromFile(context) ?: return
-        val json = JSONObject(userData)
-        json.put("status", newStatus)
-        writeToFile(context, json.toString())
-    }
-
-    fun checkOfflineLogin(context: Context, username: String, password: String): String? {
-        val userData = readFromFile(context) ?: return null
-        val json = JSONObject(userData)
-        return if (json.getString("username") == username && json.getString("password") == password) {
-            json.getString("status")
-        } else {
-            null
-        }
-    }
-    fun checkUserType(context: Context, username: String, password: String): String? {
-        val userData = readFromFile(context) ?: return null
-        val json = JSONObject(userData)
-        return if (json.getString("username") == username && json.getString("password") == password) {
-            json.optString("type", "user")
-        } else {
-            null
-        }
-    }
-    fun offlineLoginWithEmail(
-        context: Context,
-        email: String,
-        password: String,
-        onSuccess: () -> Unit,
-        onEmailError: () -> Unit,
-        onTermsError: () -> Unit,
-        onError: (String) -> Unit,
-        awaitingApproval: () -> Unit,
-        isAdmin: () -> Unit
-    ) {
-        val status = checkOfflineLogin(context, email, password)
-        when (status) {
-            "true" -> onSuccess()
-            "need_email" -> onEmailError()
-            "need_approval" -> awaitingApproval()
-
-            else -> onError("Invalid credentials or no offline data available")
-        }
-        val userType = checkUserType(context, email, password)
-        when(userType){
-            "admin" -> isAdmin()
-
-        }
-    }
-    fun removeUser(context: Context, email: String): Boolean {
-        val userData = readFromFile(context) ?: return false
-
-        // Parse the JSON data
-        val json = JSONObject(userData)
-        if (json.getString("username") == email) {
-            // If the user matches the email, remove this user
-            json.remove("username")
-            json.remove("password")
-            json.remove("status")
-            json.remove("type")
-            writeToFile(context, json.toString())
-            return true
-        }
-        return false
-    }
-
-    private fun writeToFile(context: Context, data: String) {
-        val file = File(context.filesDir, FILE_NAME)
-        file.writeText(data)
-    }
-
-    private fun readFromFile(context: Context): String? {
-        val file = File(context.filesDir, FILE_NAME)
-        return if (file.exists()) file.readText() else null
-    }
 
 }

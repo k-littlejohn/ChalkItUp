@@ -302,3 +302,9 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(co
         return db.delete(TABLE_NAME, "$COLUMN_ID = ?", arrayOf(id))
     }
 }
+
+//offline data file
+//user logs in we will call log_user-- stores user password and status in a json file
+//if only status changes call change status-- modify json file
+//if login is offline then check json for username, password and status
+//----------possible status: need_email, need_approval, true

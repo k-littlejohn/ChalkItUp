@@ -1,5 +1,6 @@
-package com.example.chalkitup.ui.screens
+package com.example.chalkitup.ui.offline
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,11 +21,12 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import com.example.chalkitup.R
+import com.example.chalkitup.ui.screens.GoogleSignInScreen
 import androidx.compose.ui.platform.LocalContext
 import com.example.chalkitup.Connection
-import com.example.chalkitup.ui.viewmodel.OfflineDataManager
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.core.Context
+import org.json.JSONObject
+import java.io.File
 
 //import kotlinx.coroutines.flow.internal.NoOpContinuation.context
 //import kotlin.coroutines.jvm.internal.CompletedContinuation.context
@@ -39,7 +41,6 @@ val AtkinsonFont = FontFamily(
 @Composable
 fun LoginScreen(
     viewModel: AuthViewModel,
-    offlineViewModel: OfflineDataManager,
     navController: NavController
 ) {
     var email by remember { mutableStateOf("") }
@@ -152,72 +153,12 @@ fun LoginScreen(
                             } else {
                                 viewModel.loginWithEmail(
                                     context, email, password,
-                                    onSuccess = {
-                                        offlineViewModel.removeUser(
-                                            context,
-                                            email
-                                        )
-                                        offlineViewModel.logUser(
-                                            context,
-                                            email,
-                                            password,
-                                            "true",
-                                            "user" // Assuming "user" type, adjust accordingly
-                                        )
-                                        navController.navigate("home") },
-                                    onEmailError = {
-                                        offlineViewModel.removeUser(
-                                            context,
-                                            email
-                                        )
-                                        offlineViewModel.logUser(
-                                        context,
-                                        email,
-                                        password,
-                                        "need_email",
-                                        "user" // Assuming "user" type, adjust accordingly
-                                    )
-                                        navController.navigate("checkEmail/verify") },
-                                    onTermsError = {
-                                        offlineViewModel.removeUser(
-                                            context,
-                                            email
-                                        )
-                                        offlineViewModel.logUser(
-                                            context,
-                                            email,
-                                            password,
-                                            "need_term",
-                                            "user" // Assuming "user" type, adjust accordingly
-                                        )
-                                        navController.navigate("termsAndCond") },
+                                    onSuccess = { navController.navigate("home") },
+                                    onEmailError = { navController.navigate("checkEmail/verify") },
+                                    onTermsError = { navController.navigate("termsAndCond") },
                                     onError = { errorMessage = it },
-                                    awaitingApproval = {
-                                        offlineViewModel.removeUser(
-                                            context,
-                                            email
-                                        )
-                                        offlineViewModel.logUser(
-                                            context,
-                                            email,
-                                            password,
-                                            "need_approval",
-                                            "user" // Assuming "user" type, adjust accordingly
-                                        )
-                                        navController.navigate("awaitingApproval") },
-                                    isAdmin = {
-                                        offlineViewModel.removeUser(
-                                            context,
-                                            email
-                                        )
-                                        offlineViewModel.logUser(
-                                            context,
-                                            email,
-                                            password,
-                                            "true",
-                                            "admin" // Assuming "user" type, adjust accordingly
-                                        )
-                                        navController.navigate("adminHome") }
+                                    awaitingApproval = { navController.navigate("awaitingApproval") },
+                                    isAdmin = { navController.navigate("adminHome") }
                                 )
                             }
                         }
@@ -227,7 +168,7 @@ fun LoginScreen(
                             if (email.isEmpty() || password.isEmpty()) {
                                 errorMessage = "Email and password cannot be empty"
                             } else {
-                                offlineViewModel.offlineLoginWithEmail(
+                                OfflineDataManager.offlineLoginWithEmail(
                                     context,
                                     email,
                                     password,
@@ -282,3 +223,78 @@ fun LoginScreen(
 }
 
 
+object OfflineDataManager {
+    private const val FILE_NAME = "user_data.json"
+
+    fun logUser(context: Context, username: String, password: String, status: String, userType: String) {
+        val userData = JSONObject().apply {
+            put("username", username)
+            put("password", password)
+            put("status", status)
+            put("type", userType)
+        }
+        writeToFile(context, userData.toString())
+    }
+
+    fun changeStatus(context: Context, newStatus: String) {
+        val userData = readFromFile(context) ?: return
+        val json = JSONObject(userData)
+        json.put("status", newStatus)
+        writeToFile(context, json.toString())
+    }
+
+    fun checkOfflineLogin(context: Context, username: String, password: String): String? {
+        val userData = readFromFile(context) ?: return null
+        val json = JSONObject(userData)
+        return if (json.getString("username") == username && json.getString("password") == password) {
+            json.getString("status")
+        } else {
+            null
+        }
+    }
+    fun checkUserType(context: Context, username: String, password: String): String? {
+        val userData = readFromFile(context) ?: return null
+        val json = JSONObject(userData)
+        return if (json.getString("username") == username && json.getString("password") == password) {
+            json.optString("type", "user")
+        } else {
+            null
+        }
+    }
+    fun offlineLoginWithEmail(
+        context: Context,
+        email: String,
+        password: String,
+        onSuccess: () -> Unit,
+        onEmailError: () -> Unit,
+        onTermsError: () -> Unit,
+        onError: (String) -> Unit,
+        awaitingApproval: () -> Unit,
+        isAdmin: () -> Unit
+    ) {
+        val status = checkOfflineLogin(context, email, password)
+        when (status) {
+            "true" -> onSuccess()
+            "need_email" -> onEmailError()
+            "need_approval" -> awaitingApproval()
+
+            else -> onError("Invalid credentials or no offline data available")
+        }
+        val userType = checkUserType(context, email, password)
+        when(userType){
+            "admin" -> isAdmin()
+
+        }
+    }
+
+    private fun writeToFile(context: Context, data: String) {
+        val file = File(context.filesDir, FILE_NAME)
+        file.writeText(data)
+    }
+
+    private fun readFromFile(context: Context): String? {
+        val file = File(context.filesDir, FILE_NAME)
+        return if (file.exists()) file.readText() else null
+    }
+
+}

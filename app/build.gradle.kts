@@ -59,6 +59,7 @@ dependencies {
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.datastore.core.android)
+    implementation(libs.androidx.runtime.saved.instance.state)
     testImplementation(libs.testng)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
