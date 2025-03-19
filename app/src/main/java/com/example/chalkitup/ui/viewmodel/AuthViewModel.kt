@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import org.json.JSONObject
 import java.io.File
+
 //import kotlin.coroutines.jvm.internal.CompletedContinuation.context
 
 // AuthViewModel
@@ -125,16 +126,16 @@ class AuthViewModel : ViewModel() {
                         isAdminApproved(
                             onResult = {
                                 if (it == true) {
-                                    OfflineDataManager.logUser(context, email, password, "true", "User")
+                                    OfflineDataManager.logUser(email, password, "true", "User")
                                     onSuccess()
                                 } else if (it == false) {
-                                    OfflineDataManager.logUser(context, email, password, "need_approval", "User")
+                                    OfflineDataManager.logUser(email, password, "need_approval", "User")
                                     awaitingApproval()
                                 }
                             },
                             isAdmin = {
                                 if (it == true) {
-                                    OfflineDataManager.logUser(context, email, password, "true", "Admin")
+                                    OfflineDataManager.logUser(email, password, "true", "Admin")
                                     isAdmin()
                                 }
                             }
@@ -359,28 +360,34 @@ class AuthViewModel : ViewModel() {
 
 
 
-object OfflineDataManager {
-    private const val FILE_NAME = "user_data.json"
 
-    fun logUser(context: Context, username: String, password: String, status: String, userType: String) {
+
+object OfflineDataManager {
+    private lateinit var userFile: File
+
+    fun init(fileDirectory: File) {
+        userFile = File(fileDirectory, "user_data.json")
+    }
+
+    fun logUser(username: String, password: String, status: String, userType: String) {
         val userData = JSONObject().apply {
             put("username", username)
             put("password", password)
             put("status", status)
             put("type", userType)
         }
-        writeToFile(context, userData.toString())
+        writeToFile(userData.toString())
     }
 
-    fun changeStatus(context: Context, newStatus: String) {
-        val userData = readFromFile(context) ?: return
+    fun changeStatus(newStatus: String) {
+        val userData = readFromFile() ?: return
         val json = JSONObject(userData)
         json.put("status", newStatus)
-        writeToFile(context, json.toString())
+        writeToFile(json.toString())
     }
 
-    fun checkOfflineLogin(context: Context, username: String, password: String): String? {
-        val userData = readFromFile(context) ?: return null
+    fun checkOfflineLogin(username: String, password: String): String? {
+        val userData = readFromFile() ?: return null
         val json = JSONObject(userData)
         return if (json.getString("username") == username && json.getString("password") == password) {
             json.getString("status")
@@ -388,8 +395,9 @@ object OfflineDataManager {
             null
         }
     }
-    fun checkUserType(context: Context, username: String, password: String): String? {
-        val userData = readFromFile(context) ?: return null
+
+    fun checkUserType(username: String, password: String): String? {
+        val userData = readFromFile() ?: return null
         val json = JSONObject(userData)
         return if (json.getString("username") == username && json.getString("password") == password) {
             json.optString("type", "user")
@@ -397,8 +405,8 @@ object OfflineDataManager {
             null
         }
     }
+
     fun offlineLoginWithEmail(
-        context: Context,
         email: String,
         password: String,
         onSuccess: () -> Unit,
@@ -408,45 +416,37 @@ object OfflineDataManager {
         awaitingApproval: () -> Unit,
         isAdmin: () -> Unit
     ) {
-        val status = checkOfflineLogin(context, email, password)
+        val status = checkOfflineLogin(email, password)
         when (status) {
             "true" -> onSuccess()
             "need_email" -> onEmailError()
             "need_approval" -> awaitingApproval()
-
             else -> onError("Invalid credentials or no offline data available")
         }
-        val userType = checkUserType(context, email, password)
-        when(userType){
-            "admin" -> isAdmin()
 
-        }
+        val userType = checkUserType(email, password)
+        if (userType == "admin") isAdmin()
     }
-    fun removeUser(context: Context, email: String): Boolean {
-        val userData = readFromFile(context) ?: return false
 
-        // Parse the JSON data
+    fun removeUser(email: String): Boolean {
+        val userData = readFromFile() ?: return false
         val json = JSONObject(userData)
         if (json.getString("username") == email) {
-            // If the user matches the email, remove this user
             json.remove("username")
             json.remove("password")
             json.remove("status")
             json.remove("type")
-            writeToFile(context, json.toString())
+            writeToFile(json.toString())
             return true
         }
         return false
     }
 
-    private fun writeToFile(context: Context, data: String) {
-        val file = File(context.filesDir, FILE_NAME)
-        file.writeText(data)
+    private fun writeToFile(data: String) {
+        userFile.writeText(data)
     }
 
-    private fun readFromFile(context: Context): String? {
-        val file = File(context.filesDir, FILE_NAME)
-        return if (file.exists()) file.readText() else null
+    private fun readFromFile(): String? {
+        return if (userFile.exists()) userFile.readText() else null
     }
-
 }

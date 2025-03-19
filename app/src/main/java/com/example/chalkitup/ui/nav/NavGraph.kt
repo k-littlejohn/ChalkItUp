@@ -176,7 +176,8 @@ fun NavGraph(navController: NavHostController) {
             SettingsScreen(
                 navController = navController,
                 settingsViewModel = settingsViewModel,
-                authViewModel = authViewModel
+                authViewModel = authViewModel,
+                offlineViewModel = OfflineDataManager
             )
         }
 

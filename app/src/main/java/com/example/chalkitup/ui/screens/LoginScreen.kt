@@ -154,11 +154,9 @@ fun LoginScreen(
                                     context, email, password,
                                     onSuccess = {
                                         offlineViewModel.removeUser(
-                                            context,
                                             email
                                         )
                                         offlineViewModel.logUser(
-                                            context,
                                             email,
                                             password,
                                             "true",
@@ -167,11 +165,9 @@ fun LoginScreen(
                                         navController.navigate("home") },
                                     onEmailError = {
                                         offlineViewModel.removeUser(
-                                            context,
                                             email
                                         )
                                         offlineViewModel.logUser(
-                                        context,
                                         email,
                                         password,
                                         "need_email",
@@ -180,11 +176,9 @@ fun LoginScreen(
                                         navController.navigate("checkEmail/verify") },
                                     onTermsError = {
                                         offlineViewModel.removeUser(
-                                            context,
                                             email
                                         )
                                         offlineViewModel.logUser(
-                                            context,
                                             email,
                                             password,
                                             "need_term",
@@ -194,11 +188,9 @@ fun LoginScreen(
                                     onError = { errorMessage = it },
                                     awaitingApproval = {
                                         offlineViewModel.removeUser(
-                                            context,
                                             email
                                         )
                                         offlineViewModel.logUser(
-                                            context,
                                             email,
                                             password,
                                             "need_approval",
@@ -207,11 +199,9 @@ fun LoginScreen(
                                         navController.navigate("awaitingApproval") },
                                     isAdmin = {
                                         offlineViewModel.removeUser(
-                                            context,
                                             email
                                         )
                                         offlineViewModel.logUser(
-                                            context,
                                             email,
                                             password,
                                             "true",
@@ -228,7 +218,6 @@ fun LoginScreen(
                                 errorMessage = "Email and password cannot be empty"
                             } else {
                                 offlineViewModel.offlineLoginWithEmail(
-                                    context,
                                     email,
                                     password,
                                     onSuccess = { navController.navigate("home") },

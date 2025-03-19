@@ -175,9 +175,17 @@ data class UserProfile(
                         val lastName = document.getString("lastName") ?: ""
                         val email = user.email ?: ""
 
-                        val subjects = document.get("subjects") as List<TutorSubject>
-                        val interests = document.get("interests") as List<Interest>
-                        val progress = document.get("progress") as List<ProgressItem>
+                        val subjects = (document.get("subjects") as? List<Map<String, Any>>)?.map {
+                            TutorSubject.fromMap(it)
+                        } ?: emptyList()
+
+                        val interests = (document.get("interests") as? List<Map<String, Any>>)?.map {
+                            Interest.fromMap(it)
+                        } ?: emptyList()
+
+                        val progress = (document.get("progress") as? List<Map<String, Any>>)?.map {
+                            ProgressItem.fromMap(it)
+                        } ?: emptyList()
 
                         onUserProfileLoaded(
                             UserProfile(
@@ -202,9 +210,26 @@ data class UserProfile(
     }
 }
 
-data class Interest(val name: String="", var isSelected: Boolean =false)
-data class ProgressItem(val title: String="", val grade: String="")
-
+data class Interest(val name: String = "", var isSelected: Boolean = false) {
+    companion object {
+        fun fromMap(map: Map<String, Any>): Interest {
+            return Interest(
+                name = map["name"] as? String ?: "",
+                isSelected = map["isSelected"] as? Boolean ?: false
+            )
+        }
+    }
+}
+data class ProgressItem(val title: String = "", val grade: String = "") {
+    companion object {
+        fun fromMap(map: Map<String, Any>): ProgressItem {
+            return ProgressItem(
+                title = map["title"] as? String ?: "",
+                grade = map["grade"] as? String ?: ""
+            )
+        }
+    }
+}
 @Composable
 fun InterestItem(
     interest: Interest,

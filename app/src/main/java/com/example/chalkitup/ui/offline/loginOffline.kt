@@ -243,7 +243,7 @@ object OfflineDataManager {
         writeToFile(context, json.toString())
     }
 
-    fun checkOfflineLogin(context: Context, username: String, password: String): String? {
+    private fun checkOfflineLogin(context: Context, username: String, password: String): String? {
         val userData = readFromFile(context) ?: return null
         val json = JSONObject(userData)
         return if (json.getString("username") == username && json.getString("password") == password) {

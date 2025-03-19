@@ -32,6 +32,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.example.chalkitup.ui.screens.MainScreen
 import com.example.chalkitup.ui.theme.ChalkitupTheme
+import com.example.chalkitup.ui.viewmodel.OfflineDataManager
 import com.google.firebase.auth.FirebaseAuth
 import com.example.chalkitup.ui.viewmodel.UserProfile
 import com.google.android.libraries.places.api.Places
@@ -46,12 +47,12 @@ import java.security.MessageDigest
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        OfflineDataManager.init(filesDir)
         val secureStorage = SecureStorage(this)
         val lastUser = secureStorage.getUser()
         // Initialize Firebase and other services
         Firebase.initialize(this)
         Places.initialize(this, "AIzaSyCp6eJq4S6fiAbSb-yOaiGfmZc1imPAxAM")
-
         Connection(this).isConnected
         setContent {
             ChalkitupTheme {
