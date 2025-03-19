@@ -1,5 +1,6 @@
 package com.example.chalkitup.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -45,11 +46,9 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
-    val auth = FirebaseAuth.getInstance()
-    val currentUser = auth.currentUser
+
+
     // Get network status from the Connection singleton
-    val context = LocalContext.current
-    val isConnected = Connection.getInstance(context).isConnected
 // Gradient Background
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
@@ -143,9 +142,13 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Login Button
+                val context = LocalContext.current
+                val connection = Connection.getInstance(context)
+                val isConnected by connection.connectionStatus.collectAsState(initial = false)
                 Button(
                     onClick = {
                         if (isConnected) {
+                            Log.d("Login", "Online selected")
                             errorMessage = ""
                             if (email.isEmpty() || password.isEmpty()) {
                                 errorMessage = "Email and password cannot be empty"
@@ -212,6 +215,7 @@ fun LoginScreen(
                             }
                         }
                         else {
+                            Log.d("Login", "Offline selected")
                             //go to user auth databse manager and check previous authentication
                             errorMessage = ""
                             if (email.isEmpty() || password.isEmpty()) {
@@ -262,7 +266,8 @@ fun LoginScreen(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 // Google Sign-In Button
-                GoogleSignInScreen()
+
+               // GoogleSignInScreen()
                 //Spacer(modifier = Modifier.height(16.dp)) // Keep if we are placing other logins
 
             }

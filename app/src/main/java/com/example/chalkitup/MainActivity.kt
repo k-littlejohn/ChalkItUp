@@ -7,7 +7,9 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
 import android.net.ConnectivityManager
+import android.net.Network
 import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -19,6 +21,7 @@ import androidx.datastore.preferences.core.Preferences
 
 import android.os.Bundle
 import android.util.Base64
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Surface
@@ -173,7 +176,31 @@ class Connection constructor(context: Context) {
 
     private val _connectionStatus = MutableStateFlow(checkConnectivity())
     val connectionStatus: StateFlow<Boolean> get() = _connectionStatus
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: Network) {
+            _connectionStatus.value = true
+        }
 
+        override fun onLost(network: Network) {
+            _connectionStatus.value = false
+        }
+    }
+    init {
+        // Register the callback to listen for changes in network status
+        _connectionStatus.value = checkConnectivity()
+
+        // Register the callback to listen for changes in network status
+        connectivityManager.registerNetworkCallback(
+            NetworkRequest.Builder().build(),
+            networkCallback
+        )
+        Log.d("Login", "ConnectionChecked: ${_connectionStatus.value}")
+    }
+
+    // Unregister the callback to prevent memory leaks
+    fun unregister() {
+        connectivityManager.unregisterNetworkCallback(networkCallback)
+    }
     companion object {
         @Volatile
         private var instance: Connection? = null
@@ -193,7 +220,7 @@ class Connection constructor(context: Context) {
     }
 
     val isConnected: Boolean
-        get() = checkConnectivity()
+        get() = _connectionStatus.value
 }
 
 
