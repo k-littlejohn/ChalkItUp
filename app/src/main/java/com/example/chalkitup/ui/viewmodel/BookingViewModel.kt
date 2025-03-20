@@ -19,6 +19,10 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import java.io.File
+import org.json.JSONArray
+import org.json.JSONObject
+
 
 class BookingViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
@@ -714,3 +718,101 @@ data class EmailMessage(
     var html: String = "",
     var body: String = "",
 )
+
+
+object BookingManager {
+    data class Booking(
+        val tutorId: String,
+        val comments: String?,
+        val sessionType: String,
+        val day: String,
+        val startTime: String,
+        val endTime: String,
+        val subject: String,
+        val studentId: String,
+        val tutorFullName: String,
+        val studentFullName: String
+    )
+
+    // Initialize function to set up the bookings file if it doesn't exist
+    fun init(directory: File) {
+        initializeJsonFile(directory)
+    }
+
+    // Function to initialize the JSON file for bookings
+    private fun initializeJsonFile(directory: File) {
+        val file = File(directory, "bookings.json")
+        if (!file.exists()) {
+            file.writeText(JSONArray().toString())
+            println("Booking file initialized.")
+        }
+    }
+
+    // Function to add a new booking
+    fun addBooking(directory: File, booking: Booking) {
+        val file = File(directory, "bookings.json")
+        val jsonArray = JSONArray(file.readText())
+
+        val jsonObject = JSONObject().apply {
+            put("tutorId", booking.tutorId)
+            put("comments", booking.comments)
+            put("sessionType", booking.sessionType)
+            put("day", booking.day)
+            put("startTime", booking.startTime)
+            put("endTime", booking.endTime)
+            put("subject", booking.subject)
+            put("studentId", booking.studentId)
+            put("tutorFullName", booking.tutorFullName)
+            put("studentFullName", booking.studentFullName)
+        }
+
+        jsonArray.put(jsonObject)
+        file.writeText(jsonArray.toString(4))
+    }
+
+    // Function to remove a booking
+    fun removeBooking(directory: File, tutorId: String, studentId: String, day: String, startTime: String) {
+        val file = File(directory, "bookings.json")
+        val jsonArray = JSONArray(file.readText())
+
+        val filteredArray = JSONArray()
+        for (i in 0 until jsonArray.length()) {
+            val obj = jsonArray.getJSONObject(i)
+            if (!(obj.getString("tutorId") == tutorId &&
+                        obj.getString("studentId") == studentId &&
+                        obj.getString("day") == day &&
+                        obj.getString("startTime") == startTime)) {
+                filteredArray.put(obj)
+            }
+        }
+
+        file.writeText(filteredArray.toString(4))
+    }
+
+    // Function to read all bookings from the file
+    fun readBookings(directory: File): List<Booking> {
+        val file = File(directory, "bookings.json")
+        if (!file.exists()) return emptyList()
+
+        val jsonArray = JSONArray(file.readText())
+        val bookings = mutableListOf<Booking>()
+
+        for (i in 0 until jsonArray.length()) {
+            val obj = jsonArray.getJSONObject(i)
+            val booking = Booking(
+                tutorId = obj.getString("tutorId"),
+                comments = obj.optString("comments", null),
+                sessionType = obj.getString("sessionType"),
+                day = obj.getString("day"),
+                startTime = obj.getString("startTime"),
+                endTime = obj.getString("endTime"),
+                subject = obj.getString("subject"),
+                studentId = obj.getString("studentId"),
+                tutorFullName = obj.getString("tutorFullName"),
+                studentFullName = obj.getString("studentFullName")
+            )
+            bookings.add(booking)
+        }
+        return bookings
+    }
+}
