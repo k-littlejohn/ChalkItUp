@@ -22,18 +22,22 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.chalkitup.ui.viewmodel.AuthViewModel
 import com.example.chalkitup.ui.viewmodel.SettingsViewModel
+import com.example.chalkitup.ui.viewmodel.OfflineDataManager
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun SettingsScreen(
     settingsViewModel: SettingsViewModel,
     authViewModel: AuthViewModel,
     navController: NavController,
+    offlineViewModel: OfflineDataManager,
     context: Context = LocalContext.current
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var successMessage by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
-
+    val auth = FirebaseAuth.getInstance()
+    val email = auth.currentUser?.email ?: ""
     Column(
         verticalArrangement = Arrangement.Top,
         modifier = Modifier
@@ -66,6 +70,9 @@ fun SettingsScreen(
                                     successMessage = "Account Deleted!"
                                     showDialog = false
                                     navController.navigate("start")
+                                    offlineViewModel.removeUser(
+                                        email
+                                    )
                                 },
                                 onError = {
                                     errorMessage = "Failed to delete Account"

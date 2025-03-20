@@ -58,6 +58,8 @@ dependencies {
     implementation(libs.firebase.storage)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.datastore.core.android)
+    implementation(libs.androidx.runtime.saved.instance.state)
     testImplementation(libs.testng)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -84,6 +86,10 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.androidx.lifecycle.runtime.ktx.v262)
+    implementation(libs.firebase.database.ktx) // Check for latest version
+    implementation(libs.androidx.datastore)
+    implementation(libs.gson)
+
 
     implementation(libs.firebase.database.ktx)
     implementation(libs.play.services.auth)

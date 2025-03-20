@@ -346,8 +346,20 @@ data class TutorSubject(
     val subject: String = "",
     val grade: String = "",
     val specialization: String = "",
-    var price: String=""
-)
+    var price: String = ""
+) {
+    companion object {
+        // Mapping function to convert a Map to TutorSubject
+        fun fromMap(map: Map<String, Any>): TutorSubject {
+            return TutorSubject(
+                subject = map["subject"] as? String ?: "",
+                grade = map["grade"] as? String ?: "",
+                specialization = map["specialization"] as? String ?: "",
+                price = map["price"] as? String ?: ""
+            )
+        }
+    }
+}
 
 /**
  * Data class to represent errors in tutor subject details.

@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "708905206257",
+    "project_id": "chalkitup-e386e",
+    "storage_bucket": "chalkitup-e386e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:708905206257:android:e307bcdd3cd56a9bacc450",
+        "android_client_info": {
+          "package_name": "com.example.chalkitup"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "708905206257-kga4ho4omh8a1tvdlb5dn2oms8e6tsja.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.chalkitup",
+            "certificate_hash": "7c8615468ec5f7397b013420a720f9da655dba62"
+          }
+        },
+        {
+          "client_id": "708905206257-n90qg6vhugiabagjupfiljr3fmj77mtg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.chalkitup",
+            "certificate_hash": "b12bdc05d4ac5451f67d3397d88c80f8340d4248"
+          }
+        },
+        {
+          "client_id": "708905206257-ii8ejoledclpds756snrea0tm79dmu6n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7fOL49BEt9IGuXSbY6IqBZYwUq0U9qBQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "708905206257-ii8ejoledclpds756snrea0tm79dmu6n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
