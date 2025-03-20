@@ -47,6 +47,7 @@ import java.util.Locale
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.chalkitup.ui.viewmodel.Appointment
+import com.example.chalkitup.ui.viewmodel.BookingManager
 import com.example.chalkitup.ui.viewmodel.HomeViewModel
 import com.example.chalkitup.ui.viewmodel.WeatherViewModel
 
@@ -538,6 +539,7 @@ fun AppointmentPopup(
                                 //rebooking = false // Reset After Cancelling
                                 onDismiss()
                                 navController.navigate("booking")
+                                BookingManager.removeBooking(appointment.tutorID, appointment.studentID, appointment.date, appointment.time)
                             }
                             //rebooking = true
                             //availableDates = true

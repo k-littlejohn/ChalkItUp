@@ -529,7 +529,9 @@ class BookingViewModel : ViewModel() {
             )
 
             sendEmail(
-                onSuccess = { onSuccess() }
+                onSuccess = {
+                    onSuccess()
+                }
             )
         }
     }
@@ -721,98 +723,108 @@ data class EmailMessage(
 
 
 object BookingManager {
-    data class Booking(
-        val tutorId: String,
-        val comments: String?,
-        val sessionType: String,
-        val day: String,
-        val startTime: String,
-        val endTime: String,
-        val subject: String,
-        val studentId: String,
-        val tutorFullName: String,
-        val studentFullName: String
-    )
+    private lateinit var userFile: File
 
     // Initialize function to set up the bookings file if it doesn't exist
-    fun init(directory: File) {
-        initializeJsonFile(directory)
-    }
-
-    // Function to initialize the JSON file for bookings
-    private fun initializeJsonFile(directory: File) {
-        val file = File(directory, "bookings.json")
-        if (!file.exists()) {
-            file.writeText(JSONArray().toString())
+    fun init(fileDirectory: File) {
+        userFile = File(fileDirectory, "bookings.json")
+        if (!userFile.exists()) {
+            userFile.writeText(JSONArray().toString())  // Initialize with empty array
             println("Booking file initialized.")
         }
     }
 
     // Function to add a new booking
-    fun addBooking(directory: File, booking: Booking) {
-        val file = File(directory, "bookings.json")
-        val jsonArray = JSONArray(file.readText())
+    fun addBooking(
+        appointmentID: String,
+        studentID: String,
+        tutorID: String,
+        tutorName: String,
+        studentName: String,
+        date: String,
+        time: String,
+        subject: String,
+        mode: String,
+        comments: String,
+        subjectObject: Map<String, Any> = emptyMap()
+    ) {
+        val jsonArray = JSONArray(userFile.readText())
 
         val jsonObject = JSONObject().apply {
-            put("tutorId", booking.tutorId)
-            put("comments", booking.comments)
-            put("sessionType", booking.sessionType)
-            put("day", booking.day)
-            put("startTime", booking.startTime)
-            put("endTime", booking.endTime)
-            put("subject", booking.subject)
-            put("studentId", booking.studentId)
-            put("tutorFullName", booking.tutorFullName)
-            put("studentFullName", booking.studentFullName)
+            put("appointmentID", appointmentID)
+            put("studentId", studentID)
+            put("tutorId", tutorID)
+            put("tutorName", tutorName)
+            put("studentName", studentName)
+            put("date", date)
+            put("time", time)
+            put("subject", subject)
+            put("mode", mode)
+            put("comments", comments)
+            put("subjectObject", subjectObject)
+
         }
 
         jsonArray.put(jsonObject)
-        file.writeText(jsonArray.toString(4))
+        userFile.writeText(jsonArray.toString(4))
     }
 
     // Function to remove a booking
-    fun removeBooking(directory: File, tutorId: String, studentId: String, day: String, startTime: String) {
-        val file = File(directory, "bookings.json")
-        val jsonArray = JSONArray(file.readText())
+    fun removeBooking(appointmentID: String) {
+        val jsonArray = JSONArray(userFile.readText())
 
         val filteredArray = JSONArray()
         for (i in 0 until jsonArray.length()) {
             val obj = jsonArray.getJSONObject(i)
-            if (!(obj.getString("tutorId") == tutorId &&
-                        obj.getString("studentId") == studentId &&
-                        obj.getString("day") == day &&
-                        obj.getString("startTime") == startTime)) {
+            if (obj.getString("appointmentID") != appointmentID) {
                 filteredArray.put(obj)
             }
         }
 
-        file.writeText(filteredArray.toString(4))
+        userFile.writeText(filteredArray.toString(4))
     }
 
     // Function to read all bookings from the file
-    fun readBookings(directory: File): List<Booking> {
-        val file = File(directory, "bookings.json")
-        if (!file.exists()) return emptyList()
-
-        val jsonArray = JSONArray(file.readText())
+    fun readBookings(): List<Booking> {
+        val jsonArray = JSONArray(userFile.readText())
         val bookings = mutableListOf<Booking>()
 
         for (i in 0 until jsonArray.length()) {
             val obj = jsonArray.getJSONObject(i)
             val booking = Booking(
-                tutorId = obj.getString("tutorId"),
-                comments = obj.optString("comments", null),
-                sessionType = obj.getString("sessionType"),
-                day = obj.getString("day"),
-                startTime = obj.getString("startTime"),
-                endTime = obj.getString("endTime"),
+
+                appointmentID = obj.getString("appointmentID"),
+                studentID = obj.getString("studentID"),
+                tutorID = obj.getString("tutorID"),
+                tutorName = obj.getString("tutorName"),
+                studentName = obj.getString("studentName"),
+                date = obj.getString("date"),
+                time = obj.getString("time"),
                 subject = obj.getString("subject"),
-                studentId = obj.getString("studentId"),
-                tutorFullName = obj.getString("tutorFullName"),
-                studentFullName = obj.getString("studentFullName")
+                mode = obj.getString("mode"),
+                comments = obj.getString("comments"),
+                subjectObject = obj.getString("subjectObject"),
+
+
             )
             bookings.add(booking)
         }
+
         return bookings
     }
+
+    // Data class for Booking
+    data class Booking(
+        val appointmentID: String = "",
+        val studentID: String = "",
+        val tutorID: String = "",
+        val tutorName: String = "",
+        val studentName: String = "",
+        val date: String = "",
+        val time: String = "",
+        val subject: String = "",
+        val mode: String = "",
+        val comments: String = "",
+        val subjectObject: String
+    )
 }

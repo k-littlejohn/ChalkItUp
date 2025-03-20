@@ -62,6 +62,7 @@ import com.example.chalkitup.ui.components.SessionClassInfo
 import com.example.chalkitup.ui.components.SubjectGradeItemNoPrice
 import com.example.chalkitup.ui.components.TutorSubject
 import com.example.chalkitup.ui.components.TutorSubjectError
+import com.example.chalkitup.ui.viewmodel.BookingManager
 import com.example.chalkitup.ui.viewmodel.BookingViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -727,6 +728,19 @@ fun BookingScreen(
                                         selectedSubject!!,
                                         onSuccess = {
                                             showSuccessDialog = true
+                                            BookingManager.addBooking(
+                                                appointmentID,
+                                                studentID,
+                                                matchedTutorId,
+                                                tutorName,
+                                                studentName,
+                                                date,
+                                                time,
+                                                subject,
+                                                mode,
+                                                comments,
+                                                subjectObject
+                                            )
                                             resetAllFields()
                                         } // Reset all fields after successful submission
                                     ) // SUCCESS DIALOG
