@@ -40,6 +40,8 @@ class TutorAvailabilityViewModel : ViewModel() {
     private val _tutorAvailabilityList = MutableStateFlow<List<TutorAvailability>>(emptyList())
     val tutorAvailabilityList: StateFlow<List<TutorAvailability>> = _tutorAvailabilityList
 
+    private val _isCurrentMonth = MutableStateFlow(false)
+
     // Generates time intervals from 9:00 AM to 9:30 PM in 30-minute increments
     val timeIntervals = generateTimeIntervals()
 
@@ -66,6 +68,9 @@ class TutorAvailabilityViewModel : ViewModel() {
         fetchAvailabilityFromFirestore() // Automatically fetch on ViewModel creation
     }
 
+    fun clearSelectedDay() {
+        _selectedDay.value = null
+    }
 
     fun selectAllOnline() {
         _selectedTimeSlots.value = _selectedTimeSlots.value.toMutableSet().apply {
@@ -159,12 +164,31 @@ class TutorAvailabilityViewModel : ViewModel() {
 
 
     // Fetches the tutor's availability data from Firestore and updates the LiveData list
-    fun fetchAvailabilityFromFirestore() {
+    fun fetchAvailabilityFromFirestore(plusMonth: java.time.YearMonth? = null) {
         // Get the currently logged-in tutor's ID
         val tutorId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
+        println("Fetching availability from Firestore")
+
+        val monthYear: String
+        if (plusMonth != null) {
+            val calendar = Calendar.getInstance()
+            calendar.add(Calendar.MONTH, 1) // Move to the next month
+            val nextMonth = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(calendar.time)
+            monthYear = nextMonth
+            _isCurrentMonth.value = false
+        } else {
+            val calendar = Calendar.getInstance()
+            val currentMonth = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(calendar.time)
+            monthYear = currentMonth
+            _isCurrentMonth.value = true
+        }
+        println("Month Year: $monthYear")
+
         // Format the current month and year as "yyyy-MM" to structure Firestore documents
-        val monthYear = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(System.currentTimeMillis())
+        // monthYear = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(System.currentTimeMillis())
+
+
         val db = FirebaseFirestore.getInstance()
 
         initializeSessionCount(tutorId, monthYear)
@@ -197,6 +221,7 @@ class TutorAvailabilityViewModel : ViewModel() {
 
     // Sets the selected day and loads its corresponding saved time slots
     fun selectDay(day: String) {
+        println("Selected Day: $day")
         _selectedDay.value = day
         _selectedTimeSlots.value = getSavedTimeSlotsForDay(day)
     }
@@ -272,7 +297,17 @@ class TutorAvailabilityViewModel : ViewModel() {
         val tutorId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
         // Format the current month and year for Firestore document structure
-        val monthYear = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(System.currentTimeMillis())
+        val monthYear: String
+        if (_isCurrentMonth.value) {
+            monthYear = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(System.currentTimeMillis())
+        } else {
+            val calendar = Calendar.getInstance()
+            calendar.add(Calendar.MONTH, 1) // Move to the next month
+            val nextMonth = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(calendar.time)
+            monthYear = nextMonth
+        }
+
+
         val db = FirebaseFirestore.getInstance()
 
         // Filter out empty availability entries before saving

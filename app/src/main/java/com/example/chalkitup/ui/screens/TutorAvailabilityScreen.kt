@@ -29,7 +29,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -74,7 +76,6 @@ fun EnterTutorAvailability(
     val scrollState = rememberScrollState()
 
     // Collecting states from ViewModel
-    //val bookedAppointments by viewModel.bookedAppointments.collectAsState()
     val tutorAvailability by viewModel.tutorAvailabilityList.collectAsState() // List of tutor's available time slots
     val selectedDay by viewModel.selectedDay.collectAsState() // Currently selected day
     val selectedTimeSlots by viewModel.selectedTimeSlots.collectAsState() // Selected time slots for the chosen day
@@ -87,21 +88,31 @@ fun EnterTutorAvailability(
         remember { DateTimeFormatter.ofPattern("yyyy-MM-dd") } // Formatter for database storage
 
     // Calendar state for handling month navigation
-    // Currently the user can only view & edit the current month
-    // I want to make previous and next <2?> months viewable but not editable -Jeremelle
     val calendarState = rememberCalendarState(
         startMonth = currentMonth.minusMonths(0),
-        endMonth = currentMonth.plusMonths(0),
+        endMonth = currentMonth.plusMonths(1),
         firstVisibleMonth = currentMonth,
     )
 
+    var isCurrentMonth by remember { mutableStateOf(true) }
+
+    LaunchedEffect (isCurrentMonth) {
+        println("isCurrentMonth: $isCurrentMonth")
+        if (isCurrentMonth) {
+            viewModel.fetchAvailabilityFromFirestore()
+        } else {
+            viewModel.fetchAvailabilityFromFirestore(currentMonth.plusMonths(1))
+        }
+    }
+
+    LaunchedEffect(calendarState.firstVisibleMonth) {
+        isCurrentMonth = calendarState.firstVisibleMonth.yearMonth == currentMonth
+        viewModel.clearSelectedDay()
+    }
+
     //------------------------------VARIABLES-END---------------------------------------------
 
-    // Select the first day of the month by default
-    LaunchedEffect(calendarState.firstVisibleMonth) {
-        //val firstDay = calendarState.firstVisibleMonth.yearMonth.atDay(1).format(dateFormatter)
-//        val today = LocalDate.now()
-//        viewModel.selectDay(today.toString())
+    LaunchedEffect(Unit) {
         viewModel.fetchAvailabilityFromFirestore()
     }
 
@@ -193,9 +204,9 @@ fun EnterTutorAvailability(
                                 val isSelected =
                                     selectedDay == formattedDate // Check if day is selected
                                 val isToday = day.date == LocalDate.now()
-                                val isCurrentMonth =
-                                    YearMonth.from(day.date) == calendarState.firstVisibleMonth.yearMonth
                                 val isPastDay = day.date < LocalDate.now()
+
+                                val dayWithinCurrentMonth = YearMonth.from(day.date) == calendarState.firstVisibleMonth.yearMonth
 
                                 Box(
                                     modifier = Modifier
@@ -204,8 +215,9 @@ fun EnterTutorAvailability(
                                         .background(
                                             when {
                                                 isSelected -> Color.DarkGray // Gray for selected day
-                                                isPastDay -> Color(0x50000000) // Light gray for past days
+                                                hasAvailability && isPastDay -> Color(0xFF398272) // Dark green for past days with availability
                                                 hasAvailability -> Color(0xFF06C59C) // Green if availability exists
+                                                isPastDay -> Color(0x50000000) // Light gray for past days
                                                 else -> Color.Transparent
                                             }
                                         )
@@ -215,7 +227,7 @@ fun EnterTutorAvailability(
                                             shape = RoundedCornerShape(8.dp)
                                         )
                                         .clickable {
-                                            if (isCurrentMonth) {
+                                            if (dayWithinCurrentMonth) {
                                                 viewModel.selectDay(formattedDate) // Select day on click
                                             }
                                         },
@@ -225,8 +237,8 @@ fun EnterTutorAvailability(
                                         text = day.date.dayOfMonth.toString(),
                                         color = when {
                                             isSelected || hasAvailability -> Color.White
-                                            isCurrentMonth || isPastDay -> Color.Black
-                                            else -> Color.LightGray
+                                            !dayWithinCurrentMonth -> Color.LightGray
+                                            else -> Color.Black
                                         },
                                     )
                                 }
@@ -330,8 +342,8 @@ fun EnterTutorAvailability(
                             }
                         }
 
-                    } else if ((selectedDay?.toLocalDate() ?: LocalDate.now()) >= LocalDate.now()) {
-
+                    } else if (((selectedDay?.toLocalDate() ?: LocalDate.now()) >= LocalDate.now()) && (selectedDay != null))
+                    { // Cannot edit past days
                         Text(
                             text = "View and Edit your Availability",
                             fontSize = 14.sp,
