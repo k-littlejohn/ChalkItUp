@@ -106,6 +106,7 @@ fun ProfileScreen(
 
     // Trigger to reload user profile when the profile screen is launched.
     LaunchedEffect(Unit) {
+        println("Loading user profile for $targetedUser")
         profileViewModel.loadUserProfile(targetedUser) // Fetches the user profile when entering the profile screen
     }
 
