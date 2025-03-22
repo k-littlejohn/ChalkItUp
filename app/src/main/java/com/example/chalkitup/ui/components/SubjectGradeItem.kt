@@ -693,14 +693,5 @@ fun SubjectGradeItemNoPrice(
             Box(modifier = Modifier.weight(2.9f)) {} // Empty box when no specialization is available
             onSpecChange("") // Reset specialization if not applicable
         }
-
-//        // Remove Button to delete the subject-grade-specialization item
-//        IconButton(onClick = onRemove) {
-//            Icon(
-//                imageVector = Icons.Default.Delete,
-//                contentDescription = "Remove Subject",
-//                tint = Color.Gray
-//            )
-//        }
     }
 }
