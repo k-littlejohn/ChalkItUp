@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.chalkitup.ui.screens.AwaitingApproval
 import com.example.chalkitup.ui.screens.BookingScreen
 import com.example.chalkitup.ui.screens.CheckEmailScreen
 import com.example.chalkitup.ui.screens.EditProfileScreen
@@ -15,20 +16,26 @@ import com.example.chalkitup.ui.screens.chat.MessageListScreen
 import com.example.chalkitup.ui.screens.chat.ChatScreen
 import com.example.chalkitup.ui.screens.EnterTutorAvailability
 import com.example.chalkitup.ui.screens.chat.NewMessageScreen
+import com.example.chalkitup.ui.screens.NotificationScreen
 import com.example.chalkitup.ui.screens.ProfileScreen
 import com.example.chalkitup.ui.screens.SettingsScreen
 import com.example.chalkitup.ui.screens.SignupScreen
 import com.example.chalkitup.ui.screens.StartScreen
 import com.example.chalkitup.ui.screens.TermsAndCond
+import com.example.chalkitup.ui.screens.admin.AdminHome
 import com.example.chalkitup.ui.viewmodel.AuthViewModel
 import com.example.chalkitup.ui.viewmodel.BookingViewModel
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
 import com.example.chalkitup.ui.viewmodel.ChatViewModel
 import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
 import com.example.chalkitup.ui.viewmodel.MessageListViewModel
+import com.example.chalkitup.ui.viewmodel.NotificationViewModel
+import com.example.chalkitup.ui.viewmodel.OfflineDataManager
 import com.example.chalkitup.ui.viewmodel.ProfileViewModel
 import com.example.chalkitup.ui.viewmodel.SettingsViewModel
 import com.example.chalkitup.ui.viewmodel.TutorAvailabilityViewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.example.chalkitup.ui.viewmodel.admin.AdminHomeViewModel
 
 // Navigation Center, NavHost with navController
 // On app launch, opens startScreen
@@ -51,7 +58,8 @@ fun NavGraph(navController: NavHostController) {
             val authViewModel: AuthViewModel = viewModel()
             LoginScreen(
                 navController = navController,
-                viewModel = authViewModel
+                viewModel = authViewModel,
+                offlineViewModel= OfflineDataManager
             )
         }
 
@@ -78,6 +86,19 @@ fun NavGraph(navController: NavHostController) {
         // Home Screen
         composable("home") {
             HomeScreen(navController = navController)
+        }
+
+        // Notification Screen
+        composable("notifications") {
+            val user = FirebaseAuth.getInstance().currentUser
+            val viewModel: NotificationViewModel = viewModel()
+            if (user != null) {
+                NotificationScreen(
+                    navController = navController,
+                    viewModel = viewModel,
+                    userId = user.uid
+                )
+            }
         }
 
         // Booking Screen
@@ -125,13 +146,17 @@ fun NavGraph(navController: NavHostController) {
         }
 
         // Profile Screen
-        composable("profile") {
+        composable("profile/{targetedUser}") {backStackEntry ->
+            val targetedUser = backStackEntry.arguments?.getString("targetedUser") ?: ""
+            println("TARGETED USER $targetedUser")
             val certificationViewModel: CertificationViewModel = viewModel()
             val profileViewModel: ProfileViewModel = viewModel()
             ProfileScreen(
                 navController = navController,
                 certificationViewModel = certificationViewModel,
-                profileViewModel = profileViewModel)
+                profileViewModel = profileViewModel,
+                targetedUser = targetedUser
+            )
         }
 
         // Edit Profile Screen
@@ -151,7 +176,8 @@ fun NavGraph(navController: NavHostController) {
             SettingsScreen(
                 navController = navController,
                 settingsViewModel = settingsViewModel,
-                authViewModel = authViewModel
+                authViewModel = authViewModel,
+                offlineViewModel = OfflineDataManager
             )
         }
 
@@ -183,6 +209,27 @@ fun NavGraph(navController: NavHostController) {
                 viewModel = viewmodel
             )
         }
+
+        // -- Screen
+        composable("awaitingApproval") {
+            AwaitingApproval(
+                navController = navController,
+            )
+        }
+
+        // -- Screen
+        composable("adminHome") {
+            val viewmodel: AdminHomeViewModel = viewModel()
+            val certViewModel: CertificationViewModel = viewModel()
+            AdminHome(
+                navController = navController,
+                viewModel = viewmodel,
+                certificationViewModel = certViewModel
+            )
+        }
+
+
+
 
     }
 }

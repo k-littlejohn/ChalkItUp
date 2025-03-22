@@ -64,8 +64,11 @@ class CertificationViewModel : ViewModel() {
      * This function retrieves all the certifications for the current user
      * and stores them in the _certifications and _selectedFiles state flows.
      */
-    private fun getCertifications() {
-        val userId = auth.currentUser?.uid ?: return // Get the current user ID
+    fun getCertifications(otherUser: String = "") {
+        var userId = auth.currentUser?.uid ?: return // Get the current user ID
+        if (otherUser.isNotEmpty()) {
+            userId = otherUser
+        }
         val storageRef = storage.reference.child("$userId/certifications")
 
         storageRef.listAll() // List all certifications from Firebase Storage
@@ -214,8 +217,11 @@ class CertificationViewModel : ViewModel() {
      * Download a certification file from Firebase Storage and store it in the cache.
      * After downloading, the file URI is set to the _fileUri LiveData for opening.
      */
-    fun downloadFileToCache(context: Context, fileName: String) {
-        val userId = auth.currentUser?.uid ?: return
+    fun downloadFileToCache(context: Context, fileName: String, otherUser: String = "") {
+        var userId = auth.currentUser?.uid ?: return
+        if (otherUser.isNotEmpty()) {
+            userId = otherUser
+        }
         val storageRef = FirebaseStorage.getInstance().reference.child("$userId/certifications/$fileName")
         val localFile = File(context.cacheDir, fileName)
 

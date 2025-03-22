@@ -1,11 +1,14 @@
 package com.example.chalkitup.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,8 +30,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.chalkitup.R
 
 /**
  * Composable function for displaying and managing the Subject, Grade, and Specialization selection for a tutor.
@@ -83,6 +89,17 @@ fun SubjectGradeItem(
     val defaultButtonColor = Color.LightGray
     val errorButtonColor = Color.Red
 
+    // Image map to display different images for different subjects
+    val subjectIcons = mapOf(
+        "Math" to R.drawable.ic_math2,
+        "Science" to R.drawable.ic_science2,
+        "English" to R.drawable.ic_english2,
+        "Social" to R.drawable.ic_social2,
+        "Biology" to R.drawable.ic_biology,
+        "Chemistry" to R.drawable.ic_chemistry2,
+        "Physics" to R.drawable.ic_physics2
+    )
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -112,7 +129,7 @@ fun SubjectGradeItem(
                 onDismissRequest = { expandedSubject = false },
                 shadowElevation = 0.dp,
                 containerColor = Color.Transparent,
-                modifier = Modifier.width(125.dp)
+                modifier = Modifier.width(140.dp)
             ) {
                 availableSubjects.forEach { subj -> // Iterate through available subjects
                     Box(
@@ -126,7 +143,29 @@ fun SubjectGradeItem(
                             .background(Color.White, shape = RoundedCornerShape(8.dp))
                     ) {
                         DropdownMenuItem(
-                            text = { Text(subj) },
+                            text = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+
+                                    Text(subj)
+
+                                    Box(modifier = Modifier.weight(1f))
+
+                                    Box(
+                                        modifier = Modifier
+                                            .width(40.dp)
+                                            .height(50.dp)
+                                    ) {
+                                        subjectIcons[subj]?.let { icon ->
+                                            Image(
+                                                painter = painterResource(id = icon),
+                                                contentDescription = "subject picture",
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentScale = ContentScale.Crop,
+                                            )
+                                        }
+                                    }
+                                }
+                            },
                             onClick = {
                                 onSubjectChange(subj) // Update the subject when a selection is made
                                 onGradeChange("") // Reset grade and specialization when subject changes
@@ -134,7 +173,6 @@ fun SubjectGradeItem(
                                 onPriceChange("")
                                 expandedSubject = false // Close the dropdown
                             },
-                            //modifier = Modifier.padding(horizontal = 3.dp, vertical = 3.dp)
                         )
                     }
                 }
@@ -271,8 +309,8 @@ fun SubjectGradeItem(
         {
         Row(
             modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically)
         {
             Box(modifier = Modifier.weight(3.5f)) {
@@ -346,8 +384,20 @@ data class TutorSubject(
     val subject: String = "",
     val grade: String = "",
     val specialization: String = "",
-    var price: String=""
-)
+    var price: String = ""
+) {
+    companion object {
+        // Mapping function to convert a Map to TutorSubject
+        fun fromMap(map: Map<String, Any>): TutorSubject {
+            return TutorSubject(
+                subject = map["subject"] as? String ?: "",
+                grade = map["grade"] as? String ?: "",
+                specialization = map["specialization"] as? String ?: "",
+                price = map["price"] as? String ?: ""
+            )
+        }
+    }
+}
 
 /**
  * Data class to represent errors in tutor subject details.
@@ -432,6 +482,17 @@ fun SubjectGradeItemNoPrice(
     val defaultButtonColor = Color(0xFFd2e5fa)
     val errorButtonColor = Color.Red
 
+    // Image map to display different images for different subjects
+    val subjectIcons = mapOf(
+        "Math" to R.drawable.ic_math2,
+        "Science" to R.drawable.ic_science2,
+        "English" to R.drawable.ic_english2,
+        "Social" to R.drawable.ic_social2,
+        "Biology" to R.drawable.ic_biology,
+        "Chemistry" to R.drawable.ic_chemistry2,
+        "Physics" to R.drawable.ic_physics2
+    )
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -461,7 +522,7 @@ fun SubjectGradeItemNoPrice(
                 onDismissRequest = { expandedSubject = false },
                 shadowElevation = 0.dp,
                 containerColor = Color.Transparent,
-                modifier = Modifier.width(125.dp)
+                modifier = Modifier.width(140.dp)
             ) {
                 availableSubjects.forEach { subj -> // Iterate through available subjects
                     Box(
@@ -475,14 +536,35 @@ fun SubjectGradeItemNoPrice(
                             .background(Color.White, shape = RoundedCornerShape(8.dp))
                     ) {
                         DropdownMenuItem(
-                            text = { Text(subj) },
+                            text = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+
+                                    Text(subj)
+
+                                    Box(modifier = Modifier.weight(1f))
+
+                                    Box (
+                                        modifier = Modifier
+                                            .width(40.dp)
+                                            .height(50.dp)
+                                    ) {
+                                        subjectIcons[subj]?.let { icon ->
+                                            Image(
+                                                painter = painterResource(id = icon),
+                                                contentDescription = "subject picture",
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentScale = ContentScale.Crop,
+                                            )
+                                        }
+                                    }
+                                }
+                            },
                             onClick = {
                                 onSubjectChange(subj) // Update the subject when a selection is made
                                 onGradeChange("") // Reset grade and specialization when subject changes
                                 onSpecChange("")
                                 expandedSubject = false // Close the dropdown
                             },
-                            //modifier = Modifier.padding(horizontal = 3.dp, vertical = 3.dp)
                         )
                     }
                 }
@@ -600,7 +682,7 @@ fun SubjectGradeItemNoPrice(
                                 onClick = {
                                     onSpecChange(spec) // Update the specialization when a selection is made
                                     expandedSpec = false // Close the dropdown
-                                }
+                                },
                             )
                         }
                     }

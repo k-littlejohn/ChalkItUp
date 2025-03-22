@@ -56,6 +56,11 @@ placesCompose = "0.1.2"
 places = "4.1.0"
 firebaseDatabaseKtx = "21.0.0"
 appcompat = "1.7.0"
+roomKtx = "2.6.1"
+datastoreCoreAndroid = "1.1.3"
+gson = "2.8.9"
+datastore = "1.0.0"
+runtimeSavedInstanceState = "1.0.0-alpha11"
 
 [libraries]
 androidx-appcompat-v120 = { module = "androidx.appcompat:appcompat", version.ref = "appcompatVersion" }
@@ -122,10 +127,14 @@ androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtim
 places = { group = "com.google.android.libraries.places", name = "places", version.ref = "places" }
 firebase-database-ktx = { group = "com.google.firebase", name = "firebase-database-ktx", version.ref = "firebaseDatabaseKtx" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomKtx" }
 
+androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastoreCoreAndroid" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+androidx-datastore = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+androidx-runtime-saved-instance-state = { group = "androidx.compose.runtime", name = "runtime-saved-instance-state", version.ref = "runtimeSavedInstanceState" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version = "1.9.24" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
-

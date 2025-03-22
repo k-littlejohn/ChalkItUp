@@ -7,6 +7,10 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -23,8 +27,30 @@ fun MyTopBar(
     navController: NavController,
     onMenuClick: () -> Unit
 ) {
+    var targetedProfileView by remember { mutableStateOf(false) }
+
     // Holds the value of the current screen the user is on
     var currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+
+    if (currentRoute != null) {
+        if (currentRoute.contains("/")) {
+            val currentRouteSpecifier = currentRoute.substringAfter("/")
+            if (currentRouteSpecifier != "{checkType}" && currentRouteSpecifier.isNotBlank()) {
+                val specificKeyCheck = navController.currentBackStackEntry?.arguments?.getString("targetedUser")
+                if (specificKeyCheck.isNullOrBlank()) {
+                    targetedProfileView = false
+                } else {
+                    // The specifier is to view another users profile
+                    targetedProfileView = true
+                }
+            } else {
+                targetedProfileView = false
+            }
+        } else {
+            targetedProfileView = false
+        }
+    }
+
     currentRoute = currentRoute?.substringBefore("/")
 
     // Use theme colors dynamically
@@ -32,8 +58,8 @@ fun MyTopBar(
     // screen the user is on
     val backgroundColor = when (currentRoute) {
         //"home" -> Color(0xFFFFFFFF)//MaterialTheme.colorScheme.primary
-        "profile","tutorAvailability","booking","home","start","login","signup","forgotPassword","termsAndCond" -> Color(0xFF54A4FF) // Fill top-screen white space
-        "checkEmail" -> Color(0xFF06C59C) // Fill top-screen white space
+        "profile","tutorAvailability","booking","home","start","login","signup","forgotPassword","termsAndCond","adminHome" -> Color(0xFF54A4FF) // Fill top-screen white space
+        "checkEmail","awaitingApproval" -> Color(0xFF06C59C) // Fill top-screen white space
         else -> Color.White
     }
 
@@ -49,8 +75,9 @@ fun MyTopBar(
                     "settings" -> "Settings"
                     "booking" -> ""
                     "messages" -> "Messages"
+                    "notifications" -> "Notifications"
                     "newMessage" -> "New Chat"
-                    "start","login","signup","forgotPassword","checkEmail","tutorAvailability","termsAndCond" -> ""
+                    "start","login","signup","forgotPassword","checkEmail","tutorAvailability","termsAndCond","adminHome","awaitingApproval" -> ""
                     else -> "ChalkItUp Tutors"
                 }
             )
@@ -73,7 +100,7 @@ fun MyTopBar(
                 }
                 // On the login and signup page currently,          // Here are the alternative back buttons on login & signup screen
                 // there is a back button in the top left
-                "login","signup" -> {
+                "login","signup","awaitingApproval" -> {
                     IconButton(onClick = { navController.navigate("start") }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
@@ -83,6 +110,14 @@ fun MyTopBar(
                 // On unspecified pages there is no button in the top left
                 else -> {
                     Unit
+                }
+            }
+            // If viewing another user's profile, there is a back button
+            if (targetedProfileView) {
+                IconButton(onClick = { navController.popBackStack() } ) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        modifier = Modifier.size(30.dp))
                 }
             }
         },
