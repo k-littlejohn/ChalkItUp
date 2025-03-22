@@ -6,9 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -29,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -87,6 +89,17 @@ fun SubjectGradeItem(
     val defaultButtonColor = Color.LightGray
     val errorButtonColor = Color.Red
 
+    // Image map to display different images for different subjects
+    val subjectIcons = mapOf(
+        "Math" to R.drawable.ic_math2,
+        "Science" to R.drawable.ic_science2,
+        "English" to R.drawable.ic_english2,
+        "Social" to R.drawable.ic_social2,
+        "Biology" to R.drawable.ic_biology,
+        "Chemistry" to R.drawable.ic_chemistry2,
+        "Physics" to R.drawable.ic_physics2
+    )
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -116,7 +129,7 @@ fun SubjectGradeItem(
                 onDismissRequest = { expandedSubject = false },
                 shadowElevation = 0.dp,
                 containerColor = Color.Transparent,
-                modifier = Modifier.width(125.dp)
+                modifier = Modifier.width(140.dp)
             ) {
                 availableSubjects.forEach { subj -> // Iterate through available subjects
                     Box(
@@ -130,7 +143,29 @@ fun SubjectGradeItem(
                             .background(Color.White, shape = RoundedCornerShape(8.dp))
                     ) {
                         DropdownMenuItem(
-                            text = { Text(subj) },
+                            text = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+
+                                    Text(subj)
+
+                                    Box(modifier = Modifier.weight(1f))
+
+                                    Box(
+                                        modifier = Modifier
+                                            .width(40.dp)
+                                            .height(50.dp)
+                                    ) {
+                                        subjectIcons[subj]?.let { icon ->
+                                            Image(
+                                                painter = painterResource(id = icon),
+                                                contentDescription = "subject picture",
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentScale = ContentScale.Crop,
+                                            )
+                                        }
+                                    }
+                                }
+                            },
                             onClick = {
                                 onSubjectChange(subj) // Update the subject when a selection is made
                                 onGradeChange("") // Reset grade and specialization when subject changes
@@ -447,6 +482,17 @@ fun SubjectGradeItemNoPrice(
     val defaultButtonColor = Color(0xFFd2e5fa)
     val errorButtonColor = Color.Red
 
+    // Image map to display different images for different subjects
+    val subjectIcons = mapOf(
+        "Math" to R.drawable.ic_math2,
+        "Science" to R.drawable.ic_science2,
+        "English" to R.drawable.ic_english2,
+        "Social" to R.drawable.ic_social2,
+        "Biology" to R.drawable.ic_biology,
+        "Chemistry" to R.drawable.ic_chemistry2,
+        "Physics" to R.drawable.ic_physics2
+    )
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -476,7 +522,7 @@ fun SubjectGradeItemNoPrice(
                 onDismissRequest = { expandedSubject = false },
                 shadowElevation = 0.dp,
                 containerColor = Color.Transparent,
-                modifier = Modifier.width(125.dp)
+                modifier = Modifier.width(140.dp)
             ) {
                 availableSubjects.forEach { subj -> // Iterate through available subjects
                     Box(
@@ -490,7 +536,29 @@ fun SubjectGradeItemNoPrice(
                             .background(Color.White, shape = RoundedCornerShape(8.dp))
                     ) {
                         DropdownMenuItem(
-                            text = { Text(subj) },
+                            text = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+
+                                    Text(subj)
+
+                                    Box(modifier = Modifier.weight(1f))
+
+                                    Box (
+                                        modifier = Modifier
+                                            .width(40.dp)
+                                            .height(50.dp)
+                                    ) {
+                                        subjectIcons[subj]?.let { icon ->
+                                            Image(
+                                                painter = painterResource(id = icon),
+                                                contentDescription = "subject picture",
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentScale = ContentScale.Crop,
+                                            )
+                                        }
+                                    }
+                                }
+                            },
                             onClick = {
                                 onSubjectChange(subj) // Update the subject when a selection is made
                                 onGradeChange("") // Reset grade and specialization when subject changes
