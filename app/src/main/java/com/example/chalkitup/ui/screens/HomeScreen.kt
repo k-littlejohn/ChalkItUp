@@ -525,10 +525,15 @@ fun UpcomingAppointmentItem(
 fun AppointmentPopup(
     navController: NavController,
     homeViewModel: HomeViewModel = viewModel(),
-    appointment: Appointment, onDismiss: () -> Unit
+    appointment: Appointment,
+    onDismiss: () -> Unit
 ) {
     val userType by homeViewModel.userType.collectAsState()
-
+    val context = LocalContext.current
+    val connection = Connection.getInstance(context)
+    val isConnected by connection.connectionStatus.collectAsState(initial = false)
+    // Track error message for network issues
+    var errorMessage by remember { mutableStateOf<String?>(null) }
     //var rebooking by remember { mutableStateOf(false) }
 //    var selectedDate by remember { mutableStateOf(appointment.date) }
     //var availableDates by remember { mutableStateOf(false) }
@@ -536,6 +541,7 @@ fun AppointmentPopup(
     AlertDialog(
         onDismissRequest = {
             //rebooking = false // Reset
+            errorMessage = null
             onDismiss()
         },
         title = { Text(text = "Appointment Details") },
@@ -551,6 +557,14 @@ fun AppointmentPopup(
                 Text(text = "Subject: ${appointment.subject}")
                 Text(text = "Location: ${appointment.mode}")
                 Text(text = "Comments: ${appointment.comments}")
+
+                errorMessage?.let {
+                    Text(
+                        text = it,
+                        color = Color.Red,
+                        //style = MaterialTheme.typography.body2
+                    )
+                }
             }
         },
         confirmButton = {
@@ -565,11 +579,17 @@ fun AppointmentPopup(
             Column {
                 Button(
                     onClick = {
-                        homeViewModel.cancelAppointment(appointment) {
-                            //rebooking = false // Reset After Cancelling
-                            onDismiss()
-                            homeViewModel.fetchAppointments()
+                        if (isConnected){
+                            homeViewModel.cancelAppointment(appointment) {
+                                //rebooking = false // Reset After Cancelling
+                                onDismiss()
+                                homeViewModel.fetchAppointments()
+                            }
                         }
+                        else {
+                            errorMessage="Error: Try canceling when you are back online!"
+                        }
+
                     },
                     //enabled = !rebooking
                 ) {
@@ -579,19 +599,23 @@ fun AppointmentPopup(
                     Button(
                         onClick = {
 //                            bookingViewModel.rebookAppointment(appointment)
-                            homeViewModel.cancelAppointment(appointment) {
-                                //rebooking = false // Reset After Cancelling
-                                onDismiss()
-                                navController.navigate("booking")
+                            if(isConnected) {
+                                homeViewModel.cancelAppointment(appointment) {
+                                    //rebooking = false // Reset After Cancelling
+                                    onDismiss()
+                                    navController.navigate("booking")
+                                }
                             }
-                            //rebooking = true
-                            //availableDates = true
+                            else{
+                                errorMessage="Error: Try rebooking when you are back online!"
+                            }
                         },
                         //enabled = !rebooking
                     ) {
                         Text("Rebook Appointment")
                     }
                 }
+
             }
         }
     )
