@@ -9,6 +9,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+import com.google.protobuf.Internal.ListAdapter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -735,34 +736,21 @@ object BookingManager {
     }
 
     // Function to add a new booking
-    fun addBooking(
-        appointmentID: String,
-        studentID: String,
-        tutorID: String,
-        tutorName: String,
-        studentName: String,
-        date: String,
-        time: String,
-        subject: String,
-        mode: String,
-        comments: String,
-        subjectObject: Map<String, Any> = emptyMap()
-    ) {
+    fun addBooking(app: Appointment) {
         val jsonArray = JSONArray(userFile.readText())
 
         val jsonObject = JSONObject().apply {
-            put("appointmentID", appointmentID)
-            put("studentId", studentID)
-            put("tutorId", tutorID)
-            put("tutorName", tutorName)
-            put("studentName", studentName)
-            put("date", date)
-            put("time", time)
-            put("subject", subject)
-            put("mode", mode)
-            put("comments", comments)
-            put("subjectObject", subjectObject)
-
+            put("appointmentID", app.appointmentID)
+            put("studentId", app.studentID)
+            put("tutorId", app.tutorID)
+            put("tutorName", app.tutorName)
+            put("studentName", app.studentName)
+            put("date", app.date)
+            put("time", app.time)
+            put("subject", app.subject)
+            put("mode", app.mode)
+            put("comments", app.comments)
+            put("subjectObject", app.subjectObject)  // subjectObject is still a Map
         }
 
         jsonArray.put(jsonObject)
@@ -785,14 +773,16 @@ object BookingManager {
     }
 
     // Function to read all bookings from the file
-    fun readBookings(): List<Booking> {
+    fun readBookings(): List<Appointment> {
         val jsonArray = JSONArray(userFile.readText())
-        val bookings = mutableListOf<Booking>()
+        val bookings = mutableListOf<Appointment>()
 
         for (i in 0 until jsonArray.length()) {
             val obj = jsonArray.getJSONObject(i)
-            val booking = Booking(
+            // Convert subjectObject (JSONObject) to Map<String, Any>
+            val subjectObject = obj.optJSONObject("subjectObject")?.toMap() ?: emptyMap()
 
+            val booking = Appointment(
                 appointmentID = obj.getString("appointmentID"),
                 studentID = obj.getString("studentID"),
                 tutorID = obj.getString("tutorID"),
@@ -803,9 +793,7 @@ object BookingManager {
                 subject = obj.getString("subject"),
                 mode = obj.getString("mode"),
                 comments = obj.getString("comments"),
-                subjectObject = obj.getString("subjectObject"),
-
-
+                subjectObject = subjectObject  // Now subjectObject is a Map<String, Any>
             )
             bookings.add(booking)
         }
@@ -813,18 +801,32 @@ object BookingManager {
         return bookings
     }
 
-    // Data class for Booking
-    data class Booking(
-        val appointmentID: String = "",
-        val studentID: String = "",
-        val tutorID: String = "",
-        val tutorName: String = "",
-        val studentName: String = "",
-        val date: String = "",
-        val time: String = "",
-        val subject: String = "",
-        val mode: String = "",
-        val comments: String = "",
-        val subjectObject: String
-    )
+    // Function to clear all bookings (reset the JSON file to an empty array)
+    fun clearBookings() {
+        userFile.writeText(JSONArray().toString())  // Overwrite the file with an empty array
+        println("All bookings have been cleared.")
+    }
 }
+
+fun JSONObject.toMap(): Map<String, Any> {
+    val map = mutableMapOf<String, Any>()
+    val keys = this.keys()
+    while (keys.hasNext()) {
+        val key = keys.next()
+        map[key] = this.get(key)  // Gets the value for the key (could be any type)
+    }
+    return map
+}
+//BookingManager.addBooking(
+//appointmentID,
+//studentID,
+//matchedTutorId,
+//tutorName,
+//studentName,
+//date,
+//time,
+//subject,
+//mode,
+//comments,
+//subjectObject
+//)

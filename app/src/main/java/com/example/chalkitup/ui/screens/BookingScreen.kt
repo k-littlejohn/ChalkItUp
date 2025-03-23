@@ -728,19 +728,6 @@ fun BookingScreen(
                                         selectedSubject!!,
                                         onSuccess = {
                                             showSuccessDialog = true
-                                            BookingManager.addBooking(
-                                                appointmentID,
-                                                studentID,
-                                                matchedTutorId,
-                                                tutorName,
-                                                studentName,
-                                                date,
-                                                time,
-                                                subject,
-                                                mode,
-                                                comments,
-                                                subjectObject
-                                            )
                                             resetAllFields()
                                         } // Reset all fields after successful submission
                                     ) // SUCCESS DIALOG

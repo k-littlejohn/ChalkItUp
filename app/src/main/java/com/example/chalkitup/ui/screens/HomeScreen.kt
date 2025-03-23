@@ -331,7 +331,7 @@ fun UpcomingAppointments(
             fontSize = 20.sp,
             color = Color.Black
         )
-
+        BookingManager.clearBookings()
         appointments.forEach { appointment ->
             // Format the date properly using "MMM d"
             val formattedDate = try {
@@ -351,6 +351,7 @@ fun UpcomingAppointments(
                 backgroundColor = Color.White,
                 onClick = { onAppointmentClick(appointment) }
             )
+            BookingManager.addBooking(appointment)
         }
     }
 }
@@ -539,7 +540,6 @@ fun AppointmentPopup(
                                 //rebooking = false // Reset After Cancelling
                                 onDismiss()
                                 navController.navigate("booking")
-                                BookingManager.removeBooking(appointment.tutorID, appointment.studentID, appointment.date, appointment.time)
                             }
                             //rebooking = true
                             //availableDates = true
