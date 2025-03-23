@@ -1,5 +1,6 @@
 package com.example.chalkitup.ui.screens
 
+import android.util.Log
 import android.widget.Space
 import androidx.compose.ui.res.painterResource
 import com.example.chalkitup.R
@@ -46,6 +47,7 @@ import androidx.compose.ui.graphics.Brush
 import java.util.Locale
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.chalkitup.Connection
 import com.example.chalkitup.ui.viewmodel.Appointment
 import com.example.chalkitup.ui.viewmodel.BookingManager
 import com.example.chalkitup.ui.viewmodel.HomeViewModel
@@ -322,7 +324,7 @@ fun UpcomingAppointments(
     homeViewModel: HomeViewModel = viewModel(),
     onAppointmentClick: (Appointment) -> Unit
 ) {
-    val appointments by homeViewModel.appointments.collectAsState()
+
 
     //Start of UI for Upcoming Appointments
     Column(modifier = Modifier.padding(16.dp)) {
@@ -331,27 +333,68 @@ fun UpcomingAppointments(
             fontSize = 20.sp,
             color = Color.Black
         )
-        BookingManager.clearBookings()
-        appointments.forEach { appointment ->
-            // Format the date properly using "MMM d"
-            val formattedDate = try {
-                val date = LocalDate.parse(appointment.date, DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US))
-                date.format(DateTimeFormatter.ofPattern("MMM d", Locale.US)) // Outputs "Mar 6"
-            } catch (e: Exception) {
-                "Invalid Date"
-            }
 
-            UpcomingAppointmentItem(
-                title = appointment.subject,
-                date = formattedDate,
-                tutor = appointment.tutorName,
-                student = appointment.studentName,
-                mode = appointment.mode,
-                time = appointment.time,
-                backgroundColor = Color.White,
-                onClick = { onAppointmentClick(appointment) }
-            )
-            BookingManager.addBooking(appointment)
+        val context = LocalContext.current
+        val connection = Connection.getInstance(context)
+        val isConnected by connection.connectionStatus.collectAsState(initial = false)
+        if(isConnected) {
+            val appointments by homeViewModel.appointments.collectAsState()
+            BookingManager.clearBookings()
+            appointments.forEach { appointment ->
+                // Format the date properly using "MMM d"
+                val formattedDate = try {
+                    val date = LocalDate.parse(
+                        appointment.date,
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US)
+                    )
+                    date.format(DateTimeFormatter.ofPattern("MMM d", Locale.US)) // Outputs "Mar 6"
+                } catch (e: Exception) {
+                    "Invalid Date"
+                }
+
+                UpcomingAppointmentItem(
+                    title = appointment.subject,
+                    date = formattedDate,
+                    tutor = appointment.tutorName,
+                    student = appointment.studentName,
+                    mode = appointment.mode,
+                    time = appointment.time,
+                    backgroundColor = Color.White,
+                    onClick = { onAppointmentClick(appointment) }
+                )
+                BookingManager.addBooking(appointment)
+                Log.d("offlineApp", "App logged: $appointment.appointmentID")
+            }
+        }
+        else{
+            val appointments=BookingManager.readBookings()
+            appointments.forEach { appointment ->
+                    // Format the date properly using "MMM d"
+                val formattedDate = try {
+                    val date = LocalDate.parse(
+                        appointment.date,
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US)
+                    )
+                    date.format(DateTimeFormatter.ofPattern("MMM d", Locale.US)) // Outputs "Mar 6"
+                } catch (e: Exception) {
+                    "Invalid Date"
+                }
+
+                UpcomingAppointmentItem(
+                    title = appointment.subject,
+                    date = formattedDate,
+                    tutor = appointment.tutorName,
+                    student = appointment.studentName,
+                    mode = appointment.mode,
+                    time = appointment.time,
+                    backgroundColor = Color.White,
+                    onClick = { onAppointmentClick(appointment) }
+                )
+
+                Log.d("offlineApp", "OfflineApp logged: $appointment.appointmentID")
+
+
+            }
         }
     }
 }

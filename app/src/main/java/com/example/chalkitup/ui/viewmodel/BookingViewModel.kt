@@ -730,7 +730,7 @@ object BookingManager {
     fun init(fileDirectory: File) {
         userFile = File(fileDirectory, "bookings.json")
         if (!userFile.exists()) {
-            userFile.writeText(JSONArray().toString())  // Initialize with empty array
+            userFile.writeText(JSONArray().toString())  // Initialize with an empty array
             println("Booking file initialized.")
         }
     }
@@ -754,7 +754,7 @@ object BookingManager {
         }
 
         jsonArray.put(jsonObject)
-        userFile.writeText(jsonArray.toString(4))
+        userFile.writeText(jsonArray.toString(4)) // Pretty print with indentation
     }
 
     // Function to remove a booking
@@ -779,35 +779,51 @@ object BookingManager {
 
         for (i in 0 until jsonArray.length()) {
             val obj = jsonArray.getJSONObject(i)
-            // Convert subjectObject (JSONObject) to Map<String, Any>
+
+            // Safely retrieve values with optString for missing or null keys
+            val appointmentID = obj.optString("appointmentID", "")
+            val studentID = obj.optString("studentID", "")
+            val tutorID = obj.optString("tutorID", "")
+            val tutorName = obj.optString("tutorName", "")
+            val studentName = obj.optString("studentName", "")
+            val date = obj.optString("date", "")
+            val time = obj.optString("time", "")
+            val subject = obj.optString("subject", "")
+            val mode = obj.optString("mode", "")
+            val comments = obj.optString("comments", "")
+
+            // Convert subjectObject to a Map<String, Any> using the safe optJSONObject and toMap()
             val subjectObject = obj.optJSONObject("subjectObject")?.toMap() ?: emptyMap()
 
+            // Create the Appointment object
             val booking = Appointment(
-                appointmentID = obj.getString("appointmentID"),
-                studentID = obj.getString("studentID"),
-                tutorID = obj.getString("tutorID"),
-                tutorName = obj.getString("tutorName"),
-                studentName = obj.getString("studentName"),
-                date = obj.getString("date"),
-                time = obj.getString("time"),
-                subject = obj.getString("subject"),
-                mode = obj.getString("mode"),
-                comments = obj.getString("comments"),
-                subjectObject = subjectObject  // Now subjectObject is a Map<String, Any>
+                appointmentID = appointmentID,
+                studentID = studentID,
+                tutorID = tutorID,
+                tutorName = tutorName,
+                studentName = studentName,
+                date = date,
+                time = time,
+                subject = subject,
+                mode = mode,
+                comments = comments,
+                subjectObject = subjectObject
             )
+
             bookings.add(booking)
         }
 
         return bookings
     }
 
-    // Function to clear all bookings (reset the JSON file to an empty array)
+    // Function to clear all bookings (i.e., empty the file)
     fun clearBookings() {
-        userFile.writeText(JSONArray().toString())  // Overwrite the file with an empty array
-        println("All bookings have been cleared.")
+        userFile.writeText(JSONArray().toString()) // Overwrite with an empty JSON array
+        println("All bookings cleared.")
     }
 }
 
+// Extension function to convert a JSONObject to a Map<String, Any>
 fun JSONObject.toMap(): Map<String, Any> {
     val map = mutableMapOf<String, Any>()
     val keys = this.keys()
@@ -817,6 +833,19 @@ fun JSONObject.toMap(): Map<String, Any> {
     }
     return map
 }
+
+fun JSONObject.toMapFromJSONObject(): Map<String, Any> {
+    val map = mutableMapOf<String, Any>()
+    val keys = this.keys()
+    while (keys.hasNext()) {
+        val key = keys.next()
+        map[key] = this.get(key)  // Gets the value for the key (could be any type)
+    }
+    return map
+}
+
+
+
 //BookingManager.addBooking(
 //appointmentID,
 //studentID,
