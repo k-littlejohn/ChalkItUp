@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import android.content.ClipboardManager
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getSystemService
@@ -50,6 +51,8 @@ import com.google.api.services.calendar.model.EventDateTime
 import com.google.auth.oauth2.GoogleCredentials
 import com.google.auth.oauth2.ServiceAccountCredentials
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.FileInputStream
 import java.io.IOException
 import java.util.*
@@ -178,7 +181,7 @@ fun authenticateServiceAccount() {
 //add the service account to the calendar
 fun createCalendarAndAddServiceAccount() {
     try {
-        val serviceAccountKeyFile = "/path/to/your/service/account.json"
+        val serviceAccountKeyFile = "/Users/samanthaskiba/StudioProjects/W25_D1/app/src/main/java/com/example/chalkitup/ui/viewmodel/admin/chalkitup-bdceba61ebce.json"
         val credentials = ServiceAccountCredentials.fromStream(FileInputStream(serviceAccountKeyFile))
         val googleCredential = GoogleCredential.fromStream(FileInputStream(serviceAccountKeyFile))
             .createScoped(listOf(CalendarScopes.CALENDAR))
@@ -209,6 +212,7 @@ fun createCalendarAndAddServiceAccount() {
         e.printStackTrace()
     }
 }
+
 
 fun addServiceAccountToCalendar(calendarService: Calendar, calendarId: String, credentials: ServiceAccountCredentials) {
     try {
@@ -363,23 +367,39 @@ class CalendarHelper(private val mService: Calendar) {
 //create a subscription button that copies subscription link and opens google calender subscriptions
 @Composable
 fun SubscriptionButton(context: Context) {
-    val calendarId = CalendarDetailsSingleton.calendarId
-    if (calendarId.isNotEmpty()) {
-        val subscriptionLink = "https://calendar.google.com/calendar/ical/$calendarId/public/basic.ics"
+    val coroutineScope = rememberCoroutineScope()
 
-        Column(modifier = Modifier.padding(16.dp)) {
-            Button(onClick = {
+    Button(onClick = {
+        coroutineScope.launch {
+            // Ensure a calendar exists
+            CalendarDetailsSingleton.ensureCalendarExists()
+
+            // Wait a bit to allow async operations to complete (not ideal, better to use proper async flow)
+            delay(2000)
+
+            val calendarId = CalendarDetailsSingleton.calendarId
+            if (calendarId.isNotEmpty()) {
+                println("Adding appointments to calendar: $calendarId")
+                addAppointmentsToCalendar(calendarId)
+
+                // Generate the subscription link
+                val subscriptionLink = "https://calendar.google.com/calendar/ical/$calendarId/public/basic.ics"
+
+                // Copy to clipboard
                 copyToClipboard(subscriptionLink, context)
                 Toast.makeText(context, "Subscription link copied!", Toast.LENGTH_SHORT).show()
+
+                // Open Google Calendar subscription page
                 openGoogleCalendar(context)
-            }) {
-                Text(text = "Subscribe to Calendar")
+            } else {
+                Toast.makeText(context, "Failed to create calendar", Toast.LENGTH_SHORT).show()
             }
         }
-    } else {
-        Text("No calendar found.", modifier = Modifier.padding(8.dp))
+    }) {
+        Text(text = "Subscribe to Calendar")
     }
 }
+
 
 // Function to copy the subscription link to clipboard
 fun copyToClipboard(subscriptionLink: String, context: Context) {
