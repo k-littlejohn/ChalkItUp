@@ -1,4 +1,4 @@
-package com.example.chalkitup.ui.viewmodel
+package com.example.chalkitup.ui.viewmodel.chat
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
