@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "chalkitup",
+  "private_key_id": "bdceba61ebcecc86c8c1e3e2c393415f32812aae",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDNXLMmK5YW+c7E\nqul566ESbsIc5r5wk1+pPzmXclJCa2SOPNoH3HcUxYJ77ycBRXgRsyXcoz7OlVVe\n/get/aKzRoE0lpX+86GHcUP3VCF2U3/AN4mdSx2ETo+KJuoyz7jxNEKrUwLqZHRm\nzpRdhGVixLDfl+6YyzcrveYKa9G795Mxblu+R+2L2XfaCUszIeedyJ1I6TDXR9ts\nnq9MoxUWpRIJmJVgqE7hF0jSA05QUIIITsGAaMwVy0wiR3wlLztdvrrrAFhIs/SW\n2yBg3lsGuZxxPrBXiGMYHCL7NVwUMvpVqHE+jo4vIaCxoC8IpzU8Wk4gXutAAcvF\nZSIJAI29AgMBAAECggEADiBxmW9Xoop6KQi5yV+GY8J3O247DPryUm3tPAgK9RM2\npls0w2Qs0+K3VGex5vI8rXkFon0fUa4vonp2lEc1lUAFHNU8Cb8ALlVCD+Y7bAyX\n5eTcJFQZunN+B8qgAzFLX1pROMBb27xfzn+o8JruL4JoyWTF7sBR8gIc7DwZACVK\n8IeY3aaEKMh05VYRB+HCOwQQFMsNj9QrHi02sZ6wkQEhUvb7Q/QXtPJdTveQps5R\nunLK7DD664ZdPsrwOXiSp08vwDZuCHTX1rHvnU+N585mHjaClPdPtTfJKa5gLNyt\nehn+OoArAp5mjARpm0tH6Z5HiSxBHVkTZA+3eJ4BiQKBgQDniyJhFSo+6YyZKO/D\nVR1VVB22euZjIG2iFl+xPGLfVe4PYj1fs00QCYTKFzxwHQ6JIMKFrr9NZGDIlFe2\n7v+4DlNQ8/TKSCV1i3j/eCipQjBqZ8ppKkblChkuztbmifugazvCQylLNRW2ZPki\nQ2DVyMuLAYnJEF/GPF1kraIKqQKBgQDjDaD6SqlBegTikJ735HJNOMzPjz3wX7eh\ngNDZ/HfKrI8vgiF17s8XbmN6GNV0dchhQnzIBYMaIHwzgeNG158+fmdkmsYXzAJk\nNiQPNOB/czsxELOBXkupRCueVK8aCCxYGNHFJIN8FgEAzhiDVvZvwR1h8z95oPqM\nu2gLeUvK9QKBgQDPNFuXtXEQy7/ecBvgGZMegR/15RW3L5Xsr0kDOp7gbe2UJr31\nnmcgKuSCVTjou5f+byqkpzTa9TEHTnkQY+DDvU4h667sNpQPFLk7JTR+A5WAI1Gn\nuwWmgdr3YHI/7MsZS902gxO5EdBUYRfx6YoGxqIfy0iafeS3ad3J8vhHwQKBgQC1\nsilZQjgSErAoEq10GJcznrmfe7SIUECl+GyplLTUNqTa0tsuAe4thQQMKCVg7gRt\neIRcmLSiSs65dT7IaTKhEwxwYL8XOgXL5duTY7AnrbH3gLL1Wt1XVhtFt+TsAxBh\na3MqvR6PRRiGaWcKa6QIKFT4Fm18SstVpX8Md4OkpQKBgHpMkMV0vGwrfy0nv4UQ\nO1J7m+93pNjkx4zMVVeDVKcvE3sBIdcSCkM4WiQsWuTyXcB6SpToIoyVSReLPPVC\nIqH+ye40slRUer21H8q2ZB4Lzx3GgcRpXOgIc13cBmuQXcsYV+9egxxJjxQWWN3o\nndgUuPgewufM1qcUleZJVOiW\n-----END PRIVATE KEY-----\n",
+  "client_email": "chalkitup@chalkitup.iam.gserviceaccount.com",
+  "client_id": "113802784452007062744",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/chalkitup%40chalkitup.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
