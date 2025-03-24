@@ -1,5 +1,25 @@
 package com.example.chalkitup.ui.screens
 
+import com.google.api.client.auth.oauth2.Credential
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow
+import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
+import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.json.JsonFactory
+import com.google.api.client.json.gson.GsonFactory
+import com.google.api.client.util.DateTime
+import com.google.api.client.util.store.FileDataStoreFactory
+import com.google.api.services.calendar.Calendar
+import com.google.api.services.calendar.CalendarScopes
+import com.google.api.services.calendar.model.Event
+import com.google.api.services.calendar.model.Events
+import java.io.File
+import java.io.InputStreamReader
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.util.Collections
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -23,14 +43,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+//import androidx.privacysandbox.tools.core.generator.build
 import com.example.chalkitup.ui.viewmodel.Appointment
 import com.example.chalkitup.ui.viewmodel.AuthViewModel
 import com.example.chalkitup.ui.viewmodel.BookingManager
 import com.example.chalkitup.ui.viewmodel.SettingsViewModel
 import com.example.chalkitup.ui.viewmodel.OfflineDataManager
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.firebase.auth.FirebaseAuth
-import java.text.SimpleDateFormat
-import java.util.Locale
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.TimeZone;
+import com.google.api.services.calendar.model.Calendar as GoogleCalendar // Rename import to avoid conflict
+import com.google.api.services.calendar.model.EventDateTime
+
 
 @Composable
 fun SettingsScreen(
@@ -38,8 +66,13 @@ fun SettingsScreen(
     authViewModel: AuthViewModel,
     navController: NavController,
     offlineViewModel: OfflineDataManager,
-    context: Context = LocalContext.current
+
 ) {
+    val context = LocalContext.current
+    val account = GoogleSignIn.getLastSignedInAccount(context)
+
+    val service = account?.let { CalendarService(context, it) }
+
     var showDialog by remember { mutableStateOf(false) }
     var successMessage by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -53,7 +86,7 @@ fun SettingsScreen(
     ) {
         // temp logout button
         /////////////////// subscription google link
-        SubscribeToCalendarButton(appointments = BookingManager.readBookings())
+        SubscribeToCalendarButton(service)
 
         ////////////////////
         Button(onClick = {
@@ -122,34 +155,29 @@ fun SettingsScreen(
 
 
 @Composable
-fun SubscribeToCalendarButton(appointments: List<Appointment>) {
+fun SubscribeToCalendarButton(service: CalendarService?) {
     val context = LocalContext.current
     var showSuccessMessage by remember { mutableStateOf(false) }
-    var showErrorMessage by remember { mutableStateOf(false) }
 
     Button(
         onClick = {
-            // Generate the calendar link and attempt to open it
-            val isSuccess = generateCalendarSubscriptionLink(context, appointments)
-
-            if (isSuccess) {
-                showSuccessMessage = true
-                showErrorMessage = false
-            } else {
-                showErrorMessage = true
-                showSuccessMessage = false
+            if (service != null) {
+                val calendarId = service.getPrimaryCalendarId()
+                if (calendarId != null) {
+                    openGoogleCalendarSubscriptionPage(context, calendarId)
+                    showSuccessMessage = true
+                }
             }
         }
     ) {
-        Text("Subscribe to Calendar")
+        Text("Subscribe to Google Calendar")
     }
 
-    // Show a success message after subscription attempt
     if (showSuccessMessage) {
         AlertDialog(
             onDismissRequest = { showSuccessMessage = false },
-            title = { Text("Subscription Success") },
-            text = { Text("You have successfully subscribed to the calendar.") },
+            title = { Text("Subscription Successful") },
+            text = { Text("Google Calendar subscription link opened.") },
             confirmButton = {
                 Button(onClick = { showSuccessMessage = false }) {
                     Text("OK")
@@ -157,119 +185,127 @@ fun SubscribeToCalendarButton(appointments: List<Appointment>) {
             }
         )
     }
+}
 
-    // Show an error message if the subscription fails
-    if (showErrorMessage) {
-        AlertDialog(
-            onDismissRequest = { showErrorMessage = false },
-            title = { Text("Error") },
-            text = { Text("There was an error subscribing to the calendar. Please try again later.") },
-            confirmButton = {
-                Button(onClick = { showErrorMessage = false }) {
-                    Text("OK")
-                }
-            }
-        )
+
+
+fun openGoogleCalendarSubscriptionPage(context: Context, calendarId: String) {
+    val url = "https://calendar.google.com/calendar/u/0/r/settings/addbyurl?cid=$calendarId"
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+
+    if (intent.resolveActivity(context.packageManager) != null) {
+        context.startActivity(intent)
+    } else {
+        Toast.makeText(context, "No browser found to open the link", Toast.LENGTH_SHORT).show()
     }
 }
 
-object GoogleCalendarHelper {
 
-    // Base URL for adding events to Google Calendar
-    private const val GOOGLE_CALENDAR_URL = "https://www.google.com/calendar/render?action=TEMPLATE"
+fun copyToClipboard(context: Context, text: String) {
+    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    val clip = ClipData.newPlainText("Google Calendar Subscription URL", text)
+    clipboard.setPrimaryClip(clip)
+    Toast.makeText(context, "Subscription URL copied to clipboard", Toast.LENGTH_SHORT).show()
+}
 
-    // Function to generate Google Calendar event URL
-    fun createCalendarEventUrl(appointments: List<Appointment>): String {
-        val calendarUrl = StringBuilder(GOOGLE_CALENDAR_URL)
+fun createGoogleCalendar(service: com.google.api.services.calendar.Calendar): String? {
+    return try {
+        val calendar = com.google.api.services.calendar.model.Calendar().apply {
+            summary = "My New Calendar"
+            timeZone = "America/New_York" // Set your timezone
+        }
 
-        // Loop through each appointment and generate the URL for each
-        appointments.forEach { appointment ->
-            // Parse the appointment date and time
-            val date = appointment.date // "2025-03-23"
-            val timeRange = appointment.time // "3:00 PM - 4:00 PM"
+        val createdCalendar = service.calendars().insert(calendar).execute()
+        createdCalendar.id // Returns the new calendar's ID
+    } catch (e: Exception) {
+        Log.e("GoogleCalendar", "Error creating calendar", e)
+        null
+    }
+}
 
-            // Parse the start and end times from the "3:00 PM - 4:00 PM" format
-            val timeParts = timeRange.split(" - ")
-            val startTime = timeParts[0] // "3:00 PM"
-            val endTime = timeParts[1] // "4:00 PM"
+fun getUserCalendars(service: com.google.api.services.calendar.Calendar) {
+    val calendarList = service.calendarList().list().execute()
 
-            // Combine date and time to form the start and end date-time strings
-            val startDateTime = "$date $startTime"
-            val endDateTime = "$date $endTime"
+    for (calendar in calendarList.items) {
+        Log.d("GoogleCalendar", "Calendar Name: ${calendar.summary}, ID: ${calendar.id}")
+    }
+}
+fun getPrimaryCalendarId(service: com.google.api.services.calendar.Calendar): String? {
+    return try {
+        val calendarList = service.calendarList().list().execute()
+        val primaryCalendar = calendarList.items.find { it.primary ?: false }
+        primaryCalendar?.id
+    } catch (e: Exception) {
+        Log.e("GoogleCalendar", "Error fetching Calendar ID", e)
+        null
+    }
+}
 
-            // Format the start and end date-time to be in ISO 8601 format (e.g., "2025-03-23T15:00:00Z")
-            val dateTimeFormat = SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault())
-            val isoDateTimeFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+fun subscribeToNewCalendar(service: com.google.api.services.calendar.Calendar, context: Context) {
+    val newCalendarId = createGoogleCalendar(service)
 
-            val startDateTimeFormatted = try {
-                val startDate = dateTimeFormat.parse(startDateTime)
-                startDate?.let { isoDateTimeFormat.format(it) }
-            } catch (e: Exception) {
-                // Handle parsing failure (e.g., if time format is incorrect)
-                e.printStackTrace()
-                startDateTime // fallback to original input if parsing fails
-            }
+    if (newCalendarId != null) {
+        // Make the calendar public before generating the subscription link
+        makeCalendarPublic(service, newCalendarId)
 
-            val endDateTimeFormatted = try {
-                val endDate = dateTimeFormat.parse(endDateTime)
-                endDate?.let { isoDateTimeFormat.format(it) }
-            } catch (e: Exception) {
-                // Handle parsing failure (e.g., if time format is incorrect)
-                e.printStackTrace()
-                endDateTime // fallback to original input if parsing fails
-            }
+        val subscriptionUrl = "https://calendar.google.com/calendar/ical/$newCalendarId/public/basic.ics"
 
-            // Build URL parameters
-            val params = mapOf(
-                "text" to appointment.subject,  // Event subject
-                "details" to appointment.comments,  // Event details
-                "location" to appointment.mode,  // Event location
-                "dates" to "$startDateTimeFormatted/$endDateTimeFormatted",  // Event start and end date/time
-                //"sprop" to "https://www.example.com",  // Optional source URL, if needed
-                //"sprop=name:ChalItUp"  // Optional name, could be your app's name or identifier
-            )
+        copyToClipboard(context, subscriptionUrl)
+        openGoogleCalendarSubscriptionPage(context, newCalendarId)
 
-            // Append the URL parameters to the base URL
-            params.forEach { (key, value) ->
-                calendarUrl.append("&$key=${Uri.encode(value)}")
+        Toast.makeText(context, "New calendar created! Subscription URL copied.", Toast.LENGTH_LONG).show()
+    } else {
+        Toast.makeText(context, "Failed to create calendar", Toast.LENGTH_LONG).show()
+    }
+}
+
+fun makeCalendarPublic(service: com.google.api.services.calendar.Calendar, calendarId: String) {
+    try {
+        val rule = com.google.api.services.calendar.model.AclRule().apply {
+            role = "reader" // Allows public read access
+            scope = com.google.api.services.calendar.model.AclRule.Scope().apply {
+                type = "default" // Means public access
             }
         }
 
-        return calendarUrl.toString()
-    }
-    // Convert time string to ISO 8601 format (HH:mm)
-    private fun convertTimeToIso8601(time: String, timeFormat: SimpleDateFormat): String {
-        val date = timeFormat.parse(time) ?: return "00:00"
-        val isoFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-        return isoFormat.format(date)
-    }
-
-    // Extract end time from the time range string
-    private fun getEndTime(timeRange: String): String {
-        val parts = timeRange.split(" - ")
-        return if (parts.size == 2) parts[1] else parts[0] // Return the second time in the range
+        service.acl().insert(calendarId, rule).execute()
+        Log.d("GoogleCalendar", "Calendar is now public!")
+    } catch (e: Exception) {
+        Log.e("GoogleCalendar", "Error making calendar public", e)
     }
 }
 
 
-fun generateCalendarSubscriptionLink(context: Context, appointments: List<Appointment>): Boolean {
-    // Generate the URL to subscribe to the calendar
-    val calendarUrl = GoogleCalendarHelper.createCalendarEventUrl(appointments)
+class CalendarService(context: Context, account: GoogleSignInAccount) {
 
-    // Log the calendar URL for debugging
-    Log.d("GoogleCalendar", "Calendar URL: $calendarUrl")
+    private val APPLICATION_NAME = "ChalkItUp"
+    private val JSON_FACTORY: JsonFactory = GsonFactory.getDefaultInstance()
 
-    // Example: Opening the generated URL in a browser or WebView
-    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(calendarUrl))
+    private var calendarService: com.google.api.services.calendar.Calendar? = null
 
-    return if (intent.resolveActivity(context.packageManager) != null) {
-        context.startActivity(intent)
-        true
-    } else {
-        // Handle the case where no app can handle the intent (e.g., Google Calendar)
-        Log.e("GoogleCalendar", "No app found to handle the calendar URL")
-        false
+    init {
+        try {
+            val transport = GoogleNetHttpTransport.newTrustedTransport()
+            val credential = GoogleAccountCredential.usingOAuth2(
+                context, listOf(CalendarScopes.CALENDAR)
+            ).setSelectedAccount(account.account)
+
+            calendarService = com.google.api.services.calendar.Calendar.Builder(
+                transport, JSON_FACTORY, credential
+            ).setApplicationName(APPLICATION_NAME).build()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun getPrimaryCalendarId(): String? {
+        return try {
+            val calendarList = calendarService?.calendarList()?.list()?.execute()
+            val primaryCalendar = calendarList?.items?.find { it.primary ?: false }
+            primaryCalendar?.id
+        } catch (e: Exception) {
+            Log.e("GoogleCalendar", "Error fetching Calendar ID", e)
+            null
+        }
     }
 }
-
-
