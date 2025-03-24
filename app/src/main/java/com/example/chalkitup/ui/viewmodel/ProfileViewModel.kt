@@ -128,7 +128,8 @@ data class UserProfile(
         Interest("Psychology", false), Interest("Social Studies", false),
         Interest("Physical Activity", false), Interest("Zoology", false)
     ),
-    val progress: List<ProgressItem> =emptyList()
+    val progress: List<ProgressItem> =emptyList(),
+    val calenderID:String=""
 ) {
     fun copyWith(
         userType: String = this.userType,
@@ -137,7 +138,8 @@ data class UserProfile(
         email: String = this.email,
         subjects: List<TutorSubject> = this.subjects,
         interests: List<Interest> = this.interests,
-        progress: List<ProgressItem> = this.progress
+        progress: List<ProgressItem> = this.progress,
+        calenderID: String = this.calenderID
     ): UserProfile {
         return copy(
             userType = userType,
@@ -146,10 +148,10 @@ data class UserProfile(
             email = email,
             subjects = subjects,
             interests = interests,
-            progress = progress
+            progress = progress,
+            calenderID = calenderID
         )
     }
-
     fun toMap(): Map<String, Any?> {
         return mapOf(
             "userType" to userType,
@@ -158,57 +160,58 @@ data class UserProfile(
             "email" to email,
             "subjects" to subjects,
             "interests" to interests,
-            "progress" to progress
+            "progress" to progress,
+            "calenderID" to calenderID
         )
     }
 
-    companion object {
-        fun fromUser(user: FirebaseUser, onUserProfileLoaded: (UserProfile?) -> Unit) {
-            val userId = user.uid
-            val userProfileRef = FirebaseFirestore.getInstance().collection("users").document(userId)
+    fun fromUser(user: FirebaseUser, onUserProfileLoaded: (UserProfile?) -> Unit) {
+        val userId = user.uid
+        val userProfileRef = FirebaseFirestore.getInstance().collection("users").document(userId)
+        userProfileRef.get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val userType = document.getString("userType") ?: ""
+                    val firstName = document.getString("firstName") ?: ""
+                    val lastName = document.getString("lastName") ?: ""
+                    val email = user.email ?: ""
+                    val subjects = (document.get("subjects") as? List<Map<String, Any>>)?.map {
+                        TutorSubject.fromMap(it)
+                    } ?: emptyList()
 
-            userProfileRef.get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        val userType = document.getString("userType") ?: ""
-                        val firstName = document.getString("firstName") ?: ""
-                        val lastName = document.getString("lastName") ?: ""
-                        val email = user.email ?: ""
+                    val interests = (document.get("interests") as? List<Map<String, Any>>)?.map {
+                        Interest.fromMap(it)
+                    } ?: emptyList()
 
-                        val subjects = (document.get("subjects") as? List<Map<String, Any>>)?.map {
-                            TutorSubject.fromMap(it)
-                        } ?: emptyList()
+                    val progress = (document.get("progress") as? List<Map<String, Any>>)?.map {
+                        ProgressItem.fromMap(it)
+                    } ?: emptyList()
+                    val calenderID = document.getString("calenderID") ?: ""
 
-                        val interests = (document.get("interests") as? List<Map<String, Any>>)?.map {
-                            Interest.fromMap(it)
-                        } ?: emptyList()
-
-                        val progress = (document.get("progress") as? List<Map<String, Any>>)?.map {
-                            ProgressItem.fromMap(it)
-                        } ?: emptyList()
-
-                        onUserProfileLoaded(
-                            UserProfile(
-                                userType = userType,
-                                firstName = firstName,
-                                lastName = lastName,
-                                email = email,
-                                subjects = subjects,
-                                interests = interests,
-                                progress = progress
-                            )
+                    onUserProfileLoaded(
+                        UserProfile(
+                            userType = userType,
+                            firstName = firstName,
+                            lastName = lastName,
+                            email = email,
+                            subjects = subjects,
+                            interests = interests,
+                            progress = progress,
+                            calenderID = calenderID
                         )
-                    } else {
-                        onUserProfileLoaded(null) // Handle missing document
-                    }
+                    )
+                } else {
+                    onUserProfileLoaded(null) // Handle missing document
                 }
-                .addOnFailureListener { e ->
-                    e.printStackTrace()
-                    onUserProfileLoaded(null) // Handle failure case
-                }
-        }
+            }
+            .addOnFailureListener { e ->
+                e.printStackTrace()
+                onUserProfileLoaded(null) // Handle failure case
+            }
+    }
     }
 }
+
 
 data class Interest(val name: String = "", var isSelected: Boolean = false) {
     companion object {
