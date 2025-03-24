@@ -38,6 +38,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 
 @Composable
@@ -59,7 +60,7 @@ fun SettingsScreen(
     var userProfile by remember { mutableStateOf(UserProfile()) }
     val googleAccount = GoogleSignIn.getLastSignedInAccount(context)
     val calendarService = if (googleAccount != null) CalendarService(context, googleAccount, userProfile) else null
-
+    var calendarId by remember { mutableStateOf(CalendarId("")) }
     Column(
         verticalArrangement = Arrangement.Top,
         modifier = Modifier
@@ -69,11 +70,13 @@ fun SettingsScreen(
         // temp logout button
         /////////////////// subscription google link
 
+
+
         SubscribeToCalendarButton(
             service = calendarService,
-            userProfile = userProfile,
-            onUpdateUserProfile = { updatedProfile ->
-                userProfile = updatedProfile // Update the state
+            calendarIdObject = calendarId,
+            onUpdateCalendarId = { updatedCalendarId ->
+                calendarId = updatedCalendarId
             }
         )
 
@@ -144,7 +147,11 @@ fun SettingsScreen(
 
 
 @Composable
-fun SubscribeToCalendarButton(service: CalendarService?, userProfile: UserProfile, onUpdateUserProfile: (UserProfile) -> Unit) {
+fun SubscribeToCalendarButton(
+    service: CalendarService?,
+    calendarIdObject: CalendarId,
+    onUpdateCalendarId: (CalendarId) -> Unit
+) {
     val context = LocalContext.current
     var showSuccessMessage by remember { mutableStateOf(false) }
 
@@ -155,10 +162,10 @@ fun SubscribeToCalendarButton(service: CalendarService?, userProfile: UserProfil
                 return@Button
             }
 
-            var calendarId = userProfile.calenderID
+            var calendarId = calendarIdObject.calendarId
             if (calendarId.isEmpty()) {
                 val newCalendarId = createGoogleCalendar(service) ?: ""
-                onUpdateUserProfile(userProfile.copyWith(calenderID = newCalendarId))
+                onUpdateCalendarId(CalendarId(newCalendarId)) // Update CalendarId object
                 calendarId = newCalendarId
             }
 
@@ -186,7 +193,6 @@ fun SubscribeToCalendarButton(service: CalendarService?, userProfile: UserProfil
         )
     }
 }
-
 
 
 fun openGoogleCalendarSubscriptionPage(context: Context, calendarId: String) {
@@ -327,5 +333,25 @@ fun createGoogleCalendar(service: CalendarService?): String? {
     } catch (e: Exception) {
         Log.e("GoogleCalendar", "Error creating calendar", e)
         null
+    }
+}
+
+data class CalendarId(val calendarId: String="")
+
+fun onUpdateCalendarId(calendarId: CalendarId) {
+    // Store the CalendarId object in Firestore or your local storage
+    updateCalendarIdInFirestore(calendarId)
+}
+fun updateCalendarIdInFirestore(calendarId: CalendarId) {
+    val userId = FirebaseAuth.getInstance().currentUser?.uid
+    if (userId != null) {
+        val userProfileRef = FirebaseFirestore.getInstance().collection("users").document(userId)
+        userProfileRef.update("calenderID", calendarId.calendarId)
+            .addOnSuccessListener {
+                Log.d("Firestore", "Calendar ID updated successfully")
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Error updating Calendar ID", e)
+            }
     }
 }

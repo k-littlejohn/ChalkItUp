@@ -128,8 +128,7 @@ data class UserProfile(
         Interest("Psychology", false), Interest("Social Studies", false),
         Interest("Physical Activity", false), Interest("Zoology", false)
     ),
-    val progress: List<ProgressItem> =emptyList(),
-    val calenderID:String=""
+    val progress: List<ProgressItem> =emptyList()
 ) {
     fun copyWith(
         userType: String = this.userType,
@@ -138,8 +137,7 @@ data class UserProfile(
         email: String = this.email,
         subjects: List<TutorSubject> = this.subjects,
         interests: List<Interest> = this.interests,
-        progress: List<ProgressItem> = this.progress,
-        calenderID: String = this.calenderID
+        progress: List<ProgressItem> = this.progress
     ): UserProfile {
         return copy(
             userType = userType,
@@ -148,10 +146,10 @@ data class UserProfile(
             email = email,
             subjects = subjects,
             interests = interests,
-            progress = progress,
-            calenderID = calenderID
+            progress = progress
         )
     }
+
     fun toMap(): Map<String, Any?> {
         return mapOf(
             "userType" to userType,
@@ -160,55 +158,55 @@ data class UserProfile(
             "email" to email,
             "subjects" to subjects,
             "interests" to interests,
-            "progress" to progress,
-            "calenderID" to calenderID
+            "progress" to progress
         )
     }
 
-    fun fromUser(user: FirebaseUser, onUserProfileLoaded: (UserProfile?) -> Unit) {
-        val userId = user.uid
-        val userProfileRef = FirebaseFirestore.getInstance().collection("users").document(userId)
-        userProfileRef.get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val userType = document.getString("userType") ?: ""
-                    val firstName = document.getString("firstName") ?: ""
-                    val lastName = document.getString("lastName") ?: ""
-                    val email = user.email ?: ""
-                    val subjects = (document.get("subjects") as? List<Map<String, Any>>)?.map {
-                        TutorSubject.fromMap(it)
-                    } ?: emptyList()
+    companion object {
+        fun fromUser(user: FirebaseUser, onUserProfileLoaded: (UserProfile?) -> Unit) {
+            val userId = user.uid
+            val userProfileRef = FirebaseFirestore.getInstance().collection("users").document(userId)
 
-                    val interests = (document.get("interests") as? List<Map<String, Any>>)?.map {
-                        Interest.fromMap(it)
-                    } ?: emptyList()
+            userProfileRef.get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val userType = document.getString("userType") ?: ""
+                        val firstName = document.getString("firstName") ?: ""
+                        val lastName = document.getString("lastName") ?: ""
+                        val email = user.email ?: ""
 
-                    val progress = (document.get("progress") as? List<Map<String, Any>>)?.map {
-                        ProgressItem.fromMap(it)
-                    } ?: emptyList()
-                    val calenderID = document.getString("calenderID") ?: ""
+                        val subjects = (document.get("subjects") as? List<Map<String, Any>>)?.map {
+                            TutorSubject.fromMap(it)
+                        } ?: emptyList()
 
-                    onUserProfileLoaded(
-                        UserProfile(
-                            userType = userType,
-                            firstName = firstName,
-                            lastName = lastName,
-                            email = email,
-                            subjects = subjects,
-                            interests = interests,
-                            progress = progress,
-                            calenderID = calenderID
+                        val interests = (document.get("interests") as? List<Map<String, Any>>)?.map {
+                            Interest.fromMap(it)
+                        } ?: emptyList()
+
+                        val progress = (document.get("progress") as? List<Map<String, Any>>)?.map {
+                            ProgressItem.fromMap(it)
+                        } ?: emptyList()
+
+                        onUserProfileLoaded(
+                            UserProfile(
+                                userType = userType,
+                                firstName = firstName,
+                                lastName = lastName,
+                                email = email,
+                                subjects = subjects,
+                                interests = interests,
+                                progress = progress
+                            )
                         )
-                    )
-                } else {
-                    onUserProfileLoaded(null) // Handle missing document
+                    } else {
+                        onUserProfileLoaded(null) // Handle missing document
+                    }
                 }
-            }
-            .addOnFailureListener { e ->
-                e.printStackTrace()
-                onUserProfileLoaded(null) // Handle failure case
-            }
-    }
+                .addOnFailureListener { e ->
+                    e.printStackTrace()
+                    onUserProfileLoaded(null) // Handle failure case
+                }
+        }
     }
 }
 
