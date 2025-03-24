@@ -136,7 +136,8 @@ fun MyTopBar(
                         Icon(
                             painter = painterResource(id = R.drawable.ic_edit),
                             contentDescription = "Edit Profile",
-                            tint = Color(0xFF000080)
+                            tint = Color(0xFF000080),
+                            modifier = Modifier.size(35.dp)
                         )
                     }
                 }
