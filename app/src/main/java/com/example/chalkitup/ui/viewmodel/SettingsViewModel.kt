@@ -1,5 +1,8 @@
 package com.example.chalkitup.ui.viewmodel
 
+import android.content.Context
+import android.net.Uri
+import android.provider.CalendarContract
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.tasks.Task
@@ -8,6 +11,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import com.google.firestore.v1.Cursor
+import android.content.Intent
+import androidx.core.content.ContextCompat.startActivity
 
 // Handles SettingScreen logic
 // - delete user's account
@@ -101,6 +107,6 @@ class SettingsViewModel : ViewModel() {
                 onError()
             }
     }
-
-
 }
+
+
