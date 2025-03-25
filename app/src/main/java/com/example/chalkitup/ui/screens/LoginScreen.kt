@@ -24,8 +24,6 @@ import com.example.chalkitup.R
 import androidx.compose.ui.platform.LocalContext
 import com.example.chalkitup.Connection
 import com.example.chalkitup.ui.viewmodel.OfflineDataManager
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.core.Context
 
 //import kotlinx.coroutines.flow.internal.NoOpContinuation.context
 //import kotlin.coroutines.jvm.internal.CompletedContinuation.context
@@ -53,7 +51,8 @@ fun LoginScreen(
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
             Color(0xFF54A4FF), // 5% Blue
-            Color.White, Color.White, Color.White, Color.White // 95% White
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface,
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface // 95% White
         )
     )
 
@@ -89,7 +88,7 @@ fun LoginScreen(
                     text = "Welcome Back",
                     fontWeight = FontWeight.Bold,
                     fontSize = 36.sp,
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(7.dp))
@@ -132,7 +131,7 @@ fun LoginScreen(
                 ) {
                     Text(
                         text = "Forgot Password?",
-                        color = Color.Blue,
+                        color = Color(0xFF54A4FF),
                         fontWeight = FontWeight.Normal,
                         fontSize = 14.sp,
                         modifier = Modifier.clickable { navController.navigate("forgotPassword") }

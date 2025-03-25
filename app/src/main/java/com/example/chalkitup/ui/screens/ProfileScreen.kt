@@ -23,7 +23,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Done
 //import androidx.compose.material3.Button
 //import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -66,6 +65,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material3.MaterialTheme
 
 
 /**
@@ -112,7 +112,8 @@ fun ProfileScreen(
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
             Color(0xFF54A4FF), // 5% Blue
-            Color.White, Color.White, Color.White, Color.White //95% white
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface,
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface //95% white
         )
     )
 
@@ -246,7 +247,7 @@ fun ProfileScreen(
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium,
                         fontStyle = FontStyle.Italic,
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -254,70 +255,71 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            // Notifications Button
-            Button(
-                onClick = { navController.navigate("notifications") },
-                modifier = Modifier
-                    .height(55.dp)
-                    .width(400.dp)
-                    .clip(RoundedCornerShape(50.dp)),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-
-                ) {
-                Box(
+            if (targetedUser.isEmpty()) {
+                // Notifications Button
+                Button(
+                    onClick = { navController.navigate("notifications") },
                     modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            brush = Brush.horizontalGradient(
-                                colors = listOf(Color(0xFF06C59C), Color(0xFF007BFF))
-                            ),
-                            shape = RoundedCornerShape(50.dp)
-                        ),
-                    contentAlignment = Alignment.CenterStart
+                        .height(55.dp)
+                        .width(400.dp)
+                        .clip(RoundedCornerShape(50.dp)),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
+                    Box(
                         modifier = Modifier
                             .fillMaxSize()
+                            .background(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(Color(0xFF06C59C), Color(0xFF007BFF))
+                                ),
+                                shape = RoundedCornerShape(50.dp)
+                            ),
+                        contentAlignment = Alignment.CenterStart
                     ) {
-                        // Notification Bell Icon
-                        Icon(
-                            painter = painterResource(id = R.drawable.notifications_foreground),
-                            contentDescription = "Notification Bell",
-                            tint = Color.White,
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
-                                .size(80.dp)
-                                .fillMaxHeight()
-
-                        )
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        // Text: "Notifications"
-                        Text(
-                            text = "Notifications",
-                            fontSize = 19.sp,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        Spacer(modifier = Modifier.weight(1f))
-
-                        // Right-Side Oval Arrow Button
-                        Box(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .width(80.dp)
-                                .clip(RoundedCornerShape(50.dp))
-                                .background(Color(0xFF06C59C)),
-                            contentAlignment = Alignment.Center
+                                .fillMaxSize()
                         ) {
+                            // Notification Bell Icon
                             Icon(
-                                imageVector = Icons.Default.ArrowForward,
-                                contentDescription = "Arrow",
+                                painter = painterResource(id = R.drawable.notifications_foreground),
+                                contentDescription = "Notification Bell",
                                 tint = Color.White,
-                                modifier = Modifier.size(24.dp)
+                                modifier = Modifier
+                                    .size(80.dp)
+                                    .fillMaxHeight()
+
                             )
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            // Text: "Notifications"
+                            Text(
+                                text = "Notifications",
+                                fontSize = 19.sp,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            Spacer(modifier = Modifier.weight(1f))
+
+                            // Right-Side Oval Arrow Button
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .width(80.dp)
+                                    .clip(RoundedCornerShape(50.dp))
+                                    .background(Color(0xFF06C59C)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ArrowForward,
+                                    contentDescription = "Arrow",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -600,7 +602,10 @@ fun ProfileScreen(
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .background(Color(0xFF42A5F5), shape = RoundedCornerShape(12.dp))
+                                            .background(
+                                                Color(0xFF42A5F5),
+                                                shape = RoundedCornerShape(12.dp)
+                                            )
                                             .padding(16.dp),
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
@@ -614,7 +619,10 @@ fun ProfileScreen(
                                         Box(
                                             modifier = Modifier
                                                 .size(40.dp)
-                                                .background(Color(0xFF06C59C), shape = RoundedCornerShape(8.dp)),
+                                                .background(
+                                                    Color(0xFF06C59C),
+                                                    shape = RoundedCornerShape(8.dp)
+                                                ),
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Text(
@@ -642,76 +650,76 @@ fun ProfileScreen(
 }
 
 // Qualification card using for Tutors Achievements, currently not editable by user, using it right now more for looks.
-    @Composable
-    fun QualificationCard(
-        icon: ImageVector,
-        title: String,
-        value: String,
-        valueColor: Color,
-        cardColor: Color
+@Composable
+fun QualificationCard(
+    icon: ImageVector,
+    title: String,
+    value: String,
+    valueColor: Color,
+    cardColor: Color
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .background(cardColor, shape = RoundedCornerShape(8.dp))
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
+        Icon(
+            imageVector = icon,
+            contentDescription = title,
+            tint = Color.White,
+            modifier = Modifier.size(24.dp)
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Text(
+            text = title,
+            fontSize = 16.sp,
+            color = Color.White,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.weight(1f)
+        )
+
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp)
-                .background(cardColor, shape = RoundedCornerShape(8.dp))
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .background(valueColor, shape = RoundedCornerShape(4.dp))
+                .padding(horizontal = 12.dp, vertical = 4.dp)
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = title,
-                tint = Color.White,
-                modifier = Modifier.size(24.dp)
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
             Text(
-                text = title,
-                fontSize = 16.sp,
-                color = Color.White,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.weight(1f)
+                text = value,
+                color = Color.Black,
+                fontWeight = FontWeight.Bold
             )
+        }
+    }
+}
 
-            Box(
-                modifier = Modifier
-                    .background(valueColor, shape = RoundedCornerShape(4.dp))
-                    .padding(horizontal = 12.dp, vertical = 4.dp)
-            ) {
-                Text(
-                    text = value,
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold
+
+@Composable
+fun CertificationGrid(
+    certifications: List<Certification>,
+    onItemClick: (String) -> Unit
+) {
+    Box(modifier = Modifier.height(100.dp)) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            items(certifications) { certification ->
+                CertificationItem(
+                    certification,
+                    onItemClick = { fileName ->
+                        onItemClick(fileName) // Handle item click
+                    }
                 )
             }
         }
     }
-
-
-    @Composable
-    fun CertificationGrid(
-        certifications: List<Certification>,
-        onItemClick: (String) -> Unit
-    ) {
-        Box(modifier = Modifier.height(100.dp)) {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                items(certifications) { certification ->
-                    CertificationItem(
-                        certification,
-                        onItemClick = { fileName ->
-                            onItemClick(fileName) // Handle item click
-                        }
-                    )
-                }
-            }
-        }
-    }
+}
 /*
     /**
      * Composable function to display a grid of items (e.g., academic progress or interests).
@@ -743,68 +751,63 @@ fun ProfileScreen(
         }
     }
 */
-    /**
-     * Composable function to display an individual certification item.
-     *
-     * This function displays either an image or a file icon for each certification
-     * based on the file type (e.g., image or non-image file).
-     *
-     * @param certification The certification item to be displayed.
-     * @param onItemClick Function to handle click events on the certification item.
-     */
-    @Composable
-    fun CertificationItem(
-        certification: Certification,
-        onItemClick: (String) -> Unit
-    ) {
-        val fileName = certification.fileName
-        val fileExtension = fileName.substringAfterLast('.', "").lowercase()
+/**
+ * Composable function to display an individual certification item.
+ *
+ * This function displays either an image or a file icon for each certification
+ * based on the file type (e.g., image or non-image file).
+ *
+ * @param certification The certification item to be displayed.
+ * @param onItemClick Function to handle click events on the certification item.
+ */
+@Composable
+fun CertificationItem(
+    certification: Certification,
+    onItemClick: (String) -> Unit
+) {
+    val fileName = certification.fileName
+    val fileExtension = fileName.substringAfterLast('.', "").lowercase()
 
-        Box(
-            modifier = Modifier
-                .clickable {
-                    onItemClick(fileName) // Handle item click
-                }
-                .size(100.dp)
-                .padding(4.dp)
-                .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
-                .background(Color.LightGray, shape = RoundedCornerShape(8.dp)),
-            contentAlignment = Alignment.Center,
-        ) {
-            if (fileExtension in listOf("jpg", "jpeg", "png", "gif", "bmp")) {
-                // Display image if the file is an image type
-                AsyncImage(
-                    model = certification.fileUrl,
-                    contentDescription = "Certification Image",
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
+    Box(
+        modifier = Modifier
+            .clickable {
+                onItemClick(fileName) // Handle item click
+            }
+            .size(100.dp)
+            .padding(4.dp)
+            .background(Color(0xFF42A5F5), shape = RoundedCornerShape(8.dp)),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (fileExtension in listOf("jpg", "jpeg", "png", "gif", "bmp")) {
+            // Display image if the file is an image type
+            AsyncImage(
+                model = certification.fileUrl,
+                contentDescription = "Certification Image",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            // Show file icon & filename for non-image files
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_insert_drive_file_24),
+                    contentDescription = "File Icon",
+                    modifier = Modifier.size(40.dp),
+                    tint = Color.White
                 )
-            } else {
-                // Show file icon & filename for non-image files
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_insert_drive_file_24),
-                        contentDescription = "File Icon",
-                        modifier = Modifier.size(40.dp)
-                    )
-                    Text(
-                        text = fileName,
-                        textAlign = TextAlign.Center,
-                        fontSize = 12.sp,
-                        color = Color.Black,
-                        modifier = Modifier.padding(4.dp)
-                    )
-                }
+                Text(
+                    text = fileName,
+                    textAlign = TextAlign.Center,
+                    fontSize = 12.sp,
+                    color = Color.White,
+                    modifier = Modifier.padding(4.dp)
+                )
             }
         }
     }
-
-
-
-
-
+}

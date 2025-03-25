@@ -104,7 +104,8 @@ fun MyTopBar(
                     IconButton(onClick = { navController.navigate("start") }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            modifier = Modifier.size(30.dp))
+                            modifier = Modifier.size(30.dp),
+                            tint = Color.DarkGray)
                     }
                 }
                 // On unspecified pages there is no button in the top left
@@ -117,7 +118,8 @@ fun MyTopBar(
                 IconButton(onClick = { navController.popBackStack() } ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        modifier = Modifier.size(30.dp))
+                        modifier = Modifier.size(30.dp),
+                        tint = Color.DarkGray)
                 }
             }
         },
@@ -132,13 +134,15 @@ fun MyTopBar(
                     }
                 }
                 "profile" -> {
-                    IconButton(onClick = { navController.navigate("editProfile") }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_edit),
-                            contentDescription = "Edit Profile",
-                            tint = Color(0xFF000080),
-                            modifier = Modifier.size(35.dp)
-                        )
+                    if (!targetedProfileView) {
+                        IconButton(onClick = { navController.navigate("editProfile") }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_edit),
+                                contentDescription = "Edit Profile",
+                                tint = Color(0xFF000080),
+                                modifier = Modifier.size(35.dp)
+                            )
+                        }
                     }
                 }
             }

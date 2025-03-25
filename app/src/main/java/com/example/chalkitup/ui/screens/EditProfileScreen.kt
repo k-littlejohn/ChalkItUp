@@ -361,7 +361,8 @@ fun EditProfileScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Upload a file")
+                Text("Upload a file",
+                    color = Color.White)
             }
 
             // Display selected files if any.
@@ -463,7 +464,8 @@ fun EditProfileScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Save Changes")
+                Text("Save Changes",
+                    color = Color.White)
             }
 
             Spacer(modifier = Modifier.width(8.dp))
@@ -476,11 +478,9 @@ fun EditProfileScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Cancel")
+                Text("Cancel",
+                    color = Color.White)
             }
         }
     }
 }
-
-
-

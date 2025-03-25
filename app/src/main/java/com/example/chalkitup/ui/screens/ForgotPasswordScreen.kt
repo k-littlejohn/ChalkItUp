@@ -23,15 +23,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.background
 
-
-// Screen Gradient
-val gradientBrush = Brush.verticalGradient(
-    colors = listOf(
-        Color(0xFF54A4FF), // 5% Blue
-        Color.White, Color.White, Color.White, Color.White // 95% White
-    )
-)
-
 // Custom Font
 val AtkinsonFont = FontFamily(
     Font(R.font.atkinson_regular, FontWeight.Normal),
@@ -45,6 +36,15 @@ fun ForgotPasswordScreen(
     navController: NavController,
     viewModel: AuthViewModel
 ) {
+    // Screen Gradient
+    val gradientBrush = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF54A4FF), // 5% Blue
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface,
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface // 95% White
+        )
+    )
+
     var errorMessage by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var confirmEmail by remember { mutableStateOf("") }
@@ -75,7 +75,7 @@ fun ForgotPasswordScreen(
                 fontSize = 36.sp,
                 fontFamily = AtkinsonFont,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             // Subtitle
@@ -84,7 +84,7 @@ fun ForgotPasswordScreen(
                 fontSize = 16.sp,
                 fontFamily = AtkinsonFont,
                 fontWeight = FontWeight.Normal,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -174,6 +174,7 @@ fun ForgotPasswordScreen(
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "Back to log in",
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
