@@ -158,7 +158,7 @@ fun SettingsScreen(
 fun authenticateServiceAccount() {
     try {
         // Path to the service account key file
-        val serviceAccountKeyFile = "/Users/samanthaskiba/StudioProjects/W25_D1/app/src/main/java/com/example/chalkitup/ui/viewmodel/admin/chalkitup-bdceba61ebce.json"
+        val serviceAccountKeyFile = "app/src/main/assets/chalkitup-bdceba61ebce.json"
         // Load the service account credentials
         val credentials = ServiceAccountCredentials.fromStream(FileInputStream(serviceAccountKeyFile))
         // Create the HTTP transport
@@ -181,7 +181,7 @@ fun authenticateServiceAccount() {
 //add the service account to the calendar
 fun createCalendarAndAddServiceAccount() {
     try {
-        val serviceAccountKeyFile = "/Users/samanthaskiba/StudioProjects/W25_D1/app/src/main/java/com/example/chalkitup/ui/viewmodel/admin/chalkitup-bdceba61ebce.json"
+        val serviceAccountKeyFile = "app/src/main/assets/chalkitup-bdceba61ebce.json"
         val credentials = ServiceAccountCredentials.fromStream(FileInputStream(serviceAccountKeyFile))
         val googleCredential = GoogleCredential.fromStream(FileInputStream(serviceAccountKeyFile))
             .createScoped(listOf(CalendarScopes.CALENDAR))
@@ -310,7 +310,7 @@ fun getCalendarService(): Calendar {
     val jsonFactory: JsonFactory = GsonFactory.getDefaultInstance()
 
     // Load credentials from the service account key file
-    val credentials = GoogleCredentials.fromStream(FileInputStream("path_to_service_account_key.json"))
+    val credentials = GoogleCredentials.fromStream(FileInputStream("app/src/main/assets/chalkitup-bdceba61ebce.json"))
         .createScoped(CalendarScopes.CALENDAR)
 
     // Convert GoogleCredentials to HttpRequestInitializer
