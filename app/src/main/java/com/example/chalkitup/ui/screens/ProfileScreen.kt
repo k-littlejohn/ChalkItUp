@@ -10,10 +10,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
+//import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
+//import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -23,7 +23,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Done
 //import androidx.compose.material3.Button
 //import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -65,6 +64,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.Image
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.filled.ArrowForward
 
 
 /**
@@ -93,6 +93,11 @@ fun ProfileScreen(
     val certifications by certificationViewModel.certifications.collectAsState()
     val profilePictureUrl by profileViewModel.profilePictureUrl.observeAsState()
 
+    // Accessing starting price and experience from userprofile
+    val startingPrice = userProfile?.startingPrice ?: ""
+    val experience = userProfile?.experience ?: ""
+
+
     // Scroll state.
     val scrollState = rememberScrollState()
 
@@ -102,6 +107,14 @@ fun ProfileScreen(
     // File URI for the certification that the user intends to open.
     val fileUri by certificationViewModel.fileUri.observeAsState()
 
+    // Gradient brush for the screen's background.
+    val gradientBrush = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF54A4FF), // 5% Blue
+            Color.White, Color.White, Color.White, Color.White //95% white
+        )
+    )
+
     //------------------------------VARIABLES-END---------------------------------------------
 
     // Trigger to reload user profile when the profile screen is launched.
@@ -110,472 +123,686 @@ fun ProfileScreen(
         profileViewModel.loadUserProfile(targetedUser) // Fetches the user profile when entering the profile screen
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+            .background(gradientBrush)
     ) {
-        // Display user information (common for both students and tutors)
-        Spacer(modifier = Modifier.height(8.dp))
-        // Display profile picture with a default avatar if none exists.
-        AsyncImage(
-            model = profilePictureUrl ?: R.drawable.chalkitup,
-            contentDescription = "Profile Picture",
+        Column(
             modifier = Modifier
-                .size(130.dp) // og 100
-                .clip(CircleShape)
-                .border(2.dp, Color.Gray, CircleShape)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        // Display user details.
-        userProfile?.let {
-            Text(
-                text = "${it.firstName} ${it.lastName}",
-                fontSize = 30.sp, // Adjust the size as needed
-                fontWeight = FontWeight.SemiBold // Makes the text bold
-            )
-            Text(it.email)
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        ) {
+            Spacer(modifier = Modifier.height(30.dp))
+
+            // Row to align profile picture with icons
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // Left Icon
+                Image(
+                    painter = painterResource(id = R.drawable.happy_eraser1),
+                    contentDescription = "Eraser",
+                    modifier = Modifier.size(110.dp)
+                )
+
+                // Profile Picture
+                AsyncImage(
+                    model = profilePictureUrl ?: R.drawable.chalkitup,
+                    contentDescription = "Profile Picture",
+                    modifier = Modifier
+                        .size(170.dp)
+                        .clip(CircleShape)
+                        .border(2.dp, Color.Gray, CircleShape)
+                )
+
+                // Right Icon
+                Image(
+                    painter = painterResource(id = R.drawable.chalk2),
+                    contentDescription = "Chalk Icon 2",
+                    modifier = Modifier.size(120.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            userProfile?.let {
+                Text(
+                    text = "${it.firstName} ${it.lastName}",
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(it.email)
+
+                if (isTutor == true) {
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Price and Experience
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("Starting Price", fontWeight = FontWeight.Bold)
+                            Text(
+                                "${startingPrice}/hour",
+                                color = Color(0xFF06C59C),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 22.sp
+                            )
+                        }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("Experience", fontWeight = FontWeight.Bold)
+                            Text(
+                                "$experience Years",
+                                color = Color(0xFF06C59C),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 22.sp
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    //Bottom line
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .background(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(
+                                        Color.Transparent,
+                                        Color(0xFF06C59C),
+                                        Color.Transparent
+                                    )
+                                )
+                            )
+
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+                //Bio
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .border(
+                            width = 3.dp,
+                            brush = Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, Color(0xFF2196F3))
+                            ),
+                            shape = RoundedCornerShape(bottomStart = 14.dp, bottomEnd = 12.dp)
+                        )
+                        .padding(14.dp)
+                ) {
+                    Text(
+                        text = it.bio.ifEmpty { "" },
+                        textAlign = TextAlign.Center,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        fontStyle = FontStyle.Italic,
+                        color = Color.Black,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            // Notifications Button
+            Button(
+                onClick = { navController.navigate("notifications") },
+                modifier = Modifier
+                    .height(55.dp)
+                    .width(400.dp)
+                    .clip(RoundedCornerShape(50.dp)),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+
+                ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(Color(0xFF06C59C), Color(0xFF007BFF))
+                            ),
+                            shape = RoundedCornerShape(50.dp)
+                        ),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+                        // Notification Bell Icon
+                        Icon(
+                            painter = painterResource(id = R.drawable.notifications_foreground),
+                            contentDescription = "Notification Bell",
+                            tint = Color.White,
+                            modifier = Modifier
+                                .size(80.dp)
+                                .fillMaxHeight()
+
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        // Text: "Notifications"
+                        Text(
+                            text = "Notifications",
+                            fontSize = 19.sp,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        // Right-Side Oval Arrow Button
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .width(80.dp)
+                                .clip(RoundedCornerShape(50.dp))
+                                .background(Color(0xFF06C59C)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowForward,
+                                contentDescription = "Arrow",
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .border(
-                        width = 3.dp,
-                        brush = Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, Color(0xFF2196F3))
-                        ),
-                        shape = RoundedCornerShape(bottomStart = 14.dp, bottomEnd = 12.dp)
-                    )
-                    .padding(14.dp)
+            Column(
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.Start
             ) {
-                Text(
-                    text = it.bio.ifEmpty { "" },
-                    textAlign = TextAlign.Center,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    fontStyle = FontStyle.Italic,
-                    color = Color.Black,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        }
+                //------------------------------TUTOR-SPECIFIC----------------------------------------------
 
+                if (isTutor == true) {
+                    Spacer(modifier = Modifier.height(12.dp))
 
-        Spacer(modifier = Modifier.height(30.dp))
+                    // ------------- Subjects Offered (Now Swipe-able) -------------
+                    userProfile?.let { profile ->
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Subjects Offered", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Spacer(modifier = Modifier.height(16.dp))
 
-        Button (
-            modifier = Modifier
-                .height(80.dp)
-                .width(400.dp)
-                .background(Color(0xFF06C59C), shape = RoundedCornerShape(18.dp))
-                .border(2.dp, Color.Black, shape = RoundedCornerShape(18.dp)),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF06C59C),
-                contentColor = Color.White
-            ),
-            onClick = {
-                navController.navigate("notifications")
-            }
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.notifications_foreground),
-                contentDescription = "Notification bell",
-                modifier = Modifier.size(90.dp)
-            )
-            Spacer(modifier = Modifier.width(30.dp))
-            Text("Notifications", fontSize = 30.sp, modifier = Modifier.padding(4.dp))
-        }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-        Column(
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.Start
-        ) {
-            //------------------------------TUTOR-SPECIFIC----------------------------------------------
-
-            if (isTutor == true) {
-
-                Text("Certifications:") // Heading for certifications section
-
-                // If no certifications found, display a message.
-                if (certifications.isEmpty()) {
-                    Text("No certifications found.")
-                } else {
-                    // Display certifications in a grid.
-                    CertificationGrid(certifications,
-                        onItemClick = { fileName ->
-                            certificationViewModel.downloadFileToCache(context, fileName) // Download selected certification file
-                        }
-                    )
-                }
-
-                // Register a lifecycle observer to reset file URI when app resumes.
-                val lifecycleOwner = LocalLifecycleOwner.current
-                DisposableEffect(lifecycleOwner) {
-                    val observer = AppLifecycleObserver {
-                        // Reset the fileUri when app is resumed.
-                        certificationViewModel.resetFileUri()
-                    }
-                    lifecycleOwner.lifecycle.addObserver(observer)
-
-                    onDispose {
-                        lifecycleOwner.lifecycle.removeObserver(observer)
-                    }
-                }
-
-                // Observe and launch file opening if a file URI is available.
-                LaunchedEffect(fileUri) {
-                    fileUri?.let { uri ->
-                        certificationViewModel.openFile(context, uri) // Open the certification file
-                    }
-                }
-
-                // ------------- Subjects Offered (Now Swipe-able) -------------
-                userProfile?.let { profile ->
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("Subjects Offered", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    LazyRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(profile.subjects) { subject ->
-                            Box(
-                                modifier = Modifier
-                                    .size(140.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(Color.LightGray)
-                            ) {
-                                // Temporary icons for subjects
-                                val subjectIcon = when (subject.subject) {
-                                    "Math" -> R.drawable.ic_math2
-                                    "Physics" -> R.drawable.ic_physics2
-                                    "Chemistry" -> R.drawable.ic_chemistry2
-                                    "Social" -> R.drawable.ic_social2
-                                    "English" -> R.drawable.ic_english2
-                                    "Science" -> R.drawable.ic_science2
-                                    "Biology" -> R.drawable.ic_biology
-                                    else -> R.drawable.chalkitup
-                                }
-
-                                Image(
-                                    painter = painterResource(id = subjectIcon),
-                                    contentDescription = subject.subject,
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(profile.subjects) { subject ->
                                 Box(
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .background(Color.Black.copy(alpha = 0.7f))
-                                        .align(Alignment.BottomCenter)
+                                        .size(160.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(Color.LightGray)
                                 ) {
-                                    Text(
-                                        text = subject.subject,
-                                        color = Color.White,
-                                        fontSize = 14.sp,
-                                        modifier = Modifier.padding(4.dp)
+                                    // Temporary icons for subjects
+                                    val subjectIcon = when (subject.subject) {
+                                        "Math" -> R.drawable.ic_math2
+                                        "Physics" -> R.drawable.ic_physics2
+                                        "Chemistry" -> R.drawable.ic_chemistry2
+                                        "Social" -> R.drawable.ic_social2
+                                        "English" -> R.drawable.ic_english2
+                                        "Science" -> R.drawable.ic_science2
+                                        "Biology" -> R.drawable.ic_biology
+                                        else -> R.drawable.chalkitup
+                                    }
+
+                                    Image(
+                                        painter = painterResource(id = subjectIcon),
+                                        contentDescription = subject.subject,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
                                     )
+
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(Color.Black.copy(alpha = 0.7f))
+                                            .align(Alignment.BottomCenter)
+                                    ) {
+                                        Text(
+                                            text = subject.subject,
+                                            color = Color.White,
+                                            fontSize = 14.sp,
+                                            modifier = Modifier.padding(4.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
-                    }
 
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(42.dp))
 
-                    // ------------- Qualifications -------------
-                    Text("Qualifications", fontWeight = FontWeight.Bold, fontSize = 18.sp)
 
-                    QualificationCard(
-                        icon = Icons.Default.CheckCircle,
-                        title = "Average Grade",
-                        value = "A",
-                        valueColor = Color(0xFF06C59C),
-                        cardColor = Color(0xFF42A5F5)
-                    )
+                        Text("Certifications & Qualifications:")
 
-                    QualificationCard(
-                        icon = Icons.Default.Timer,
-                        title = "Total Tutor Hours",
-                        value = "168",
-                        valueColor = Color(0xFF06C59C),
-                        cardColor = Color(0xFF42A5F5)
-                    )
+                        // If no certifications found, display a message.
+                        if (certifications.isEmpty()) {
+                            Text("No certifications found.")
+                        } else {
+                            // Display certifications in a grid.
+                            CertificationGrid(
+                                certifications,
+                                onItemClick = { fileName ->
+                                    certificationViewModel.downloadFileToCache(
+                                        context,
+                                        fileName
+                                    ) // Download selected certification file
+                                }
+                            )
+                        }
 
-                    QualificationCard(
-                        icon = Icons.Default.Star,
-                        title = "Overall Rating",
-                        value = "4.4/5",
-                        valueColor = Color(0xFF06C59C),
-                        cardColor = Color(0xFF42A5F5)
-                    )
+                        // Register a lifecycle observer to reset file URI when app resumes.
+                        val lifecycleOwner = LocalLifecycleOwner.current
+                        DisposableEffect(lifecycleOwner) {
+                            val observer = AppLifecycleObserver {
+                                // Reset the fileUri when app is resumed.
+                                certificationViewModel.resetFileUri()
+                            }
+                            lifecycleOwner.lifecycle.addObserver(observer)
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    //Will be moving to subjects offered, keeping for now.
-                    // ------------- Subjects Tutor Can Teach -------------
-                    Text("Subjects you can tutor:", fontWeight = FontWeight.Bold)
-                    val formattedSubjects = profile.subjects.map { subject ->
-                        listOf(subject.subject, subject.grade, subject.specialization)
-                            .filter { it.isNotEmpty() }
-                            .joinToString(" ") // Format subject info
-                    }
-                    Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
-                        LazyColumn {
-                            items(formattedSubjects) { subject ->
-                                Text(
-                                    text = subject,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(8.dp)
-                                )
+                            onDispose {
+                                lifecycleOwner.lifecycle.removeObserver(observer)
                             }
                         }
-                    }
-                }
 
-            //------------------------------TUTOR-SPECIFIC-END---------------------------------------------
-            } else {
-                //------------------------------STUDENT-SPECIFIC---------------------------------------------
-                val addedProgress: MutableList<String> = mutableListOf()
-                userProfile?.let {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        "Academic Performance:",
-                        fontSize = 15.sp, // Adjust the size as needed
-                        fontWeight = FontWeight.Bold // Makes the text bold
-                    )
-                    it.progress.forEachIndexed { _, progress ->
-                        if (progress.title.isNotEmpty() && progress.grade.isNotEmpty()) {
-                            addedProgress.add(progress.title + ": " + progress.grade)
+                        // Observe and launch file opening if a file URI is available.
+                        LaunchedEffect(fileUri) {
+                            fileUri?.let { uri ->
+                                certificationViewModel.openFile(
+                                    context,
+                                    uri
+                                ) // Open the certification file
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(28.dp))
+
+                        // ------------- Achievements -------------
+                        Text("Achievements", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+
+                        QualificationCard(
+                            icon = Icons.Default.CheckCircle,
+                            title = "Average Grade",
+                            value = "A",
+                            valueColor = Color(0xFF06C59C),
+                            cardColor = Color(0xFF42A5F5)
+                        )
+
+                        QualificationCard(
+                            icon = Icons.Default.Timer,
+                            title = "Total Tutor Hours",
+                            value = "168",
+                            valueColor = Color(0xFF06C59C),
+                            cardColor = Color(0xFF42A5F5)
+                        )
+
+                        QualificationCard(
+                            icon = Icons.Default.Star,
+                            title = "Overall Rating",
+                            value = "4.4/5",
+                            valueColor = Color(0xFF06C59C),
+                            cardColor = Color(0xFF42A5F5)
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        //Will be moving to subjects offered, keeping for now.
+                        // ------------- Subjects Tutor Can Teach -------------
+//                    Text("Subjects you can tutor:", fontWeight = FontWeight.Bold)
+//                    val formattedSubjects = profile.subjects.map { subject ->
+//                        listOf(subject.subject, subject.grade, subject.specialization)
+//                            .filter { it.isNotEmpty() }
+//                            .joinToString(" ") // Format subject info
+//                    }
+//                    Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
+//                        LazyColumn {
+//                            items(formattedSubjects) { subject ->
+//                                Text(
+//                                    text = subject,
+//                                    modifier = Modifier
+//                                        .fillMaxWidth()
+//                                        .padding(8.dp)
+//                                )
+//                            }
+//                        }
+//                    }
+                    }
+
+                    //------------------------------TUTOR-SPECIFIC-END---------------------------------------------
+                } else {
+                    //------------------------------STUDENT-SPECIFIC---------------------------------------------
+
+                    userProfile?.let { profile ->
+                        val selectedInterests = profile.interests.filter { it.isSelected }
+
+                        if (selectedInterests.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Text("Interests", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            LazyRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                items(selectedInterests) { interest ->
+                                    Box(
+                                        modifier = Modifier
+                                            .size(160.dp)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(Color.LightGray)
+                                    ) {
+                                        val interestIcon = when (interest.name) {
+                                            "Accounting" -> R.drawable.accounting
+                                            "Agriculture" -> R.drawable.agriculture
+                                            "Ancient History" -> R.drawable.ancienthistory
+                                            "Animal" -> R.drawable.animal
+                                            "Art" -> R.drawable.art
+                                            "Art-History" -> R.drawable.arthistory
+                                            "Biology" -> R.drawable.ic_biology
+                                            "Business" -> R.drawable.business
+                                            "Computer Science" -> R.drawable.computerscience
+                                            "Cell-Biology" -> R.drawable.cellbiology
+                                            "Chemistry" -> R.drawable.ic_chemistry2
+                                            "Earth-Science" -> R.drawable.earthscience
+                                            "English" -> R.drawable.ic_english2
+                                            "Engineering" -> R.drawable.engineering
+                                            "Finance" -> R.drawable.finance
+                                            "French" -> R.drawable.french
+                                            "Food" -> R.drawable.food
+                                            "Geology" -> R.drawable.geology
+                                            "Government" -> R.drawable.government
+                                            "Kinesiology" -> R.drawable.kinesiology
+                                            "Language" -> R.drawable.language
+                                            "Legal" -> R.drawable.legal
+                                            "Marketing" -> R.drawable.marketing
+                                            "Math" -> R.drawable.ic_math2
+                                            "Medical Science" -> R.drawable.medicalscience
+                                            "Music" -> R.drawable.music
+                                            "Nutrition" -> R.drawable.nutrition
+                                            "Physics" -> R.drawable.ic_physics2
+                                            "Psychology" -> R.drawable.psychology
+                                            "Social Studies" -> R.drawable.ic_social2
+                                            "Physical Activity" -> R.drawable.physicalactivity
+                                            "Zoology" -> R.drawable.zoology
+                                            else -> R.drawable.chalkitup
+                                        }
+
+                                        Image(
+                                            painter = painterResource(id = interestIcon),
+                                            contentDescription = interest.name,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier.fillMaxSize()
+                                        )
+
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .background(Color.Black.copy(alpha = 0.7f))
+                                                .align(Alignment.BottomCenter)
+                                        ) {
+                                            Text(
+                                                text = interest.name,
+                                                color = Color.White,
+                                                fontSize = 14.sp,
+                                                modifier = Modifier.padding(4.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            Text(
+                                "No Interests Have been Listed",
+                                fontSize = 14.sp,
+                                color = Color.Gray
+                            )
                         }
                     }
-                if (addedProgress.isNotEmpty()) {
-                    ItemGrid(addedProgress, 1)
-                }
-                else{
-                    Text("No Progress Update")
+
+                    //------------------------------Academic Performance---------------------------------------------
+                    //------------------------------Academic Performance---------------------------------------------
+                    val addedProgress: MutableList<Pair<String, String>> = mutableListOf()
+                    userProfile?.let {
+                        Spacer(modifier = Modifier.height(34.dp))
+                        Text(
+                            "Academic Performance", fontSize = 20.sp, fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        it.progress.forEach { progress ->
+                            if (progress.title.isNotEmpty() && progress.grade.isNotEmpty()) {
+                                addedProgress.add(progress.title to progress.grade)
+                            }
                         }
 
+                        if (addedProgress.isNotEmpty()) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                addedProgress.forEach { (title, grade) ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(Color(0xFF42A5F5), shape = RoundedCornerShape(12.dp))
+                                            .padding(16.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = title,
+                                            fontSize = 19.sp,
+                                            color = Color.White,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                        Box(
+                                            modifier = Modifier
+                                                .size(40.dp)
+                                                .background(Color(0xFF06C59C), shape = RoundedCornerShape(8.dp)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = grade,
+                                                fontSize = 20.sp,
+                                                color = Color.Black,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            Text(
+                                "No Progress Update",
+                                fontSize = 14.sp,
+                                color = Color.Gray
+                            )
+                        }
                     }
                 }
-                //------------------------------STUDENT-SPECIFIC-END--------------------------------------------
+            }
+        }
+    }
+}
 
-            // ------------------------------ INTERESTS ----------------------------------------------
-            val addedInterests: MutableList<String> = mutableListOf()
-            // Display user's interests.
-            userProfile?.let {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("Interests:",
-                    fontSize = 15.sp, // Adjust the size as needed
-                    fontWeight = FontWeight.Bold // Makes the text bold
-                    )
-                it.interests.forEachIndexed{ _, interest ->
-                    if (interest.isSelected){
-                        addedInterests.add(interest.name)
-                    }
-                }
+// Qualification card using for Tutors Achievements, currently not editable by user, using it right now more for looks.
+    @Composable
+    fun QualificationCard(
+        icon: ImageVector,
+        title: String,
+        value: String,
+        valueColor: Color,
+        cardColor: Color
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+                .background(cardColor, shape = RoundedCornerShape(8.dp))
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                tint = Color.White,
+                modifier = Modifier.size(24.dp)
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                text = title,
+                fontSize = 16.sp,
+                color = Color.White,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.weight(1f)
+            )
+
+            Box(
+                modifier = Modifier
+                    .background(valueColor, shape = RoundedCornerShape(4.dp))
+                    .padding(horizontal = 12.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = value,
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold
+                )
             }
-            if (addedInterests.isNotEmpty()) {
-                ItemGrid(addedInterests, 2)
-            }
-            else{
-                Text("No Interests Have been Listed")
-            }
-            //-----------------end of interest display
         }
     }
 
 
-    //----------------------------------------------------------------
-
-    //list interests
-//                Spacer(modifier = Modifier.height(16.dp))
-//                Text("Interests:")
-//
-//                if (interests.isNullOrEmpty()) {
-//                    Text("No progress found.")
-//                } else {
-//                    ProgressGrid(interests!!)
-//                }
-
-//    Spacer(modifier = Modifier.height(16.dp))
-//    // Edit Profile Button
-//    Button(onClick = { navController.navigate("editProfile") })
-//    { Text("Edit Profile") }
-}
-
-@Composable
-fun QualificationCard(
-    icon: ImageVector,
-    title: String,
-    value: String,
-    valueColor: Color,
-    cardColor: Color
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .background(cardColor, shape = RoundedCornerShape(8.dp))
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+    @Composable
+    fun CertificationGrid(
+        certifications: List<Certification>,
+        onItemClick: (String) -> Unit
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = title,
-            tint = Color.White,
-            modifier = Modifier.size(24.dp)
-        )
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Text(
-            text = title,
-            fontSize = 16.sp,
-            color = Color.White,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.weight(1f)
-        )
+        Box(modifier = Modifier.height(100.dp)) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(certifications) { certification ->
+                    CertificationItem(
+                        certification,
+                        onItemClick = { fileName ->
+                            onItemClick(fileName) // Handle item click
+                        }
+                    )
+                }
+            }
+        }
+    }
+/*
+    /**
+     * Composable function to display a grid of items (e.g., academic progress or interests).
+     *
+     * This function displays items in a grid with a specified number of columns.
+     *
+     * @param items List of items to be displayed in the grid.
+     * @param columns Number of columns to display the items in.
+     */
+    @Composable
+    fun ItemGrid(items: List<String>, columns: Int) {
+        Box(modifier = Modifier.height(100.dp)) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(columns),
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(items) { item ->
+                    Box(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
+                            .padding(8.dp)
+                    ) {
+                        Text(text = item, textAlign = TextAlign.Center)
+                    }
+                }
+            }
+        }
+    }
+*/
+    /**
+     * Composable function to display an individual certification item.
+     *
+     * This function displays either an image or a file icon for each certification
+     * based on the file type (e.g., image or non-image file).
+     *
+     * @param certification The certification item to be displayed.
+     * @param onItemClick Function to handle click events on the certification item.
+     */
+    @Composable
+    fun CertificationItem(
+        certification: Certification,
+        onItemClick: (String) -> Unit
+    ) {
+        val fileName = certification.fileName
+        val fileExtension = fileName.substringAfterLast('.', "").lowercase()
 
         Box(
             modifier = Modifier
-                .background(valueColor, shape = RoundedCornerShape(4.dp))
-                .padding(horizontal = 12.dp, vertical = 4.dp)
+                .clickable {
+                    onItemClick(fileName) // Handle item click
+                }
+                .size(100.dp)
+                .padding(4.dp)
+                .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
+                .background(Color.LightGray, shape = RoundedCornerShape(8.dp)),
+            contentAlignment = Alignment.Center,
         ) {
-            Text(
-                text = value,
-                color = Color.Black,
-                fontWeight = FontWeight.Bold
-            )
-        }
-    }
-}
-
-
-
-
-@Composable
-fun CertificationGrid(
-    certifications: List<Certification>,
-    onItemClick: (String) -> Unit
-) {
-    Box(modifier = Modifier.height(100.dp)) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            items(certifications) { certification ->
-                CertificationItem(certification,
-                    onItemClick = { fileName ->
-                        onItemClick(fileName) // Handle item click
-                    }
-                )
-            }
-        }
-    }
-}
-
-/**
- * Composable function to display a grid of items (e.g., academic progress or interests).
- *
- * This function displays items in a grid with a specified number of columns.
- *
- * @param items List of items to be displayed in the grid.
- * @param columns Number of columns to display the items in.
- */
-@Composable
-fun ItemGrid(items: List<String>, columns: Int) {
-    Box(modifier = Modifier.height(100.dp)) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(columns),
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            items(items) { item ->
-                Box(
+            if (fileExtension in listOf("jpg", "jpeg", "png", "gif", "bmp")) {
+                // Display image if the file is an image type
+                AsyncImage(
+                    model = certification.fileUrl,
+                    contentDescription = "Certification Image",
                     modifier = Modifier
-                        .padding(8.dp)
-                        .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
-                        .padding(8.dp)
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                // Show file icon & filename for non-image files
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Text(text = item, textAlign = TextAlign.Center) // Display item text
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_insert_drive_file_24),
+                        contentDescription = "File Icon",
+                        modifier = Modifier.size(40.dp)
+                    )
+                    Text(
+                        text = fileName,
+                        textAlign = TextAlign.Center,
+                        fontSize = 12.sp,
+                        color = Color.Black,
+                        modifier = Modifier.padding(4.dp)
+                    )
                 }
             }
         }
     }
-}
 
-/**
- * Composable function to display an individual certification item.
- *
- * This function displays either an image or a file icon for each certification
- * based on the file type (e.g., image or non-image file).
- *
- * @param certification The certification item to be displayed.
- * @param onItemClick Function to handle click events on the certification item.
- */
-@Composable
-fun CertificationItem(
-    certification: Certification,
-    onItemClick: (String) -> Unit
-) {
-    val fileName = certification.fileName
-    val fileExtension = fileName.substringAfterLast('.', "").lowercase()
-
-    Box(
-        modifier = Modifier
-            .clickable {
-                onItemClick(fileName) // Handle item click
-            }
-            .size(100.dp)
-            .padding(4.dp)
-            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
-            .background(Color.LightGray, shape = RoundedCornerShape(8.dp)),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (fileExtension in listOf("jpg", "jpeg", "png", "gif", "bmp")) {
-            // Display image if the file is an image type
-            AsyncImage(
-                model = certification.fileUrl,
-                contentDescription = "Certification Image",
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
-        } else {
-            // Show file icon & filename for non-image files
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Done, // change this to better icon -Jeremelle
-                    contentDescription = "File Icon",
-                    modifier = Modifier.size(40.dp)
-                )
-                Text(
-                    text = fileName,
-                    textAlign = TextAlign.Center,
-                    fontSize = 12.sp,
-                    color = Color.Black,
-                    modifier = Modifier.padding(4.dp)
-                )
-            }
-        }
-    }
-}
 
 
 
