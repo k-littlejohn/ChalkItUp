@@ -70,18 +70,18 @@ fun MyTopBar(
     // Changes the text at the top based on what screen the user
     // is on
     CenterAlignedTopAppBar(
-        modifier = Modifier.height(80.dp), // Increased height
+        modifier = Modifier.height(80.dp), // Increased height for icon, felt 80.dp looked the best
         title = {
             if (currentRoute == "home" || currentRoute == "editProfile") {
                 Image(
                     painter = painterResource(id = R.drawable.chalk_eraser2),
-                    contentDescription = "Chalk Eraser",
-                    modifier = Modifier.size(80.dp) // Adjust size as needed
+                    contentDescription = "Chalk & Eraser",
+                    modifier = Modifier.size(80.dp)
                 )
             } else {
                 Box(
-                    modifier = Modifier.fillMaxSize(), // Ensures the Box takes full height
-                    contentAlignment = Alignment.Center // Centers the text inside the Box
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = when (currentRoute) {
