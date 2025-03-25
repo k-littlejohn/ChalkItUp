@@ -3,6 +3,7 @@ package com.example.chalkitup.ui.screens
 //import androidx.privacysandbox.tools.core.generator.build
 //import com.google.api.client.json.GsonFactory
 //first create a service account for google
+import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -39,6 +40,7 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.http.GenericUrl
 import com.google.api.client.http.HttpRequest
 import com.google.api.client.http.HttpRequestFactory
+import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.client.util.DateTime
@@ -79,7 +81,7 @@ fun SettingsScreen(
     //val googleAccount = GoogleSignIn.getLastSignedInAccount(context)
     val calendarId = remember { CalendarDetailsSingleton.calendarId }
     LaunchedEffect(Unit) {
-        CalendarDetailsSingleton.ensureCalendarExists()
+        CalendarDetailsSingleton.ensureCalendarExists(context)
     }
 
     Column(
@@ -155,54 +157,56 @@ fun SettingsScreen(
 }
 
 //----------------------- google calender API
-fun authenticateServiceAccount() {
+fun authenticateServiceAccount(context: Context) {
     try {
-        // Path to the service account key file
-        val serviceAccountKeyFile = "app/src/main/assets/chalkitup-bdceba61ebce.json"
-        // Load the service account credentials
-        val credentials = ServiceAccountCredentials.fromStream(FileInputStream(serviceAccountKeyFile))
-        // Create the HTTP transport
+        // Load the service account credentials from assets
+        val serviceAccountKeyFile = context.assets.open("chalkitup-bdceba61ebce.json")
+        val credentials = ServiceAccountCredentials.fromStream(serviceAccountKeyFile)
+
         val httpTransport = GoogleNetHttpTransport.newTrustedTransport()
-        // Use GsonFactory for JSON parsing
         val jsonFactory: JsonFactory = GsonFactory.getDefaultInstance()
-        // Now you can use 'credentials' to authenticate API requests
+
+        // Create the HTTP request factory
         val requestFactory: HttpRequestFactory = httpTransport.createRequestFactory { credentials }
-        // Example API endpoint (replace with your actual endpoint)
+
+        // Example API endpoint
         val url = GenericUrl("https://www.googleapis.com/calendar/v3/calendars/primary/events")
-        // Build the request
         val request: HttpRequest = requestFactory.buildGetRequest(url)
-        // Execute the request
+
         val response = request.execute()
         println("Response: ${response.content}")
+
     } catch (e: Exception) {
         e.printStackTrace()
     }
 }
+
 //add the service account to the calendar
-fun createCalendarAndAddServiceAccount() {
+fun createCalendarAndAddServiceAccount(context: Context) {
     try {
-        val serviceAccountKeyFile = "app/src/main/assets/chalkitup-bdceba61ebce.json"
-        val credentials = ServiceAccountCredentials.fromStream(FileInputStream(serviceAccountKeyFile))
-        val googleCredential = GoogleCredential.fromStream(FileInputStream(serviceAccountKeyFile))
-            .createScoped(listOf(CalendarScopes.CALENDAR))
+        val serviceAccountKeyFile = context.assets.open("chalkitup-bdceba61ebce.json")
+        val credentials = ServiceAccountCredentials.fromStream(serviceAccountKeyFile)
 
         val httpTransport = GoogleNetHttpTransport.newTrustedTransport()
         val jsonFactory: JsonFactory = GsonFactory.getDefaultInstance()
+
+        val googleCredential = GoogleCredential.fromStream(serviceAccountKeyFile)
+            .createScoped(listOf(CalendarScopes.CALENDAR))
 
         val calendarService = Calendar.Builder(httpTransport, jsonFactory, googleCredential)
             .setApplicationName("ChalkItUp")
             .build()
 
-        val calendar = GoogleCalendar()
-        calendar.summary = "ChalkItUp Calendar"
-        calendar.timeZone = "America/Edmonton"
+        val calendar = GoogleCalendar().apply {
+            summary = "ChalkItUp Calendar"
+            timeZone = "America/Edmonton"
+        }
 
         val createdCalendar = calendarService.calendars().insert(calendar).execute()
         val calendarId = createdCalendar.id
 
         // Store calendar ID in Singleton
         CalendarDetailsSingleton.calendarId = calendarId
-
         println("Created and stored Calendar ID: $calendarId")
 
         // Grant access to the service account
@@ -216,87 +220,78 @@ fun createCalendarAndAddServiceAccount() {
 
 fun addServiceAccountToCalendar(calendarService: Calendar, calendarId: String, credentials: ServiceAccountCredentials) {
     try {
-        // Define the service account email (you can get this from the credentials)
+        // Define the service account email
         val serviceAccountEmail = credentials.clientEmail
 
         // Create the ACL rule for the service account
-        val aclRule = AclRule()
-        aclRule.scope = Scope().setType("user").setValue(serviceAccountEmail)
-        aclRule.role = "owner"  // You can set the role to "reader" or "writer" as per your needs
+        val aclRule = AclRule().apply {
+            scope = Scope().setType("user").setValue(serviceAccountEmail)
+            role = "owner"  // You can set the role to "reader" or "writer" as per your needs
+        }
 
         // Insert the ACL rule to give permissions to the service account
         calendarService.acl().insert(calendarId, aclRule).execute()
 
         println("Service account $serviceAccountEmail has been added to the calendar with owner permissions.")
-
     } catch (e: Exception) {
         e.printStackTrace()
     }
 }
 
+
 // Data class to store the calendar ID
 object CalendarDetailsSingleton {
     var calendarId: String = ""
 
-    fun ensureCalendarExists() {
+    fun ensureCalendarExists(context: Context) {
         if (calendarId.isEmpty()) {
             println("No calendar found. Creating a new one...")
-            createCalendarAndAddServiceAccount()
+            createCalendarAndAddServiceAccount(context)
         } else {
             println("Calendar already exists: $calendarId")
         }
     }
 }
 
-fun addAppointmentsToCalendar(calendarId: String) {
+fun addAppointmentsToCalendar(context: Context, calendarId: String) {
     try {
-        val calendarService = getCalendarService()  // Get the Google Calendar service
+        val calendarService = getCalendarService(context)
 
-        // Retrieve the list of appointments from the JSON file using BookingManager
+        // Retrieve appointments from your BookingManager (assuming it's correctly implemented)
         val appointments = BookingManager.readBookings()
 
-        // Iterate through the appointments and create events for each one
         for (appointment in appointments) {
-            // Define the event details
-            val event = Event()
-                .setSummary("Appointment with ${appointment.studentName}")
-                .setDescription("Subject: ${appointment.subject}\nMode: ${appointment.mode}\nComments: ${appointment.comments}")
-                .setLocation("Online or location TBD")
+            val event = Event().apply {
+                summary = "Appointment with ${appointment.studentName}"
+                description = "Subject: ${appointment.subject}\nMode: ${appointment.mode}\nComments: ${appointment.comments}"
+                location = "Online or location TBD"
+            }
 
             // Set start and end times for the event
             val startDateTime = Cal.getInstance()
             val startParts = appointment.date.split("-")
             val timeParts = appointment.time.split(":")
-            startDateTime.set(
-                startParts[0].toInt(),
-                startParts[1].toInt() - 1,  // Calendar month is 0-based, so subtract 1
-                startParts[2].toInt(),
-                timeParts[0].toInt(),
-                timeParts[1].toInt()
-            )
-            val start = EventDateTime()
-                .setDateTime(DateTime(startDateTime.time))
-                .setTimeZone("America/Edmonton")  // Set your desired timezone
+            startDateTime.set(startParts[0].toInt(), startParts[1].toInt() - 1, startParts[2].toInt(), timeParts[0].toInt(), timeParts[1].toInt())
 
-            val endDateTime = Cal.getInstance()
-            endDateTime.set(
-                startParts[0].toInt(),
-                startParts[1].toInt() - 1,
-                startParts[2].toInt(),
-                timeParts[0].toInt(),
-                timeParts[1].toInt() + 30  // 30-minute duration for the event
-            )
-            val end = EventDateTime()
-                .setDateTime(DateTime(endDateTime.time))
-                .setTimeZone("America/Edmonton")  // Set your desired timezone
+            val start = EventDateTime().apply {
+                setDateTime(DateTime(startDateTime.time))
+                setTimeZone("America/Edmonton")
+            }
 
-            event.setStart(start)
-                .setEnd(end)
+            val endDateTime = Cal.getInstance().apply {
+                set(startParts[0].toInt(), startParts[1].toInt() - 1, startParts[2].toInt(), timeParts[0].toInt(), timeParts[1].toInt() + 30)
+            }
+
+            val end = EventDateTime().apply {
+                setDateTime(DateTime(endDateTime.time))
+                setTimeZone("America/Edmonton")
+            }
+
+            event.setStart(start).setEnd(end)
 
             // Insert the event into the calendar
             val createdEvent = calendarService.events().insert(calendarId, event).execute()
 
-            // Print out the event details
             println("Event created: ${createdEvent.htmlLink}")
         }
 
@@ -305,25 +300,24 @@ fun addAppointmentsToCalendar(calendarId: String) {
     }
 }
 
-fun getCalendarService(): Calendar {
+
+fun getCalendarService(context: Context): Calendar {
     val httpTransport = GoogleNetHttpTransport.newTrustedTransport()
     val jsonFactory: JsonFactory = GsonFactory.getDefaultInstance()
 
-    // Load credentials from the service account key file
-    val credentials = GoogleCredentials.fromStream(FileInputStream("app/src/main/assets/chalkitup-bdceba61ebce.json"))
+    val credentials = GoogleCredentials.fromStream(context.assets.open("chalkitup-bdceba61ebce.json"))
         .createScoped(CalendarScopes.CALENDAR)
 
-    // Convert GoogleCredentials to HttpRequestInitializer
-    val requestInitializer = credentials as com.google.api.client.http.HttpRequestInitializer
+    val requestInitializer = credentials as HttpRequestInitializer
 
-    // Initialize the Calendar service
     return Calendar.Builder(httpTransport, jsonFactory, requestInitializer)
         .setApplicationName("ChalkItUp")
         .build()
 }
-fun getCalendarSubscriptionLink(calendarId: String): String {
+
+fun getCalendarSubscriptionLink(context: Context, calendarId: String): String {
     try {
-        val calendarService = getCalendarService() // Assume this is your existing function to get the Calendar service
+        val calendarService = getCalendarService(context) // Assume this is your existing function to get the Calendar service
         val calendar = calendarService.calendars().get(calendarId).execute()
 
         // Retrieve the public iCal URL from the calendar details
@@ -341,26 +335,22 @@ fun getCalendarSubscriptionLink(calendarId: String): String {
 class CalendarHelper(private val mService: Calendar) {
     @Throws(IOException::class)
     fun makeCalendarPublic(calendarId: String?) {
-        // Create an ACL rule to make the calendar public
-        val rule = AclRule()
-        rule.setRole("reader") // Public will only have read access
-        rule.setScope(Scope().setType("default"))
+        val rule = AclRule().apply {
+            setRole("reader")
+            setScope(Scope().setType("default"))
+        }
 
-        // Apply the rule to the calendar
         try {
             val createdRule = mService.acl().insert(calendarId, rule).execute()
-            println("Calendar made public: " + createdRule.id)
+            println("Calendar made public: ${createdRule.id}")
         } catch (e: IOException) {
-            println("Error making calendar public: " + e.message)
+            println("Error making calendar public: ${e.message}")
             throw e
         }
     }
-    fun generateSubscriptionLink(calendarId: String): String {
-        // Format the subscription link as per Google Calendar's iCal format
-        val subscriptionUrl =
-            "https://calendar.google.com/calendar/ical/$calendarId/public/basic.ics"
 
-        return subscriptionUrl
+    fun generateSubscriptionLink(calendarId: String): String {
+        return "https://calendar.google.com/calendar/ical/$calendarId/public/basic.ics"
     }
 }
 
@@ -372,18 +362,17 @@ fun SubscriptionButton(context: Context) {
     Button(onClick = {
         coroutineScope.launch {
             // Ensure a calendar exists
-            CalendarDetailsSingleton.ensureCalendarExists()
-
-            // Wait a bit to allow async operations to complete (not ideal, better to use proper async flow)
-            delay(2000)
+            CalendarDetailsSingleton.ensureCalendarExists(context)
 
             val calendarId = CalendarDetailsSingleton.calendarId
             if (calendarId.isNotEmpty()) {
                 println("Adding appointments to calendar: $calendarId")
-                addAppointmentsToCalendar(calendarId)
+                addAppointmentsToCalendar(context, calendarId)
 
                 // Generate the subscription link
-                val subscriptionLink = "https://calendar.google.com/calendar/ical/$calendarId/public/basic.ics"
+                val calendarHelper = CalendarHelper(getCalendarService(context))
+                calendarHelper.makeCalendarPublic(calendarId)
+                val subscriptionLink = calendarHelper.generateSubscriptionLink(calendarId)
 
                 // Copy to clipboard
                 copyToClipboard(subscriptionLink, context)
@@ -401,18 +390,17 @@ fun SubscriptionButton(context: Context) {
 }
 
 
-// Function to copy the subscription link to clipboard
 fun copyToClipboard(subscriptionLink: String, context: Context) {
     val clipboard = getSystemService(context, ClipboardManager::class.java)
-    val clip = android.content.ClipData.newPlainText("Calendar Subscription", subscriptionLink)
+    val clip = ClipData.newPlainText("Calendar Subscription", subscriptionLink)
     clipboard?.setPrimaryClip(clip)
 }
 
-// Function to open Google Calendar subscription page
 fun openGoogleCalendar(context: Context) {
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://calendar.google.com/calendar/r/subscriptions"))
     context.startActivity(intent)
 }
+
 
 
 
