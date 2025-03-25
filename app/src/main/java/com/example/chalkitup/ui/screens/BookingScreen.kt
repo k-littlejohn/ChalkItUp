@@ -238,8 +238,6 @@ fun BookingScreen(
                 // Session Type Selection
                 Text(
                     text = "Pick a Mode",
-                    color = Color.Black,
-
                     modifier = Modifier.padding(16.dp)
                 )
 
