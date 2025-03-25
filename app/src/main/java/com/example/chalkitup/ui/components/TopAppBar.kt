@@ -18,6 +18,9 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.ui.res.painterResource
 import com.example.chalkitup.R
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.ui.Alignment
 
 // Top app bar
 
@@ -59,7 +62,7 @@ fun MyTopBar(
     val backgroundColor = when (currentRoute) {
         //"home" -> Color(0xFFFFFFFF)//MaterialTheme.colorScheme.primary
         "profile","tutorAvailability","booking","home","start","login","signup","forgotPassword","termsAndCond","adminHome" -> Color(0xFF54A4FF) // Fill top-screen white space
-        "checkEmail","awaitingApproval" -> Color(0xFF06C59C) // Fill top-screen white space
+        "checkEmail","awaitingApproval", "editProfile" -> Color(0xFF06C59C) // Fill top-screen white space
         else -> Color.White
     }
 
@@ -67,20 +70,33 @@ fun MyTopBar(
     // Changes the text at the top based on what screen the user
     // is on
     CenterAlignedTopAppBar(
+        modifier = Modifier.height(80.dp), // Increased height
         title = {
-            Text(
-                text = when (currentRoute) {
-                    "home" -> ""
-                    "profile" -> "Profile"
-                    "settings" -> "Settings"
-                    "booking" -> ""
-                    "messages" -> "Messages"
-                    "notifications" -> "Notifications"
-                    "newMessage" -> "New Chat"
-                    "start","login","signup","forgotPassword","checkEmail","tutorAvailability","termsAndCond","adminHome","awaitingApproval" -> ""
-                    else -> "ChalkItUp Tutors"
+            if (currentRoute == "home" || currentRoute == "editProfile") {
+                Image(
+                    painter = painterResource(id = R.drawable.chalk_eraser2),
+                    contentDescription = "Chalk Eraser",
+                    modifier = Modifier.size(80.dp) // Adjust size as needed
+                )
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxSize(), // Ensures the Box takes full height
+                    contentAlignment = Alignment.Center // Centers the text inside the Box
+                ) {
+                    Text(
+                        text = when (currentRoute) {
+                            "profile" -> "Profile"
+                            "settings" -> "Settings"
+                            "booking" -> ""
+                            "messages" -> "Messages"
+                            "notifications" -> "Notifications"
+                            "newMessage" -> "New Chat"
+                            "start", "login", "signup", "forgotPassword", "checkEmail", "tutorAvailability", "termsAndCond", "adminHome", "awaitingApproval" -> ""
+                            else -> "ChalkItUp Tutors"
+                        }
+                    )
                 }
-            )
+            }
         },
 
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -95,9 +111,20 @@ fun MyTopBar(
                 // the navigation drawer
                 "home" -> {
                     IconButton(onClick = onMenuClick) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                        Icon(Icons.Default.Menu, contentDescription = "Menu",
+                            modifier = Modifier.size(30.dp)
+                        )
                     }
                 }
+                "profile" -> {
+                    IconButton(onClick = { navController.navigate("settings") }) {
+                        Icon(
+                            Icons.Default.Settings, contentDescription = "Settings",
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
+                }
+
                 // On the login and signup page currently,          // Here are the alternative back buttons on login & signup screen
                 // there is a back button in the top left
                 "login","signup","awaitingApproval" -> {
@@ -128,7 +155,10 @@ fun MyTopBar(
                 // there is a settings button in the top right
                 "home" -> {
                     IconButton(onClick = { navController.navigate("settings") }) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                        Icon(
+                            Icons.Default.Settings, contentDescription = "Settings",
+                            modifier = Modifier.size(30.dp)
+                        )
                     }
                 }
                 "profile" -> {
@@ -137,7 +167,7 @@ fun MyTopBar(
                             painter = painterResource(id = R.drawable.ic_edit),
                             contentDescription = "Edit Profile",
                             tint = Color(0xFF000080),
-                            modifier = Modifier.size(35.dp)
+                            modifier = Modifier.size(30.dp)
                         )
                     }
                 }
