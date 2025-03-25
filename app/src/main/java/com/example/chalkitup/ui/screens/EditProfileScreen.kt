@@ -148,7 +148,8 @@ fun EditProfileScreen(
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
             Color(0xFF06C59C),//Color(0xFF54A4FF), // 5% Blue
-            Color.White, Color.White, Color.White, Color.White //95% white
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface,
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface //95% white
         )
     )
 
