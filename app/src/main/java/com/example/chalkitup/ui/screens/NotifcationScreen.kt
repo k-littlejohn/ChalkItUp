@@ -186,6 +186,8 @@ fun LoadNotifications(
             }
             notification.notifDate = formattedDate
 
+            println("Notification: $notification")
+
            PastNotifications(
                notif = notification,
                onClick = { onNotificationClick(notification) }
@@ -214,7 +216,9 @@ fun PastNotifications(
         "Booked" to R.drawable.pluscalendar,
         "Rescheduled" to R.drawable.circlecalendar,
         "Cancelled" to  R.drawable.minuscalendar,
-        "Message" to R.drawable.message
+        "Message" to R.drawable.message,
+        "Deactivated" to R.drawable.baseline_cancel_24, //TODO change icon
+        "Approved" to R.drawable.baseline_check_box_24, //TODO change icon
     )
 
     Box(
@@ -292,6 +296,16 @@ fun PastNotifications(
                 notifLine3 =
                     if (userType == "Student") "A tutor has reached out"
                     else "A student has reached out"
+            } else if (notif.notifType == "Deactivated") {
+                subjMessage = "Account - Deactivated"
+                notifLine1 = "${notif.notifDate} | ${notif.notifTime}"
+                notifLine2 = "An Admin has deactivated your account"
+                notifLine3 = notif.comments
+            } else if (notif.notifType == "Approved") {
+                subjMessage = "Account - Approved"
+                notifLine1 = "${notif.notifDate} | ${notif.notifTime}"
+                notifLine2 = "Welcome to ChalkItUp!"
+                notifLine3 = notif.comments
             }
 
             Column(
@@ -364,6 +378,16 @@ fun NotifLargeForm(
                         Text(text =
                         if (userType == "Student") "A tutor has reached out to you"
                         else "A student has reached out to you")
+                    }
+                    "Deactivated" -> {
+                        Text(text = "Account - Deactivated")
+                        Text(text = "Notification Time & Date: ${notif.notifTime} ${notif.notifDate}")
+                        Text(text = "Comments: ${notif.comments}")
+                    }
+                    "Approved" -> {
+                        Text(text = "Account - Approved")
+                        Text(text = "Notification Time & Date: ${notif.notifTime} ${notif.notifDate}")
+                        Text(text = "Comments: ${notif.comments}")
                     }
                 }
             }

@@ -220,6 +220,7 @@ class BookingViewModel : ViewModel() {
             try {
                 db.collection("users")
                     .whereEqualTo("userType", "Tutor") // Filter for tutors only
+                    .whereEqualTo("active", true) // Filter for active tutors only
                     .get()
                     .addOnSuccessListener { querySnapshot ->
                         val matchedTutorIds = mutableListOf<String>()
