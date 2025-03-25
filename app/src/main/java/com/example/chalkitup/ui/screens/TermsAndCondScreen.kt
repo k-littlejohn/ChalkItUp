@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -43,6 +44,15 @@ fun TermsAndCond(
     navController: NavController,
     authViewModel: AuthViewModel,
 ) {
+    // Screen Gradient
+    val gradientBrush = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF54A4FF), // 5% Blue
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface,
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface // 95% White
+        )
+    )
+
     // Scroll states for the main form and the Terms & Conditions box.
     val scrollState = rememberScrollState() // Main form scroll state - entire screen
     val termsScrollState =
@@ -199,7 +209,8 @@ fun TermsAndCond(
                             "11.1. We may update these Terms from time to time, and users will be notified of significant changes.\n" +
                                     "11.2. Continued use of the Platform constitutes acceptance of revised Terms."
                         )
-                    }
+                    },
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
 
@@ -227,7 +238,8 @@ fun TermsAndCond(
                         disabledIndeterminateBorderColor = Color.DarkGray
                     )
                 )
-                Text("I have read and agree to the Terms and Conditions")
+                Text("I have read and agree to the Terms and Conditions",
+                    color = MaterialTheme.colorScheme.onSurface)
             }
 
             // Error message if terms are not agreed to.

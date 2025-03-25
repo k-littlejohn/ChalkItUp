@@ -31,6 +31,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.SliderDefaults
@@ -63,7 +64,6 @@ import com.example.chalkitup.ui.components.validateTutorSubjects
 import com.example.chalkitup.ui.components.SubjectGradeItemNoPrice
 import com.example.chalkitup.ui.components.TutorSubject
 import com.example.chalkitup.ui.components.TutorSubjectError
-import com.example.chalkitup.ui.viewmodel.BookingManager
 import com.example.chalkitup.ui.viewmodel.BookingViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -188,7 +188,7 @@ fun BookingScreen(
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
             Color(0xFF54A4FF), // 5% Blue
-            Color.White, Color.White
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface
         )
     )
 
@@ -239,6 +239,7 @@ fun BookingScreen(
                 Text(
                     text = "Pick a Mode",
                     color = Color.Black,
+
                     modifier = Modifier.padding(16.dp)
                 )
 
@@ -296,7 +297,6 @@ fun BookingScreen(
 
                 Text(
                     text = "Select your Subject",
-                    color = Color.Black,
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
 
@@ -358,7 +358,6 @@ fun BookingScreen(
                 ) {
                     Text(
                         text = "Hourly Rate          ",
-                        color = Color.Black
                     )
                     Text(
                         text = "\$${priceRange.start.toInt()} - \$${priceRange.endInclusive.toInt()}",
@@ -393,13 +392,10 @@ fun BookingScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 32.dp, vertical = 16.dp),
-                //   horizontalAlignment = Alignment.CenterHorizontally
-
             ) {
                 // Comments Box
                 Text(
                     text = "Add notes for your Tutor",
-                    color = Color.Black,
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
 
@@ -609,7 +605,8 @@ fun BookingScreen(
                                             .height(55.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Text(day)
+                                        Text(day,
+                                            color = Color.Black,)
                                     }
                                 }
                             }
@@ -707,7 +704,6 @@ fun BookingScreen(
                                 Text(
                                     "Select a Start time",
                                     modifier = Modifier.padding(16.dp),
-                                    color = Color.Black
                                 )
 
                                 Divider(
@@ -765,7 +761,6 @@ fun BookingScreen(
                                 Text(
                                     "Select an End time",
                                     modifier = Modifier.padding(16.dp),
-                                    color = Color.Black
                                 )
                                 Divider(
                                     color = Color.Gray, // Color of the divider

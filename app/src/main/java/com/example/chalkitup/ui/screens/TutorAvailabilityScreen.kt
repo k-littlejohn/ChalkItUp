@@ -120,7 +120,7 @@ fun EnterTutorAvailability(
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
             Color(0xFF54A4FF), // 5% Blue
-            Color.White, Color.White
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface
         )
     )
 

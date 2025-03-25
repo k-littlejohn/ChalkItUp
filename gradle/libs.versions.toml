@@ -1,5 +1,5 @@
 [versions]
-agp = "8.9.0"
+agp = "8.9.1"
 androidGradle = "7.x.x"
 androidxLifecycleRuntimeKtx = "2.8.7"
 appcompatVersion = "1.7.0"
@@ -25,7 +25,7 @@ googleid = "1.1.1"
 googlePlayServicesAuth = "21.3.0"
 googlePlayServicesAuthVersion = "21.3.0"
 googleServices = "4.4.2"
-gradle = "8.9.0"
+gradle = "8.9.1"
 junit = "4.13.2"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
@@ -48,6 +48,7 @@ firebaseStorage = "21.0.1"
 composeFoundation = "1.7.8"
 playServicesAuth = "21.3.0"
 playServicesAuthVersion = "21.3.0"
+protobufJavalite = "3.25.5"
 retrofit = "2.9.0"
 runtimeLivedataVersion = "1.7.8"
 testng = "6.9.6"
@@ -121,6 +122,7 @@ play-services-auth = { module = "com.google.android.gms:play-services-auth", ver
 play-services-auth-v2000 = { module = "com.google.android.gms:play-services-auth", version.ref = "googlePlayServicesAuthVersion" }
 play-services-auth-v2010 = { module = "com.google.android.gms:play-services-auth", version.ref = "googlePlayServicesAuth" }
 play-services-auth-v2070 = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuthVersion" }
+protobuf-javalite = { module = "com.google.protobuf:protobuf-javalite", version.ref = "protobufJavalite" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 testng = { group = "org.testng", name = "testng", version.ref = "testng" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }

@@ -20,6 +20,8 @@ import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import androidx.compose.material.icons.automirrored.filled.Message
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBarItemDefaults
 
 // Bottom App Bar
 
@@ -67,12 +69,16 @@ fun BottomNavigationBar(
     var currentRoute = navController.currentDestination?.route
     currentRoute = currentRoute?.substringBefore("/")
 
+    if (currentRoute == "profile") {
+        currentRoute = "profile/"
+    }
+
     val fillerBar = ("checkEmail" == currentRoute) || ("awaitingApproval" == currentRoute)
 
     // Create the Bottom Navigation Bar
     NavigationBar (
-        containerColor = if (fillerBar) Color(0xFF54A4FF) else Color.LightGray,
-        contentColor = if (fillerBar) Color(0xFF54A4FF) else Color.LightGray,
+        containerColor = if (fillerBar) Color(0xFF54A4FF) else MaterialTheme.colorScheme.surface,
+        contentColor = if (fillerBar) Color(0xFF54A4FF) else MaterialTheme.colorScheme.onSurface,
     ) {
         if (fillerBar) {
             Unit
@@ -80,6 +86,11 @@ fun BottomNavigationBar(
             // Iterate over the list of items and create a NavigationBarItem for each
             items.forEach { item ->
                 NavigationBarItem(
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.onSurface,
+                        selectedTextColor = MaterialTheme.colorScheme.onSurface,
+                        indicatorColor = Color(0xFF06C59C),
+                    ),
                     icon = {
                         Icon(
                             item.icon,
