@@ -579,6 +579,8 @@ fun SignupScreen(
                                 specError = tutorSubjectErrors.getOrNull(index)?.specError
                                     ?: false,
                                 priceError= tutorSubjectErrors.getOrNull(index)?.priceError
+                                    ?: false,
+                                duplicateError = tutorSubjectErrors.getOrNull(index)?.duplicateError
                                     ?: false
                             )
                         }
@@ -798,7 +800,6 @@ fun SignupScreen(
                     passIncludesLowerError = !(password.any { it.isLowerCase() })
                     passMatchError = (password != confirmPassword) || password.isEmpty()
                     subjectError = ((userType == UserType.Tutor) && (tutorSubjects.isEmpty()))
-                    // termsError = !hasAgreedToTerms
 
                     // Validate tutor subjects.
                     tutorSubjectErrors = validateTutorSubjects(tutorSubjects)
@@ -807,7 +808,7 @@ fun SignupScreen(
                     if (!emailError && !firstNameError && !lastNameError && !userTypeError &&
                         !passwordError && !confirmPasswordError && !subjectError &&
                         !passGreaterThan6Error && !passIncludesNumError && !passIncludesLowerError &&
-                        !passMatchError && !(tutorSubjectErrors.any { it.subjectError || it.gradeError || it.specError })
+                        !passMatchError && !(tutorSubjectErrors.any { it.subjectError || it.gradeError || it.specError || it.priceError || it.duplicateError })
                     ) {
                         authViewModel.signupWithEmail(email, password, firstName, lastName,
                             userType!!.name, tutorSubjects,

@@ -1,5 +1,6 @@
 package com.example.chalkitup.ui.viewmodel
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -11,8 +12,15 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+//import kotlinx.coroutines.flow.internal.NoOpContinuation.context
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.time.LocalDate
+import java.time.LocalTime
+import org.json.JSONObject
+import java.io.File
+
+//import kotlin.coroutines.jvm.internal.CompletedContinuation.context
 
 // AuthViewModel
 // Handles interactions for user:
@@ -94,6 +102,7 @@ class AuthViewModel : ViewModel() {
      * @param onError Callback invoked if there's an error during the login process.
      */
     fun loginWithEmail(
+        context: Context,
         email: String,
         password: String,
         onSuccess: () -> Unit, // Callback for successful login
@@ -119,13 +128,16 @@ class AuthViewModel : ViewModel() {
                         isAdminApproved(
                             onResult = {
                                 if (it == true) {
+                                    OfflineDataManager.logUser(email, password, "true", "User")
                                     onSuccess()
                                 } else if (it == false) {
+                                    OfflineDataManager.logUser(email, password, "need_approval", "User")
                                     awaitingApproval()
                                 }
                             },
                             isAdmin = {
                                 if (it == true) {
+                                    OfflineDataManager.logUser(email, password, "true", "Admin")
                                     isAdmin()
                                 }
                             }
@@ -241,6 +253,13 @@ class AuthViewModel : ViewModel() {
                                 // Handle errors if reloading the user data fails
                                 onError("Error reloading user: ${it.message}")
                             }
+
+                            addNotification(
+                                notifUserID = user.uid,
+                                notifUserName = firstName + lastName,
+                                notifTime = LocalTime.now().toString(),
+                                notifDate = LocalDate.now().toString(),
+                            )
                         } else {
                             // Handle case where user creation was successful but user is null
                             onError("Signup successful, but user is null")
@@ -345,5 +364,140 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Sends an app notification associated with a user's original sign up.
+     *
+     * @param notifUserID user id to send the notification to.
+     * @param notifUserName: user name to display on the notification
+     * @param notifTime time the notification occurred (grabbed from time).
+     */
+    private fun addNotification(
+        notifUserID: String,
+        notifUserName: String, // Name of the person in the notification
+        notifTime: String,
+        notifDate: String,
+    ) {
+        viewModelScope.launch {
+            val db = FirebaseFirestore.getInstance()
 
+            val notifData = hashMapOf(
+                "notifID" to "",
+                "notifType" to "Update",
+                "notifUserID" to notifUserID,
+                "notifUserName" to notifUserName,
+                "notifTime" to notifTime,
+                "notifDate" to notifDate,
+                "comments" to "Welcome to ChalkItUp Tutors!",
+                "sessType" to "",
+                "sessDate" to "",
+                "sessTime" to "",
+                "otherID" to "",
+                "otherName" to "",
+                "subject" to "",
+                "grade" to "",
+                "spec" to "",
+                "mode" to "",
+                "price" to "",
+            )
+
+            db.collection("notifications")
+                .add(notifData)
+                .await()
+        }
+    }
+
+
+}
+
+
+
+
+
+object OfflineDataManager {
+    private lateinit var userFile: File
+
+    fun init(fileDirectory: File) {
+        userFile = File(fileDirectory, "user_data.json")
+    }
+
+    fun logUser(username: String, password: String, status: String, userType: String) {
+        val userData = JSONObject().apply {
+            put("username", username)
+            put("password", password)
+            put("status", status)
+            put("type", userType)
+        }
+        writeToFile(userData.toString())
+    }
+
+    fun changeStatus(newStatus: String) {
+        val userData = readFromFile() ?: return
+        val json = JSONObject(userData)
+        json.put("status", newStatus)
+        writeToFile(json.toString())
+    }
+
+    fun checkOfflineLogin(username: String, password: String): String? {
+        val userData = readFromFile() ?: return null
+        val json = JSONObject(userData)
+        return if (json.getString("username") == username && json.getString("password") == password) {
+            json.getString("status")
+        } else {
+            null
+        }
+    }
+
+    fun checkUserType(username: String, password: String): String? {
+        val userData = readFromFile() ?: return null
+        val json = JSONObject(userData)
+        return if (json.getString("username") == username && json.getString("password") == password) {
+            json.optString("type", "user")
+        } else {
+            null
+        }
+    }
+
+    fun offlineLoginWithEmail(
+        email: String,
+        password: String,
+        onSuccess: () -> Unit,
+        onEmailError: () -> Unit,
+        onTermsError: () -> Unit,
+        onError: (String) -> Unit,
+        awaitingApproval: () -> Unit,
+        isAdmin: () -> Unit
+    ) {
+        val status = checkOfflineLogin(email, password)
+        when (status) {
+            "true" -> onSuccess()
+            "need_email" -> onEmailError()
+            "need_approval" -> awaitingApproval()
+            else -> onError("Invalid credentials or no offline data available")
+        }
+
+        val userType = checkUserType(email, password)
+        if (userType == "admin") isAdmin()
+    }
+
+    fun removeUser(email: String): Boolean {
+        val userData = readFromFile() ?: return false
+        val json = JSONObject(userData)
+        if (json.getString("username") == email) {
+            json.remove("username")
+            json.remove("password")
+            json.remove("status")
+            json.remove("type")
+            writeToFile(json.toString())
+            return true
+        }
+        return false
+    }
+
+    private fun writeToFile(data: String) {
+        userFile.writeText(data)
+    }
+
+    private fun readFromFile(): String? {
+        return if (userFile.exists()) userFile.readText() else null
+    }
 }

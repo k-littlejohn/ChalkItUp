@@ -1,24 +1,33 @@
 package com.example.chalkitup.ui.viewmodel
 
+import com.example.chalkitup.ui.viewmodel.NotificationViewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.chalkitup.ui.components.TutorSubject
+import com.example.chalkitup.ui.screens.NotificationScreen
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+import com.google.protobuf.Internal.ListAdapter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.util.Calendar
 import java.util.Locale
+import java.io.File
+import org.json.JSONArray
+import org.json.JSONObject
+
 
 class BookingViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
@@ -27,9 +36,6 @@ class BookingViewModel : ViewModel() {
 
     // Values are set in addSessionToFirestore() function
 
-    // may be better to put these in a data class or something
-    // feel free to make changes to this, variables, functions, whatever u like
-    // just made this quick -Jeremelle
     private val _userSubject = MutableStateFlow<TutorSubject?>(null)
     private val userSubject: StateFlow<TutorSubject?> get() = _userSubject
 
@@ -95,6 +101,8 @@ class BookingViewModel : ViewModel() {
         }
     }
 
+    // NOT FINISHED
+    // Need to grab emails for both the student and tutor
     private fun sendEmail(onSuccess: () -> Unit) {
 
         Log.d("MessagesScreen", "fName: ${fName.value}, email: ${userEmail.value}")
@@ -137,7 +145,6 @@ class BookingViewModel : ViewModel() {
     val availability: StateFlow<Map<LocalDate, List<LocalTime>>> get() = _availability
 
     private val _tutorAvailabilityMap = MutableStateFlow<Map<String, Map<LocalDate, List<LocalTime>>>>(emptyMap())
-    val tutorAvailabilityMap: StateFlow<Map<String, Map<LocalDate, List<LocalTime>>>> get() = _tutorAvailabilityMap
 
     // State for selected day and times
     private val _selectedDay = MutableStateFlow<LocalDate?>(null)
@@ -149,6 +156,9 @@ class BookingViewModel : ViewModel() {
     private val _selectedEndTime = MutableStateFlow<LocalTime?>(null)
     val selectedEndTime: StateFlow<LocalTime?> get() = _selectedEndTime
 
+    private val _isCurrentMonth = MutableStateFlow(true)
+    val isCurrentMonth: StateFlow<Boolean> get() = _isCurrentMonth
+
     // State for loading and errors
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> get() = _isLoading
@@ -156,8 +166,9 @@ class BookingViewModel : ViewModel() {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> get() = _error
 
-
-    // TODO: ALERT DIALOG FOR ERRORS -for after submit: "your session has been booked" or "your session could not be booked bc..."
+    fun toggleIsCurrentMonth() {
+        _isCurrentMonth.value = !_isCurrentMonth.value
+    }
 
     // Function to reset all state variables
     fun resetState() {
@@ -167,6 +178,7 @@ class BookingViewModel : ViewModel() {
         _availability.value = emptyMap()
         _isLoading.value = false
         _error.value = null
+        _isCurrentMonth.value = true
 
         // EMAIL VARIABLES RESET
         _userSubject.value = null
@@ -180,13 +192,21 @@ class BookingViewModel : ViewModel() {
 
     fun resetDay() {
         _selectedDay.value = null
+        _selectedStartTime.value = null
+        _selectedEndTime.value = null
+    }
+
+    fun resetMonth() {
+        _isCurrentMonth.value = true
     }
 
     fun getFirstDayOfMonth(currentDate: LocalDate): LocalDate {
+        println("Getting first day of month for: $currentDate")
         return currentDate.withDayOfMonth(1) // First day of the month
     }
 
     fun getLastDayOfMonth(currentDate: LocalDate): LocalDate {
+        println("Getting last day of month for: $currentDate")
         return currentDate.withDayOfMonth(currentDate.lengthOfMonth()) // Last day of the month
     }
 
@@ -195,7 +215,7 @@ class BookingViewModel : ViewModel() {
         fetchTutors(subject, priceRange,mode)
     }
 
-    // Function to fetch tutors who can teach the selected subject
+    // Function to fetch tutors who can teach the selected subject within the price range
     private fun fetchTutors(selectedSubject: TutorSubject, priceRange: ClosedFloatingPointRange<Float>,mode: String) {
         _isLoading.value = true
         viewModelScope.launch {
@@ -264,11 +284,23 @@ class BookingViewModel : ViewModel() {
     }
 
     // Fetch availability data for the selected tutors
-    private fun fetchAvailabilityForTutors(tutorIds: List<String>, mode: String) {
+    fun fetchAvailabilityForTutors(tutorIds: List<String>, mode: String) {
         _isLoading.value = true
         viewModelScope.launch {
             try {
-                val currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"))
+
+                //val currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"))
+                val monthYear: String
+                if (_isCurrentMonth.value) {
+                    monthYear = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(System.currentTimeMillis())
+                } else {
+                    val calendar = Calendar.getInstance()
+                    calendar.add(Calendar.MONTH, 1) // Move to the next month
+                    val nextMonth = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(calendar.time)
+                    monthYear = nextMonth
+                }
+
+
                 val availabilityMap = mutableMapOf<LocalDate, MutableList<LocalTime>>()
                 val tutorAvailabilityMap = mutableMapOf<String, MutableMap<LocalDate, MutableList<LocalTime>>>()
 
@@ -276,7 +308,7 @@ class BookingViewModel : ViewModel() {
                 val deferredList = tutorIds.map { tutorId ->
                     async {
                         db.collection("availability")
-                            .document(currentMonth)
+                            .document(monthYear)
                             .collection(tutorId)
                             .document("availabilityData")
                             .get()
@@ -525,7 +557,9 @@ class BookingViewModel : ViewModel() {
             )
 
             sendEmail(
-                onSuccess = { onSuccess() }
+                onSuccess = {
+                    onSuccess()
+                }
             )
         }
     }
@@ -683,6 +717,42 @@ class BookingViewModel : ViewModel() {
         db.collection("appointments")
             .add(sessionData)
             .await()
+
+        // To add the information for a notification
+        // One to show for the tutor and one for the student
+        addNotification(
+            notifUserID = studentId,
+            notifUserName = studentFullName,
+            notifTime = LocalTime.now().toString(),
+            notifDate = LocalDate.now().toString(),
+            comments = comments,
+            sessDate = day.toString(),
+            sessTime = formattedTimeRange,
+            otherID = tutorId,
+            otherName = tutorFullName,
+            subject = formattedSubject,
+            grade = subject.grade,
+            spec = subject.specialization,
+            mode = formattedSessionType,
+            price = subject.price
+        )
+
+        addNotification(
+            notifUserID = tutorId,
+            notifUserName = tutorFullName,
+            notifTime = LocalTime.now().toString(),
+            notifDate = LocalDate.now().toString(),
+            comments = comments,
+            sessDate = day.toString(),
+            sessTime = formattedTimeRange,
+            otherID = studentId,
+            otherName = studentFullName,
+            subject = formattedSubject,
+            grade = subject.grade,
+            spec = subject.specialization,
+            mode = formattedSessionType,
+            price = subject.price
+        )
     }
 
     private suspend fun fetchUserFullName(userId: String): String {
@@ -701,6 +771,52 @@ class BookingViewModel : ViewModel() {
         }
     }
 
+    // Firebase order: notifications/actual notification info
+    private fun addNotification(
+        notifUserID: String,
+        notifUserName: String, // Name of the person in the notification
+        notifTime: String,
+        notifDate: String,
+        comments: String,
+        sessDate: String,
+        sessTime: String,
+        otherID: String, // ID of the other person in the notification
+        otherName: String, // ID of the other person in the notification
+        subject: String,
+        grade: String,
+        spec: String,
+        mode: String,
+        price: String
+    ) {
+        viewModelScope.launch {
+            val db = FirebaseFirestore.getInstance()
+
+            val notifData = hashMapOf(
+                "notifID" to "",
+                "notifType" to "Session",
+                "notifUserID" to notifUserID,
+                "notifUserName" to notifUserName,
+                "notifTime" to notifTime,
+                "notifDate" to notifDate,
+                "comments" to comments,
+                "sessType" to "Booked",
+                "sessDate" to sessDate,
+                "sessTime" to sessTime,
+                "otherID" to otherID,
+                "otherName" to otherName,
+                "subject" to subject,
+                "grade" to grade,
+                "spec" to spec,
+                "mode" to mode,
+                "price" to price
+            )
+
+            db.collection("notifications")
+                .add(notifData)
+                .await()
+        }
+    }
+
 }
 
 // Email Class info
@@ -714,3 +830,141 @@ data class EmailMessage(
     var html: String = "",
     var body: String = "",
 )
+
+
+object BookingManager {
+    private lateinit var userFile: File
+
+    // Initialize function to set up the bookings file if it doesn't exist
+    fun init(fileDirectory: File) {
+        userFile = File(fileDirectory, "bookings.json")
+        if (!userFile.exists()) {
+            userFile.writeText(JSONArray().toString())  // Initialize with an empty array
+            println("Booking file initialized.")
+        }
+    }
+
+    // Function to add a new booking
+    fun addBooking(app: Appointment) {
+        val jsonArray = JSONArray(userFile.readText())
+
+        val jsonObject = JSONObject().apply {
+            put("appointmentID", app.appointmentID)
+            put("studentId", app.studentID)
+            put("tutorId", app.tutorID)
+            put("tutorName", app.tutorName)
+            put("studentName", app.studentName)
+            put("date", app.date)
+            put("time", app.time)
+            put("subject", app.subject)
+            put("mode", app.mode)
+            put("comments", app.comments)
+            put("subjectObject", app.subjectObject)  // subjectObject is still a Map
+        }
+
+        jsonArray.put(jsonObject)
+        userFile.writeText(jsonArray.toString(4)) // Pretty print with indentation
+    }
+
+    // Function to remove a booking
+    fun removeBooking(appointmentID: String) {
+        val jsonArray = JSONArray(userFile.readText())
+
+        val filteredArray = JSONArray()
+        for (i in 0 until jsonArray.length()) {
+            val obj = jsonArray.getJSONObject(i)
+            if (obj.getString("appointmentID") != appointmentID) {
+                filteredArray.put(obj)
+            }
+        }
+
+        userFile.writeText(filteredArray.toString(4))
+    }
+
+    // Function to read all bookings from the file
+    fun readBookings(): List<Appointment> {
+        val jsonArray = JSONArray(userFile.readText())
+        val bookings = mutableListOf<Appointment>()
+
+        for (i in 0 until jsonArray.length()) {
+            val obj = jsonArray.getJSONObject(i)
+
+            // Safely retrieve values with optString for missing or null keys
+            val appointmentID = obj.optString("appointmentID", "")
+            val studentID = obj.optString("studentID", "")
+            val tutorID = obj.optString("tutorID", "")
+            val tutorName = obj.optString("tutorName", "")
+            val studentName = obj.optString("studentName", "")
+            val date = obj.optString("date", "")
+            val time = obj.optString("time", "")
+            val subject = obj.optString("subject", "")
+            val mode = obj.optString("mode", "")
+            val comments = obj.optString("comments", "")
+
+            // Convert subjectObject to a Map<String, Any> using the safe optJSONObject and toMap()
+            val subjectObject = obj.optJSONObject("subjectObject")?.toMap() ?: emptyMap()
+
+            // Create the Appointment object
+            val booking = Appointment(
+                appointmentID = appointmentID,
+                studentID = studentID,
+                tutorID = tutorID,
+                tutorName = tutorName,
+                studentName = studentName,
+                date = date,
+                time = time,
+                subject = subject,
+                mode = mode,
+                comments = comments,
+                subjectObject = subjectObject
+            )
+
+            bookings.add(booking)
+        }
+
+        return bookings
+    }
+
+    // Function to clear all bookings (i.e., empty the file)
+    fun clearBookings() {
+        userFile.writeText(JSONArray().toString()) // Overwrite with an empty JSON array
+        println("All bookings cleared.")
+    }
+}
+
+// Extension function to convert a JSONObject to a Map<String, Any>
+fun JSONObject.toMap(): Map<String, Any> {
+    val map = mutableMapOf<String, Any>()
+    val keys = this.keys()
+    while (keys.hasNext()) {
+        val key = keys.next()
+        map[key] = this.get(key)  // Gets the value for the key (could be any type)
+    }
+    return map
+}
+
+fun JSONObject.toMapFromJSONObject(): Map<String, Any> {
+    val map = mutableMapOf<String, Any>()
+    val keys = this.keys()
+    while (keys.hasNext()) {
+        val key = keys.next()
+        map[key] = this.get(key)  // Gets the value for the key (could be any type)
+    }
+    return map
+}
+
+
+
+//BookingManager.addBooking(
+//appointmentID,
+//studentID,
+//matchedTutorId,
+//tutorName,
+//studentName,
+//date,
+//time,
+//subject,
+//mode,
+//comments,
+//subjectObject
+//)

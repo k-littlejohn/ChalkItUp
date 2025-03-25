@@ -1,5 +1,6 @@
 package com.example.chalkitup.ui.screens
 
+import android.util.Log
 import android.widget.Space
 import androidx.compose.ui.res.painterResource
 import com.example.chalkitup.R
@@ -45,8 +46,11 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.Brush
 import java.util.Locale
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.chalkitup.Connection
 import com.example.chalkitup.ui.viewmodel.Appointment
+import com.example.chalkitup.ui.viewmodel.BookingManager
 import com.example.chalkitup.ui.viewmodel.HomeViewModel
 import com.example.chalkitup.ui.viewmodel.WeatherViewModel
 
@@ -56,6 +60,10 @@ fun HomeScreen(
     homeViewModel: HomeViewModel = viewModel(),
     weatherViewModel: WeatherViewModel = viewModel()
 ) {
+    val userType by homeViewModel.userType.collectAsState()
+
+    var showTutorial by remember { mutableStateOf(false) }
+
     var selectedAppointment by remember { mutableStateOf<Appointment?>(null) }
     val userName by homeViewModel.userName.collectAsState()
 
@@ -74,6 +82,11 @@ fun HomeScreen(
         )
     )
 
+    // Show dialog when showDialog is true
+    if (showTutorial) {
+        userType?.let { TutorialDialog(onDismiss = { showTutorial = false }, userType = it) }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -86,6 +99,24 @@ fun HomeScreen(
                 .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
+
+            // Information Icon Button
+            IconButton(
+                onClick = { showTutorial = true },
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = "Tutorial",
+                    tint = Color.White
+                )
+            }
+
+            // Show dialog when showDialog is true
+//            if (showTutorial) {
+//                userType?.let { TutorialDialog(onDismiss = { showTutorial = false }, userType = it) }
+//            }
+
+
 
             Row(
                 modifier = Modifier
@@ -321,7 +352,7 @@ fun UpcomingAppointments(
     homeViewModel: HomeViewModel = viewModel(),
     onAppointmentClick: (Appointment) -> Unit
 ) {
-    val appointments by homeViewModel.appointments.collectAsState()
+
 
     //Start of UI for Upcoming Appointments
     Column(modifier = Modifier.padding(16.dp)) {
@@ -331,25 +362,67 @@ fun UpcomingAppointments(
             color = Color.Black
         )
 
-        appointments.forEach { appointment ->
-            // Format the date properly using "MMM d"
-            val formattedDate = try {
-                val date = LocalDate.parse(appointment.date, DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US))
-                date.format(DateTimeFormatter.ofPattern("MMM d", Locale.US)) // Outputs "Mar 6"
-            } catch (e: Exception) {
-                "Invalid Date"
-            }
+        val context = LocalContext.current
+        val connection = Connection.getInstance(context)
+        val isConnected by connection.connectionStatus.collectAsState(initial = false)
+        if(isConnected) {
+            val appointments by homeViewModel.appointments.collectAsState()
+            BookingManager.clearBookings()
+            appointments.forEach { appointment ->
+                // Format the date properly using "MMM d"
+                val formattedDate = try {
+                    val date = LocalDate.parse(
+                        appointment.date,
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US)
+                    )
+                    date.format(DateTimeFormatter.ofPattern("MMM d", Locale.US)) // Outputs "Mar 6"
+                } catch (e: Exception) {
+                    "Invalid Date"
+                }
 
-            UpcomingAppointmentItem(
-                title = appointment.subject,
-                date = formattedDate,
-                tutor = appointment.tutorName,
-                student = appointment.studentName,
-                mode = appointment.mode,
-                time = appointment.time,
-                backgroundColor = Color.White,
-                onClick = { onAppointmentClick(appointment) }
-            )
+                UpcomingAppointmentItem(
+                    title = appointment.subject,
+                    date = formattedDate,
+                    tutor = appointment.tutorName,
+                    student = appointment.studentName,
+                    mode = appointment.mode,
+                    time = appointment.time,
+                    backgroundColor = Color.White,
+                    onClick = { onAppointmentClick(appointment) }
+                )
+                BookingManager.addBooking(appointment)
+                Log.d("offlineApp", "App logged: $appointment.appointmentID")
+            }
+        }
+        else{
+            val appointments=BookingManager.readBookings()
+            appointments.forEach { appointment ->
+                    // Format the date properly using "MMM d"
+                val formattedDate = try {
+                    val date = LocalDate.parse(
+                        appointment.date,
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US)
+                    )
+                    date.format(DateTimeFormatter.ofPattern("MMM d", Locale.US)) // Outputs "Mar 6"
+                } catch (e: Exception) {
+                    "Invalid Date"
+                }
+
+                UpcomingAppointmentItem(
+                    title = appointment.subject,
+                    date = formattedDate,
+                    tutor = appointment.tutorName,
+                    student = appointment.studentName,
+                    mode = appointment.mode,
+                    time = appointment.time,
+                    backgroundColor = Color.White,
+                    onClick = { onAppointmentClick(appointment) }
+                )
+
+                Log.d("offlineApp", "OfflineApp logged: $appointment.appointmentID")
+
+
+            }
         }
     }
 }
@@ -480,10 +553,16 @@ fun UpcomingAppointmentItem(
 fun AppointmentPopup(
     navController: NavController,
     homeViewModel: HomeViewModel = viewModel(),
-    appointment: Appointment, onDismiss: () -> Unit
+    appointment: Appointment,
+    onDismiss: () -> Unit
 ) {
     val userType by homeViewModel.userType.collectAsState()
 
+    val context = LocalContext.current
+    val connection = Connection.getInstance(context)
+    val isConnected by connection.connectionStatus.collectAsState(initial = false)
+    // Track error message for network issues
+    var errorMessage by remember { mutableStateOf<String?>(null) }
     //var rebooking by remember { mutableStateOf(false) }
 //    var selectedDate by remember { mutableStateOf(appointment.date) }
     //var availableDates by remember { mutableStateOf(false) }
@@ -491,6 +570,8 @@ fun AppointmentPopup(
     AlertDialog(
         onDismissRequest = {
             //rebooking = false // Reset
+            errorMessage = null
+
             onDismiss()
         },
         title = { Text(text = "Appointment Details") },
@@ -506,12 +587,19 @@ fun AppointmentPopup(
                 Text(text = "Subject: ${appointment.subject}")
                 Text(text = "Location: ${appointment.mode}")
                 Text(text = "Comments: ${appointment.comments}")
+
+                errorMessage?.let {
+                    Text(
+                        text = it,
+                        color = Color.Red,
+                        //style = MaterialTheme.typography.body2
+                    )
+                }
             }
         },
         confirmButton = {
             Button(
                 onClick = {
-                    //rebooking = false // Reset
                     onDismiss()
                 }
             ) { Text("Close") }
@@ -520,146 +608,374 @@ fun AppointmentPopup(
             Column {
                 Button(
                     onClick = {
-                        homeViewModel.cancelAppointment(appointment) {
-                            //rebooking = false // Reset After Cancelling
-                            onDismiss()
-                            homeViewModel.fetchAppointments()
+                        if (isConnected){
+                            homeViewModel.cancelAppointment(appointment) {
+                                //rebooking = false // Reset After Cancelling
+                                onDismiss()
+                                homeViewModel.fetchAppointments()
+                            }
                         }
+                        else {
+                            errorMessage="Error: Try canceling when you are back online!"
+                        }
+
                     },
-                    //enabled = !rebooking
                 ) {
                     Text("Cancel Appointment")
                 }
                 if (userType == "Student") {
                     Button(
                         onClick = {
+
 //                            bookingViewModel.rebookAppointment(appointment)
-                            homeViewModel.cancelAppointment(appointment) {
-                                //rebooking = false // Reset After Cancelling
-                                onDismiss()
-                                navController.navigate("booking")
+                            if(isConnected) {
+                                homeViewModel.cancelAppointment(appointment) {
+                                    //rebooking = false // Reset After Cancelling
+                                    onDismiss()
+                                    navController.navigate("booking")
+                                }
                             }
-                            //rebooking = true
-                            //availableDates = true
+                            else{
+                                errorMessage="Error: Try rebooking when you are back online!"
+
+                            }
                         },
-                        //enabled = !rebooking
                     ) {
                         Text("Rebook Appointment")
                     }
                 }
+
             }
         }
     )
-
-//    if (availableDates) {
-//        SelectDates(
-//            currentAppointmentDate = selectedDate,
-//            onDateUpdated = { newDate ->
-//                selectedDate = newDate
-//                rebookAppointment(appointment, newDate) {
-//                    rebooking = false
-//                    availableDates = false
-//                    onDismiss()
-//                }
-//            },
-//            onDismiss = {
-//                rebooking = false
-//                availableDates = false
-//            }
-//        )
-//    }
 }
 
-// This Is A Placeholder, I Am Waiting For Booking to Be Fully Functional
-// Once Booking is Functional With Tutors Availability This Will Need To Be Changed
-//@Composable
-//fun SelectDates(
-//    currentAppointmentDate: String,
-//    onDateUpdated: (String) -> Unit,
-//    onDismiss: () -> Unit
-//) {
-//    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-//    val today = remember { LocalDate.now() }
-//    val selectedDate = remember { mutableStateOf(LocalDate.parse(currentAppointmentDate)) }
-//
-//    val availableDates = List(5) { today.plusDays(it.toLong()) }
-//
-//    AlertDialog(
-//        onDismissRequest = onDismiss,
-//        title = { Text("Select a New Date") },
-//        text = {
-//            Column {
-//                Text("Selected Date: ${selectedDate.value.format(dateFormatter)}")
-//                Spacer(modifier = Modifier.height(8.dp))
-//                LazyColumn {
-//                    items(availableDates) { date ->
-//                        Button(
-//                            onClick = { selectedDate.value = date },
-//                            modifier = Modifier.fillMaxWidth()
-//                        ) {
-//                            Text(text = date.format(dateFormatter))
-//                        }
-//                    }
-//                }
-//            }
-//        },
-//        confirmButton = {
-//            Button(onClick = {
-//                onDateUpdated(selectedDate.value.format(dateFormatter))
-//                onDismiss()
-//            }) {
-//                Text("Confirm")
-//            }
-//        },
-//        dismissButton = {
-//            Button(onClick = onDismiss) {
-//                Text("Cancel")
-//            }
-//        }
-//    )
-//}
 
-// When Cancelling and Rebooking The Tutors Availability Will Need To Be Returned Back To Selection
-// The Following cancelAppointment and rebookAppointment Is Also A Placeholder For Now.
-// They Work Just Not In The Context We Need
-//fun cancelAppointment(appointment: Appointment, onComplete: () -> Unit) {
-//    val db = FirebaseFirestore.getInstance()
-//    val appointmentRef = db.collection("appointments").document(appointment.appointmentID)
-//
-//    appointmentRef.delete().addOnSuccessListener {
-//        println("Appointment canceled successfully!")
-//        onComplete()
-//    }.addOnFailureListener { e ->
-//        println("Error canceling appointment: ${e.message}")
-//        onComplete()
-//    }
-//}
+@Composable
+fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
+    val otherUserType = if (userType == "Tutor") "Student" else "Tutor"
 
-//fun rebookAppointment(
-//    appointment: Appointment,
-//    newDate: String,
-//    onComplete: () -> Unit
-//) {
-//    val db = FirebaseFirestore.getInstance()
-//    val appointmentRef = db.collection("appointments").document(appointment.appointmentID)
-//
-//    appointmentRef.delete().addOnCompleteListener {
-//        if (it.isSuccessful) {
-//            println("Appointment deleted successfully, proceeding with rebook.")
-//
-//            val newAppointment = appointment.copy(date = newDate, appointmentID = "")
-//            db.collection("appointments").add(newAppointment)
-//                .addOnSuccessListener {
-//                    println("Appointment rebooked successfully!")
-//                    onComplete()
-//                }
-//                .addOnFailureListener { e ->
-//                    println("Error rebooking appointment: ${e.message}")
-//                    onComplete()
-//                }
-//        } else {
-//            println("Error deleting appointment: ${it.exception?.message}")
-//            onComplete()
-//        }
-//    }
-//}
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = Color.White,
+            modifier = Modifier
+                .requiredWidth(380.dp)
+                .padding(16.dp)
+        ) {
+            Column (
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                // Scrollable content
+                Box(
+                    modifier = Modifier
+                        .weight(1f) // Allows the content to take up available space
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp)
+                ) {
+                    Column (
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+
+                        Text(
+                            text = "Tutorial",
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+
+                        Text(
+                            text = "Welcome to ChalkItUp!",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text("How to navigate and use ChalkItUp")
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row (
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            //Photo
+
+                            Column (
+                                horizontalAlignment = Alignment.Start,
+                                verticalArrangement = Arrangement.Center,
+                            ) {
+                                Text(
+                                    "Click on this icon in the home screen any time to view this tutorial again",
+                                    fontSize = 15.sp,
+                                    color = Color.DarkGray,
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row (
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            //Photo
+
+                            Column (
+                                horizontalAlignment = Alignment.Start,
+                                verticalArrangement = Arrangement.Center,
+                            ) {
+                                Text("This is your Home Page",
+                                    fontSize = 15.sp,
+                                    color = Color.DarkGray,)
+                                Text("Find your upcoming appointment dates, times, and details",
+                                    fontSize = 15.sp,
+                                    color = Color.DarkGray,)
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row (
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            //Photo
+                            //IFELSE
+
+                            Column (
+                                horizontalAlignment = Alignment.Start,
+                                verticalArrangement = Arrangement.Center,
+                            ) {
+                                Text("Tap on an upcoming appointment to find more details and view your $otherUserType's profile",
+                                    fontSize = 15.sp,
+                                    color = Color.DarkGray,)
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Column(
+                            horizontalAlignment = Alignment.Start,
+                            verticalArrangement = Arrangement.Center,
+                        ) {
+                            val secondIcon: String = if (userType == "Tutor") {
+                                "Availability"
+                            } else {
+                                "Booking"
+                            }
+                            Text("Use the icons on the bottom of the screen to navigate between your Home Page, $secondIcon, Messages, and your Profile",
+                                fontSize = 15.sp,
+                                color = Color.DarkGray,)
+
+                            // Photo
+                            //IFELSE
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        if (userType == "Tutor") {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center,
+                            ) {
+                                //Photo
+
+                                Column(
+                                    horizontalAlignment = Alignment.Start,
+                                    verticalArrangement = Arrangement.Center,
+                                ) {
+                                    Text("This is your availability page",
+                                        fontSize = 15.sp,
+                                        color = Color.DarkGray,)
+                                    Text("You can enter your availability for the current month and the next month and edit it whenever you please",
+                                        fontSize = 15.sp,
+                                        color = Color.DarkGray,)
+                                    Text("You'll be notified in the last week of the current month to remember to enter availability for the upcoming month",
+                                        fontSize = 15.sp,
+                                        color = Color.DarkGray,)
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center,
+                            ) {
+                                //Photo
+
+                                Column(
+                                    horizontalAlignment = Alignment.Start,
+                                    verticalArrangement = Arrangement.Center,
+                                ) {
+                                    Text("Enter any availability you have for online appointments, in person appointments, or both!",
+                                        fontSize = 15.sp,
+                                        color = Color.DarkGray,)
+                                }
+                            }
+                        } else {
+                            Row (
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center,
+                            ) {
+                                //Photo
+
+                                Column (
+                                    horizontalAlignment = Alignment.Start,
+                                    verticalArrangement = Arrangement.Center,
+                                ) {
+                                    Text("This is your Booking page",
+                                        fontSize = 15.sp,
+                                        color = Color.DarkGray,)
+                                    Text("Book a new appointment with a tutor here!",
+                                        fontSize = 15.sp,
+                                        color = Color.DarkGray,)
+                                    Text("Pick a subject, price range, date, and time, and be automatically matched with a qualified tutor!",
+                                        fontSize = 15.sp,
+                                        color = Color.DarkGray,)
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row (
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            //Photo
+
+                            Column (
+                                horizontalAlignment = Alignment.Start,
+                                verticalArrangement = Arrangement.Center,
+                            ) {
+                                Text("This is your Messages page",
+                                    fontSize = 15.sp,
+                                    color = Color.DarkGray,)
+                                Text("Find all your new and old messages here!",
+                                    fontSize = 15.sp,
+                                    color = Color.DarkGray,)
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row (
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            //Photo
+                            //IFELSE
+
+                            Column (
+                                horizontalAlignment = Alignment.Start,
+                                verticalArrangement = Arrangement.Center,
+                            ) {
+                                Text("Search for a $otherUserType to start a new chat with them!",
+                                    fontSize = 15.sp,
+                                    color = Color.DarkGray,)
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row (
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            //Photo
+                            //IFELSE
+
+                            Column (
+                                horizontalAlignment = Alignment.Start,
+                                verticalArrangement = Arrangement.Center,
+                            ) {
+                                Text("This is your Profile Page. This is how you'll appear to other users",
+                                    fontSize = 15.sp,
+                                    color = Color.DarkGray,)
+                                Text("Edit your profile here!",
+                                    fontSize = 15.sp,
+                                    color = Color.DarkGray,)
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row (
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            //Photo
+                            //IFELSE
+
+                            Column (
+                                horizontalAlignment = Alignment.Start,
+                                verticalArrangement = Arrangement.Center,
+                            ) {
+                                Text("Edit your interests, subjects, bio, and more!",
+                                    fontSize = 15.sp,
+                                    color = Color.DarkGray,)
+                                Text("Customize it to your liking!",
+                                    fontSize = 15.sp,
+                                    color = Color.DarkGray,)
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row (
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            //Photo
+
+                            Column (
+                                horizontalAlignment = Alignment.Start,
+                                verticalArrangement = Arrangement.Center,
+                            ) {
+                                Text("Enter your settings from the home page here",
+                                    fontSize = 15.sp,
+                                    color = Color.DarkGray,)
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row (
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            //Photo
+
+                            Column (
+                                horizontalAlignment = Alignment.Start,
+                                verticalArrangement = Arrangement.Center,
+                            ) {
+                                Text("Logout or delete your account here ... tbd are we adding more here??",
+                                    fontSize = 15.sp,
+                                    color = Color.DarkGray,)
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                    }
+                }
+
+                // Fixed Close Button at the bottom
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .width(160.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor =  Color(0xFF06C59C)
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                ) {
+                    Text("Close")
+                }
+            }
+        }
+    }
+}

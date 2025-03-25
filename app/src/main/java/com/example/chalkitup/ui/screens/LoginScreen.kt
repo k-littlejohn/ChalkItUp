@@ -1,5 +1,6 @@
 package com.example.chalkitup.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,9 +21,14 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import com.example.chalkitup.R
-import com.example.chalkitup.ui.screens.GoogleSignInScreen
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.ui.platform.LocalContext
+import com.example.chalkitup.Connection
+import com.example.chalkitup.ui.viewmodel.OfflineDataManager
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.core.Context
+
+//import kotlinx.coroutines.flow.internal.NoOpContinuation.context
+//import kotlin.coroutines.jvm.internal.CompletedContinuation.context
 
 val AtkinsonFont = FontFamily(
     Font(R.font.atkinson_regular, FontWeight.Normal),
@@ -34,12 +40,15 @@ val AtkinsonFont = FontFamily(
 @Composable
 fun LoginScreen(
     viewModel: AuthViewModel,
+    offlineViewModel: OfflineDataManager,
     navController: NavController
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
 
+
+    // Get network status from the Connection singleton
 // Gradient Background
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
@@ -133,21 +142,96 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Login Button
+                val context = LocalContext.current
+                val connection = Connection.getInstance(context)
+                val isConnected by connection.connectionStatus.collectAsState(initial = false)
                 Button(
                     onClick = {
-                        errorMessage = ""
-                        if (email.isEmpty() || password.isEmpty()) {
-                            errorMessage = "Email and password cannot be empty"
-                        } else {
-                            viewModel.loginWithEmail(
-                                email, password,
-                                onSuccess = { navController.navigate("home") },
-                                onEmailError = { navController.navigate("checkEmail/verify") },
-                                onTermsError = { navController.navigate("termsAndCond") },
-                                onError = { errorMessage = it },
-                                awaitingApproval = { navController.navigate("awaitingApproval") },
-                                isAdmin = { navController.navigate("adminHome") }
-                            )
+                        if (isConnected) {
+                            Log.d("Login", "Online selected")
+                            errorMessage = ""
+                            if (email.isEmpty() || password.isEmpty()) {
+                                errorMessage = "Email and password cannot be empty"
+                            } else {
+                                viewModel.loginWithEmail(
+                                    context, email, password,
+                                    onSuccess = {
+                                        offlineViewModel.removeUser(
+                                            email
+                                        )
+                                        offlineViewModel.logUser(
+                                            email,
+                                            password,
+                                            "true",
+                                            "user" // Assuming "user" type, adjust accordingly
+                                        )
+                                        navController.navigate("home") },
+                                    onEmailError = {
+                                        offlineViewModel.removeUser(
+                                            email
+                                        )
+                                        offlineViewModel.logUser(
+                                        email,
+                                        password,
+                                        "need_email",
+                                        "user" // Assuming "user" type, adjust accordingly
+                                    )
+                                        navController.navigate("checkEmail/verify") },
+                                    onTermsError = {
+                                        offlineViewModel.removeUser(
+                                            email
+                                        )
+                                        offlineViewModel.logUser(
+                                            email,
+                                            password,
+                                            "need_term",
+                                            "user" // Assuming "user" type, adjust accordingly
+                                        )
+                                        navController.navigate("termsAndCond") },
+                                    onError = { errorMessage = it },
+                                    awaitingApproval = {
+                                        offlineViewModel.removeUser(
+                                            email
+                                        )
+                                        offlineViewModel.logUser(
+                                            email,
+                                            password,
+                                            "need_approval",
+                                            "user" // Assuming "user" type, adjust accordingly
+                                        )
+                                        navController.navigate("awaitingApproval") },
+                                    isAdmin = {
+                                        offlineViewModel.removeUser(
+                                            email
+                                        )
+                                        offlineViewModel.logUser(
+                                            email,
+                                            password,
+                                            "true",
+                                            "admin" // Assuming "user" type, adjust accordingly
+                                        )
+                                        navController.navigate("adminHome") }
+                                )
+                            }
+                        }
+                        else {
+                            Log.d("Login", "Offline selected")
+                            //go to user auth databse manager and check previous authentication
+                            errorMessage = ""
+                            if (email.isEmpty() || password.isEmpty()) {
+                                errorMessage = "Email and password cannot be empty"
+                            } else {
+                                offlineViewModel.offlineLoginWithEmail(
+                                    email,
+                                    password,
+                                    onSuccess = { navController.navigate("home") },
+                                    onEmailError = { navController.navigate("checkEmail/verify") },
+                                    onTermsError = { navController.navigate("termsAndCond") },
+                                    onError = { errorMessage = it },
+                                    awaitingApproval = { navController.navigate("awaitingApproval") },
+                                    isAdmin = { navController.navigate("adminHome") },
+                                )
+                            }
                         }
                     },
                     shape = RoundedCornerShape(8.dp),
@@ -182,6 +266,7 @@ fun LoginScreen(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 // Google Sign-In Button
+
                 GoogleSignInScreen()
                 //Spacer(modifier = Modifier.height(16.dp)) // Keep if we are placing other logins
 
@@ -189,3 +274,5 @@ fun LoginScreen(
         }
     }
 }
+
+

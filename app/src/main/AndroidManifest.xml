@@ -16,7 +16,7 @@
     </queries>
 
     <application
-        android:name=".OfflineFirebase"
+        android:name=".ui.offline.OfflineFirebase"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -29,8 +29,8 @@
 
 
         <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCp6eJq4S6fiAbSb-yOaiGfmZc1imPAxAM" />
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
 
         <meta-data
             android:name="com.google.android.gms.auth.api.signin"

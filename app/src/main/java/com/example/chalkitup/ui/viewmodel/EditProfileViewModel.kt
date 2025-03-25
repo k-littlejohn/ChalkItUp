@@ -62,6 +62,8 @@ class EditProfileViewModel : ViewModel() {
         lastName: String,
         subjects: List<TutorSubject>,
         bio: String,
+        startingPrice: String,
+        experience: String,
         progress: List<ProgressItem>,
         interests: List<Interest>
     ) {
@@ -77,13 +79,18 @@ class EditProfileViewModel : ViewModel() {
             "lastName" to lastName,
             "bio" to bio,
             "interests" to interests,
-            "progress" to progress
+            "progress" to progress,
+            "startingPrice" to startingPrice,
+            "experience" to experience
         )
+
 
         // Only update tutor-specific fields if the user is a tutor
         userProfile.value?.let {
             if (it.userType == "Tutor") {
                 updateData["subjects"] = subjects
+                updateData["startingPrice"] = startingPrice
+                updateData["experience"] = experience
             }
         }
 

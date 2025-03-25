@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.TabRowDefaults.Divider
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -38,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -58,10 +60,10 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.example.chalkitup.R
 import com.example.chalkitup.ui.components.validateTutorSubjects
-import com.example.chalkitup.ui.components.SessionClassInfo
 import com.example.chalkitup.ui.components.SubjectGradeItemNoPrice
 import com.example.chalkitup.ui.components.TutorSubject
 import com.example.chalkitup.ui.components.TutorSubjectError
+import com.example.chalkitup.ui.viewmodel.BookingManager
 import com.example.chalkitup.ui.viewmodel.BookingViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -96,28 +98,53 @@ fun BookingScreen(
 
     // State to track errors in tutor subject selections.
     var userSubjectErrors by remember { mutableStateOf<List<TutorSubjectError>>(emptyList()) }
-    var userType by remember { mutableStateOf<String?>(null) }
-
-    var sessionClassInfo by remember { mutableStateOf<List<SessionClassInfo>>(emptyList()) }
 
     var priceRange by remember { mutableStateOf(20f..60f) } // Default price range
 
+
     // State for week navigation and day selection
-    val currentMonth = LocalDate.now().monthValue
+    val isCurrentMonth by viewModel.isCurrentMonth.collectAsState()
+
+    var currentMonth by remember { mutableIntStateOf(LocalDate.now().monthValue) }
     var selectedWeekStart by remember { mutableStateOf(LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))) }
-    val daysInWeek = (0..6).map { selectedWeekStart.plusDays(it.toLong()) }
 
     // Calculate the first and last day of the current month
-    val firstDayOfMonth = viewModel.getFirstDayOfMonth(LocalDate.now())
-    val lastDayOfMonth = viewModel.getLastDayOfMonth(LocalDate.now())
+    var firstDayOfMonth by remember { mutableStateOf(viewModel.getFirstDayOfMonth(LocalDate.now())) }
+    var lastDayOfMonth by remember { mutableStateOf(viewModel.getLastDayOfMonth(LocalDate.now()))}
+
+    LaunchedEffect(isCurrentMonth) {
+        if (isCurrentMonth) {
+            currentMonth = LocalDate.now().monthValue
+            selectedWeekStart = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+            viewModel.resetDay()
+
+            firstDayOfMonth = viewModel.getFirstDayOfMonth(LocalDate.now())
+            lastDayOfMonth = viewModel.getLastDayOfMonth(LocalDate.now())
+        } else {
+            currentMonth = LocalDate.now().plusMonths(1).monthValue
+            selectedWeekStart = LocalDate.now().plusMonths(1).with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+            viewModel.resetDay()
+
+            firstDayOfMonth = viewModel.getFirstDayOfMonth(LocalDate.now().plusMonths(1))
+            lastDayOfMonth = viewModel.getLastDayOfMonth(LocalDate.now().plusMonths(1))
+        }
+        println("Current Month: $currentMonth")
+        println("selectedWeekStart: $selectedWeekStart")
+        println("firstDayOfMonth: $firstDayOfMonth")
+        println("lastDayOfMonth: $lastDayOfMonth")
+    }
+
+    val daysInWeek = (0..6).map { selectedWeekStart.plusDays(it.toLong()) }
+
+    val tutors by viewModel.tutors.collectAsState()
 
     // ViewModel States
     val selectedDay by viewModel.selectedDay.collectAsState()
     val selectedStartTime by viewModel.selectedStartTime.collectAsState()
     val selectedEndTime by viewModel.selectedEndTime.collectAsState()
     val availability by viewModel.availability.collectAsState()
-    //val tutorAvailabilityMap by viewModel.tutorAvailabilityMap.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+
 //    val error by viewModel.error.collectAsState()
 
     var comments by remember { mutableStateOf("") }
@@ -427,20 +454,64 @@ fun BookingScreen(
 
             if (!continueSuccess) {
                 viewModel.resetDay()
+                viewModel.resetMonth()
             }
 
             if (continueSuccess) {
 
-                if (selectedDay == null) {
-                    viewModel.selectDay(LocalDate.now())
-                }
+                //if (selectedDay == null) {
+                    //viewModel.selectDay(LocalDate.now())
+                //}
 
                 val dayText = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
 
                 Column(
-                    horizontalAlignment = Alignment.Start,
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
+
+                    Row (
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Button (
+                            onClick = {
+                                if (!isCurrentMonth) {
+                                    viewModel.toggleIsCurrentMonth() // Set to current month if not already
+                                    viewModel.resetDay()
+
+                                    viewModel.fetchAvailabilityForTutors(tutors, sessionType)
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isCurrentMonth) Color(0xFF06C59C)
+                                else Color(0xFFd2e5fa)
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.width(160.dp)
+                        ) { Text("${LocalDate.now().month}", color = Color.White) }
+
+                        //Spacer(modifier = Modifier.width(10.dp))
+
+                        Button (
+                            onClick = {
+                                if (isCurrentMonth) {
+                                    viewModel.toggleIsCurrentMonth() // Set to next month if not already
+                                    viewModel.resetDay()
+
+                                    viewModel.fetchAvailabilityForTutors(tutors, sessionType)
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (!isCurrentMonth) Color(0xFF06C59C)
+                                else Color(0xFFd2e5fa)
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.width(160.dp)
+                        ) { Text("${LocalDate.now().plusMonths(1).month}", color = Color.White) }
+
+                    }
+
                     Text(
                         "What day works best for you?",
                         modifier = Modifier.padding(16.dp),
@@ -465,6 +536,11 @@ fun BookingScreen(
                                 previousWeekStart.monthValue == currentMonth ||
                                 previousWeekEnd == firstDayOfMonth
                             ) {
+                                println("previousWeekStart: $previousWeekStart")
+                                println("previousWeekEnd: $previousWeekEnd")
+                                println("firstDayOfMonth: $firstDayOfMonth")
+                                println("lastDayOfMonth: $lastDayOfMonth")
+                                println("currentMonth: $currentMonth")
                                 selectedWeekStart = previousWeekStart
                             }
                         },
@@ -490,7 +566,6 @@ fun BookingScreen(
                                 elevation = 3.dp, // Add elevation to the outer Box
                                 shape = RoundedCornerShape(16.dp)
                             )
-                        //.padding(8.dp) // Add padding inside the Box
                     ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally
@@ -562,7 +637,7 @@ fun BookingScreen(
                                             .width(48.dp)
                                             .height(65.dp)
                                             .clickable {
-                                                if (day >= LocalDate.now()) {
+                                                if (day >= LocalDate.now() && day.monthValue == currentMonth) {
                                                     viewModel.selectDay(day)
                                                 }
                                             },
@@ -656,6 +731,14 @@ fun BookingScreen(
                             modifier = Modifier.padding(16.dp)
                         )
                     }
+                }
+
+                if (selectedDay == null) {
+                    Text(
+                        text = "Select a day",
+                        color = Color.Gray,
+                        modifier = Modifier.padding(16.dp)
+                    )
                 }
 
                 // Display Available End Times
@@ -800,7 +883,9 @@ fun SuccessAlertDialog(
             }
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth().padding(16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
             ) {
                 Spacer(modifier = Modifier.height(32.dp))
                 Row (
