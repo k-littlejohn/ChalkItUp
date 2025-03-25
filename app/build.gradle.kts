@@ -110,4 +110,8 @@ dependencies {
     // Google Sign-in
     implementation(libs.play.services.auth)
     implementation(libs.protobuf.javalite)
+
+    // Gif display
+    implementation(libs.glide)
+    implementation(libs.glide.compose)
 }
