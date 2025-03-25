@@ -76,8 +76,11 @@ fun SubjectGradeItem(
     subjectError: Boolean,
     gradeError: Boolean,
     specError: Boolean,
-    priceError: Boolean
+    priceError: Boolean,
+    duplicateError: Boolean
 ) {
+    println("Subject: $tutorSubject Duplicate: $duplicateError")
+
     // State variables to control the visibility of dropdown menus for subject, grade, and specialization
     var expandedSubject by remember { mutableStateOf(false) }
     var expandedGrade by remember { mutableStateOf(false) }
@@ -113,8 +116,8 @@ fun SubjectGradeItem(
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = when {
+                        subjectError || duplicateError -> errorButtonColor
                         tutorSubject.subject.isNotEmpty() -> selectedButtonColor
-                        subjectError -> errorButtonColor
                         else -> defaultButtonColor
                     }
                 ),
@@ -139,7 +142,7 @@ fun SubjectGradeItem(
                                 6.dp,
                                 shape = RoundedCornerShape(8.dp),
                                 clip = true
-                            ) // Apply shadow properly
+                            )
                             .background(Color.White, shape = RoundedCornerShape(8.dp))
                     ) {
                         DropdownMenuItem(
@@ -189,8 +192,8 @@ fun SubjectGradeItem(
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = when {
+                        gradeError || duplicateError -> errorButtonColor
                         tutorSubject.grade.isNotEmpty() -> selectedButtonColor
-                        gradeError -> errorButtonColor
                         else -> defaultButtonColor
                     }
                 ),
@@ -250,8 +253,8 @@ fun SubjectGradeItem(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = when {
+                            specError || duplicateError -> errorButtonColor
                             tutorSubject.specialization.isNotEmpty() -> selectedButtonColor
-                            specError -> errorButtonColor
                             else -> defaultButtonColor
                         }
                     ),
@@ -320,8 +323,8 @@ fun SubjectGradeItem(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = when {
+                            priceError || duplicateError -> errorButtonColor
                             tutorSubject.price.isNotEmpty() -> selectedButtonColor
-                            priceError -> errorButtonColor
                             else -> defaultButtonColor
                         }
                     ),
@@ -408,7 +411,8 @@ data class TutorSubjectError(
     val subjectError: Boolean,
     val gradeError: Boolean,
     val specError: Boolean,
-    val priceError: Boolean
+    val priceError: Boolean,
+    val duplicateError: Boolean
 )
 
 /**
@@ -420,19 +424,38 @@ data class TutorSubjectError(
  * @param tutorSubjects The list of tutor subjects to validate.
  * @return A list of TutorSubjectError objects representing validation errors for each subject.
  */
+//fun validateTutorSubjects(tutorSubjects: List<TutorSubject>): List<TutorSubjectError> {
+//    return tutorSubjects.map { subject ->
+//        TutorSubjectError(
+//            subjectError = subject.subject.isEmpty(),
+//            gradeError = subject.grade.isEmpty(),
+//            priceError = subject.price.isEmpty(),
+//            specError = (subject.grade in listOf(
+//                "10",
+//                "11",
+//                "12"
+//            ) && subject.specialization.isEmpty())
+//        )
+//    }
+//}
 fun validateTutorSubjects(tutorSubjects: List<TutorSubject>): List<TutorSubjectError> {
-    return tutorSubjects.map { subject ->
-        TutorSubjectError(
+    val seenSubjects = mutableSetOf<Triple<String, String, String>>()
+    return tutorSubjects.mapIndexed { index, subject ->
+        val subjectKey = Triple(subject.subject, subject.grade, subject.specialization)
+        val isDuplicate = !seenSubjects.add(subjectKey) // False if already in the set
+
+        val error = TutorSubjectError(
             subjectError = subject.subject.isEmpty(),
             gradeError = subject.grade.isEmpty(),
             priceError = subject.price.isEmpty(),
-            specError = (subject.grade in listOf(
-                "10",
-                "11",
-                "12"
-            ) && subject.specialization.isEmpty())
-
+            specError = (subject.grade in listOf("10", "11", "12") && subject.specialization.isEmpty()),
+            duplicateError = isDuplicate
         )
+
+        // Debugging: Log errors
+        println("Subject #$index: ${subject.subject}, Grade: ${subject.grade}, Spec: ${subject.specialization}, Duplicate: ${error.duplicateError}")
+
+        error
     }
 }
 
