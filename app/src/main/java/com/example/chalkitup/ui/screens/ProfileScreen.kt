@@ -561,7 +561,7 @@ fun CertificationItem(
                 verticalArrangement = Arrangement.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.Done, // change this to better icon -Jeremelle
+                    painter = painterResource(id = R.drawable.baseline_insert_drive_file_24),
                     contentDescription = "File Icon",
                     modifier = Modifier.size(40.dp)
                 )
