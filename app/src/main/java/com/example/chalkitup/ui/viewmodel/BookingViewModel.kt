@@ -16,9 +16,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.util.Calendar
 import java.util.Locale
 import java.io.File
 import org.json.JSONArray
@@ -32,9 +34,6 @@ class BookingViewModel : ViewModel() {
 
     // Values are set in addSessionToFirestore() function
 
-    // may be better to put these in a data class or something
-    // feel free to make changes to this, variables, functions, whatever u like
-    // just made this quick -Jeremelle
     private val _userSubject = MutableStateFlow<TutorSubject?>(null)
     private val userSubject: StateFlow<TutorSubject?> get() = _userSubject
 
@@ -142,7 +141,6 @@ class BookingViewModel : ViewModel() {
     val availability: StateFlow<Map<LocalDate, List<LocalTime>>> get() = _availability
 
     private val _tutorAvailabilityMap = MutableStateFlow<Map<String, Map<LocalDate, List<LocalTime>>>>(emptyMap())
-    val tutorAvailabilityMap: StateFlow<Map<String, Map<LocalDate, List<LocalTime>>>> get() = _tutorAvailabilityMap
 
     // State for selected day and times
     private val _selectedDay = MutableStateFlow<LocalDate?>(null)
@@ -154,6 +152,9 @@ class BookingViewModel : ViewModel() {
     private val _selectedEndTime = MutableStateFlow<LocalTime?>(null)
     val selectedEndTime: StateFlow<LocalTime?> get() = _selectedEndTime
 
+    private val _isCurrentMonth = MutableStateFlow(true)
+    val isCurrentMonth: StateFlow<Boolean> get() = _isCurrentMonth
+
     // State for loading and errors
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> get() = _isLoading
@@ -161,8 +162,9 @@ class BookingViewModel : ViewModel() {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> get() = _error
 
-
-    // TODO: ALERT DIALOG FOR ERRORS -for after submit: "your session has been booked" or "your session could not be booked bc..."
+    fun toggleIsCurrentMonth() {
+        _isCurrentMonth.value = !_isCurrentMonth.value
+    }
 
     // Function to reset all state variables
     fun resetState() {
@@ -172,6 +174,7 @@ class BookingViewModel : ViewModel() {
         _availability.value = emptyMap()
         _isLoading.value = false
         _error.value = null
+        _isCurrentMonth.value = true
 
         // EMAIL VARIABLES RESET
         _userSubject.value = null
@@ -185,13 +188,21 @@ class BookingViewModel : ViewModel() {
 
     fun resetDay() {
         _selectedDay.value = null
+        _selectedStartTime.value = null
+        _selectedEndTime.value = null
+    }
+
+    fun resetMonth() {
+        _isCurrentMonth.value = true
     }
 
     fun getFirstDayOfMonth(currentDate: LocalDate): LocalDate {
+        println("Getting first day of month for: $currentDate")
         return currentDate.withDayOfMonth(1) // First day of the month
     }
 
     fun getLastDayOfMonth(currentDate: LocalDate): LocalDate {
+        println("Getting last day of month for: $currentDate")
         return currentDate.withDayOfMonth(currentDate.lengthOfMonth()) // Last day of the month
     }
 
@@ -200,7 +211,7 @@ class BookingViewModel : ViewModel() {
         fetchTutors(subject, priceRange,mode)
     }
 
-    // Function to fetch tutors who can teach the selected subject
+    // Function to fetch tutors who can teach the selected subject within the price range
     private fun fetchTutors(selectedSubject: TutorSubject, priceRange: ClosedFloatingPointRange<Float>,mode: String) {
         _isLoading.value = true
         viewModelScope.launch {
@@ -269,11 +280,23 @@ class BookingViewModel : ViewModel() {
     }
 
     // Fetch availability data for the selected tutors
-    private fun fetchAvailabilityForTutors(tutorIds: List<String>, mode: String) {
+    fun fetchAvailabilityForTutors(tutorIds: List<String>, mode: String) {
         _isLoading.value = true
         viewModelScope.launch {
             try {
-                val currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"))
+
+                //val currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"))
+                val monthYear: String
+                if (_isCurrentMonth.value) {
+                    monthYear = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(System.currentTimeMillis())
+                } else {
+                    val calendar = Calendar.getInstance()
+                    calendar.add(Calendar.MONTH, 1) // Move to the next month
+                    val nextMonth = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(calendar.time)
+                    monthYear = nextMonth
+                }
+
+
                 val availabilityMap = mutableMapOf<LocalDate, MutableList<LocalTime>>()
                 val tutorAvailabilityMap = mutableMapOf<String, MutableMap<LocalDate, MutableList<LocalTime>>>()
 
@@ -281,7 +304,7 @@ class BookingViewModel : ViewModel() {
                 val deferredList = tutorIds.map { tutorId ->
                     async {
                         db.collection("availability")
-                            .document(currentMonth)
+                            .document(monthYear)
                             .collection(tutorId)
                             .document("availabilityData")
                             .get()

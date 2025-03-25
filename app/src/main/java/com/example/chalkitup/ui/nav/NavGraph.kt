@@ -1,6 +1,8 @@
 package com.example.chalkitup.ui.nav
 
 import ForgotPasswordScreen
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -26,9 +28,9 @@ import com.example.chalkitup.ui.screens.admin.AdminHome
 import com.example.chalkitup.ui.viewmodel.AuthViewModel
 import com.example.chalkitup.ui.viewmodel.BookingViewModel
 import com.example.chalkitup.ui.viewmodel.CertificationViewModel
-import com.example.chalkitup.ui.viewmodel.ChatViewModel
+import com.example.chalkitup.ui.viewmodel.chat.ChatViewModel
 import com.example.chalkitup.ui.viewmodel.EditProfileViewModel
-import com.example.chalkitup.ui.viewmodel.MessageListViewModel
+import com.example.chalkitup.ui.viewmodel.chat.MessageListViewModel
 import com.example.chalkitup.ui.viewmodel.NotificationViewModel
 import com.example.chalkitup.ui.viewmodel.OfflineDataManager
 import com.example.chalkitup.ui.viewmodel.ProfileViewModel
@@ -40,11 +42,10 @@ import com.example.chalkitup.ui.viewmodel.admin.AdminHomeViewModel
 // Navigation Center, NavHost with navController
 // On app launch, opens startScreen
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun NavGraph(navController: NavHostController) {
 
-    val messageListViewModel: MessageListViewModel = viewModel()
-    val chatViewModel: ChatViewModel = viewModel()
 
     NavHost(navController = navController, startDestination = "start") {
 
@@ -112,6 +113,7 @@ fun NavGraph(navController: NavHostController) {
 
         // Messages Screen
         composable("messages") {
+            val messageListViewModel: MessageListViewModel = viewModel()
             MessageListScreen(
                 navController = navController,
                 messageListViewModel
@@ -120,6 +122,8 @@ fun NavGraph(navController: NavHostController) {
 
         // New Message Screen
         composable("newMessage") {
+            val messageListViewModel: MessageListViewModel = viewModel()
+            val chatViewModel: ChatViewModel = viewModel()
             NewMessageScreen(
                 navController = navController,
                 messageListViewModel,
@@ -133,10 +137,9 @@ fun NavGraph(navController: NavHostController) {
             val selectedUserId = backStackEntry.arguments?.getString("selectedUserId") ?: ""
             val conversationIdArg = backStackEntry.arguments?.getString("conversationId") ?: ""
 
-            val conversationId =
-                if (conversationIdArg == "null") null
-                else conversationIdArg
+            val conversationId = if (conversationIdArg == "null") null else conversationIdArg
 
+            val chatViewModel: ChatViewModel = viewModel()
             ChatScreen(
                 navController = navController,
                 chatViewModel,

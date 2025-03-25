@@ -345,6 +345,7 @@ fun AdminHome(
                                                 ),
                                                 onClick = {
                                                     // go to tutors profile
+                                                    println("Tutor ID: ${tutor.id}")
                                                     navController.navigate("profile/${tutor.id}")
                                                 }
                                             ) {
@@ -490,12 +491,13 @@ fun SubjectDisplay(tutor: User) {
             ) {
                 // Temporary icons for subjects
                 val subjectIcon = when (subject.subject) {
-                    "Math" -> R.drawable.ic_math
-                    "Physics" -> R.drawable.ic_physics
-                    "Chemistry" -> R.drawable.ic_chemistry
-                    "Social" -> R.drawable.ic_social
-                    "English" -> R.drawable.ic_english
-                    "Science" -> R.drawable.ic_science
+                    "Math" -> R.drawable.ic_math2
+                    "Physics" -> R.drawable.ic_physics2
+                    "Chemistry" -> R.drawable.ic_chemistry2
+                    "Social" -> R.drawable.ic_social2
+                    "English" -> R.drawable.ic_english2
+                    "Science" -> R.drawable.ic_science2
+                    "Biology" -> R.drawable.ic_biology
                     else -> R.drawable.chalkitup // havent chosen an icon yet.
                 }
 
