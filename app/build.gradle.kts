@@ -117,6 +117,7 @@ dependencies {
     implementation(libs.google.api.client)  // Google API Client
     implementation(libs.google.oauth.client)  // OAuth for authentication
     implementation(libs.google.api.services.calendar)  // Google Calendar API
-//    // JSON parsing support for Google APIs
+//    // JSON parsing su
+//    pport for Google APIs
     implementation(libs.google.http.client.gson)
 }
