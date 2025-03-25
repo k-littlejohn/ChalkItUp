@@ -1,9 +1,11 @@
 package com.example.chalkitup.ui.viewmodel
 
+import com.example.chalkitup.ui.viewmodel.NotificationViewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.chalkitup.ui.components.TutorSubject
+import com.example.chalkitup.ui.screens.NotificationScreen
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
@@ -99,6 +101,8 @@ class BookingViewModel : ViewModel() {
         }
     }
 
+    // NOT FINISHED
+    // Need to grab emails for both the student and tutor
     private fun sendEmail(onSuccess: () -> Unit) {
 
         Log.d("MessagesScreen", "fName: ${fName.value}, email: ${userEmail.value}")
@@ -713,6 +717,42 @@ class BookingViewModel : ViewModel() {
         db.collection("appointments")
             .add(sessionData)
             .await()
+
+        // To add the information for a notification
+        // One to show for the tutor and one for the student
+        addNotification(
+            notifUserID = studentId,
+            notifUserName = studentFullName,
+            notifTime = LocalTime.now().toString(),
+            notifDate = LocalDate.now().toString(),
+            comments = comments,
+            sessDate = day.toString(),
+            sessTime = formattedTimeRange,
+            otherID = tutorId,
+            otherName = tutorFullName,
+            subject = formattedSubject,
+            grade = subject.grade,
+            spec = subject.specialization,
+            mode = formattedSessionType,
+            price = subject.price
+        )
+
+        addNotification(
+            notifUserID = tutorId,
+            notifUserName = tutorFullName,
+            notifTime = LocalTime.now().toString(),
+            notifDate = LocalDate.now().toString(),
+            comments = comments,
+            sessDate = day.toString(),
+            sessTime = formattedTimeRange,
+            otherID = studentId,
+            otherName = studentFullName,
+            subject = formattedSubject,
+            grade = subject.grade,
+            spec = subject.specialization,
+            mode = formattedSessionType,
+            price = subject.price
+        )
     }
 
     private suspend fun fetchUserFullName(userId: String): String {
@@ -728,6 +768,52 @@ class BookingViewModel : ViewModel() {
         } catch (e: Exception) {
             // Handle errors (e.g., Firestore network issues)
             ""
+        }
+    }
+
+    // Firebase order: notifications/actual notification info
+    private fun addNotification(
+        notifUserID: String,
+        notifUserName: String, // Name of the person in the notification
+        notifTime: String,
+        notifDate: String,
+        comments: String,
+        sessDate: String,
+        sessTime: String,
+        otherID: String, // ID of the other person in the notification
+        otherName: String, // ID of the other person in the notification
+        subject: String,
+        grade: String,
+        spec: String,
+        mode: String,
+        price: String
+    ) {
+        viewModelScope.launch {
+            val db = FirebaseFirestore.getInstance()
+
+            val notifData = hashMapOf(
+                "notifID" to "",
+                "notifType" to "Session",
+                "notifUserID" to notifUserID,
+                "notifUserName" to notifUserName,
+                "notifTime" to notifTime,
+                "notifDate" to notifDate,
+                "comments" to comments,
+                "sessType" to "Booked",
+                "sessDate" to sessDate,
+                "sessTime" to sessTime,
+                "otherID" to otherID,
+                "otherName" to otherName,
+                "subject" to subject,
+                "grade" to grade,
+                "spec" to spec,
+                "mode" to mode,
+                "price" to price
+            )
+
+            db.collection("notifications")
+                .add(notifData)
+                .await()
         }
     }
 
