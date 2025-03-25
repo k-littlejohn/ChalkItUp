@@ -60,8 +60,10 @@ import java.io.IOException
 import java.util.*
 import com.google.api.services.calendar.model.Calendar as GoogleCalendar
 import java.util.Calendar as Cal
-
-
+import java.io.InputStream
+import com.google.api.services.calendar.Calendar.Builder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun SettingsScreen(
@@ -195,21 +197,24 @@ fun authenticateServiceAccount(context: Context) {
 //add the service account to the calendar
 fun createCalendarAndAddServiceAccount(context: Context) {
     try {
-        // Open the service account credentials file and automatically close it after use
+        // Use 'use' block to automatically close the input stream when done
         context.assets.open("chalkitup-bdceba61ebce.json").use { serviceAccountKeyFile ->
-            // Load the service account credentials from the input stream
-            val credentials = ServiceAccountCredentials.fromStream(serviceAccountKeyFile)
+            // Create GoogleCredentials from the input stream and scope it
+            val googleCredentials = GoogleCredentials.fromStream(serviceAccountKeyFile)
+                .createScoped(listOf(CalendarScopes.CALENDAR))
 
+            // Create HTTP transport and JSON factory
             val httpTransport = GoogleNetHttpTransport.newTrustedTransport()
             val jsonFactory: JsonFactory = GsonFactory.getDefaultInstance()
 
-            // Create GoogleCredential with appropriate scopes
-            val googleCredential = GoogleCredential
-                .fromStream(serviceAccountKeyFile)
-                .createScoped(listOf(CalendarScopes.CALENDAR))
+            // Create an HttpRequestInitializer that ensures credentials are refreshed before each request
+            val httpRequestInitializer = HttpRequestInitializer { request: HttpRequest ->
+                googleCredentials.refreshIfExpired()  // Ensure the credentials are fresh before making the request
+                // No need for googleCredentials.initialize(request) here
+            }
 
-            // GoogleCredential implements HttpRequestInitializer, which is needed here
-            val calendarService = Calendar.Builder(httpTransport, jsonFactory, googleCredential)
+            // Build the Calendar service using the credentials and HttpRequestInitializer
+            val calendarService = Calendar.Builder(httpTransport, jsonFactory, httpRequestInitializer)
                 .setApplicationName("ChalkItUp")
                 .build()
 
@@ -223,19 +228,16 @@ fun createCalendarAndAddServiceAccount(context: Context) {
             val createdCalendar = calendarService.calendars().insert(calendar).execute()
             val calendarId = createdCalendar.id
 
-            // Store calendar ID in Singleton
+            // Store the calendar ID in the Singleton for later use
             CalendarDetailsSingleton.calendarId = calendarId
             println("Created and stored Calendar ID: $calendarId")
-
-            // Grant access to the service account
-            addServiceAccountToCalendar(calendarService, calendarId, credentials)
         }
+
     } catch (e: Exception) {
         // Log the error for debugging purposes
         e.printStackTrace()
     }
 }
-
 
 fun addServiceAccountToCalendar(calendarService: Calendar, calendarId: String, credentials: ServiceAccountCredentials) {
     try {
