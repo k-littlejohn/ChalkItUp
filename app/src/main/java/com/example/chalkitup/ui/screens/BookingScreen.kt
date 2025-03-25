@@ -209,8 +209,16 @@ fun BookingScreen(
                 SuccessAlertDialog(onDismiss = { showSuccessDialog = false })
             }
 
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(40.dp))
+/*
+            Image(
+                painter = painterResource(id = R.drawable.chalkitup),
+                contentDescription = "Chalk It Up",
+                modifier = Modifier.size(300.dp)
+            )
 
+*/
+            Spacer(modifier = Modifier.height(10.dp))
             Text(
                 "Book an Appointment",
                 modifier = Modifier.padding(16.dp),
@@ -228,7 +236,7 @@ fun BookingScreen(
 
                 // Session Type Selection
                 Text(
-                    text = "Pick a Location",
+                    text = "Pick a Mode",
                     color = Color.Black,
                     modifier = Modifier.padding(16.dp)
                 )

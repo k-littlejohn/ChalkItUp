@@ -67,8 +67,7 @@ fun MyTopBar(
     }
 
     // Change text dynamically
-    // Changes the text at the top based on what screen the user
-    // is on
+    // Changes the text at the top based on what screen the user is on
     CenterAlignedTopAppBar(
         modifier = Modifier.height(80.dp), // Increased height for icon, felt 80.dp looked the best
         title = {
@@ -78,6 +77,38 @@ fun MyTopBar(
                     contentDescription = "Chalk & Eraser",
                     modifier = Modifier.size(80.dp)
                 )
+            } else if (currentRoute == "booking") { //May switch images around
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.chalk1),
+                        contentDescription = "Chalk 1",
+                        modifier = Modifier.size(80.dp)
+                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.chalk_eraser2),
+                        contentDescription = "Chalk Eraser2",
+                        modifier = Modifier.size(80.dp)
+                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.chalk2),
+                        contentDescription = "Chalk 2",
+                        modifier = Modifier.size(80.dp)
+                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.chalk_eraser1),
+                        contentDescription = "Chalk Eraser1",
+                        modifier = Modifier.size(80.dp)
+                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.chalk3),
+                        contentDescription = "Chalk 3",
+                        modifier = Modifier.size(80.dp)
+                    )
+                }
             } else {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -87,7 +118,6 @@ fun MyTopBar(
                         text = when (currentRoute) {
                             "profile" -> "Profile"
                             "settings" -> "Settings"
-                            "booking" -> ""
                             "messages" -> "Messages"
                             "notifications" -> "Notifications"
                             "newMessage" -> "New Chat"
