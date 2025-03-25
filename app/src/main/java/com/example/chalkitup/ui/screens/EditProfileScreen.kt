@@ -65,6 +65,12 @@ import com.example.chalkitup.ui.viewmodel.InterestItem
 import com.example.chalkitup.ui.viewmodel.ProgressInput
 import com.example.chalkitup.ui.viewmodel.ProgressItem
 
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.graphics.Brush
+
+
 /**
  * EditProfileScreen
  *
@@ -138,6 +144,14 @@ fun EditProfileScreen(
     var interests = remember { mutableStateListOf<Interest>() }
     //var interests by remember { mutableStateOf<List<Interest>>(emptyList()) }
 
+    // Gradient brush for the screen's background.
+    val gradientBrush = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF06C59C),//Color(0xFF54A4FF), // 5% Blue
+            Color.White, Color.White, Color.White, Color.White //95% white
+        )
+    )
+
     // Initialize profile fields when the user profile data changes.
     LaunchedEffect(userProfile) {
         userProfile?.let {
@@ -169,314 +183,324 @@ fun EditProfileScreen(
     //------------------------------VARIABLES-END----------------------------------------------
 
     // Main layout.
-    Column(modifier = Modifier
-        .padding(24.dp)
-        .verticalScroll(scrollState)
-        .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(gradientBrush)
     ) {
+        Column(modifier = Modifier
+            .padding(24.dp)
+            .verticalScroll(scrollState)
+            .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
 
-        Text("Edit Profile")
-
-        // Circular profile picture with a click to change.
-        AsyncImage(
-            model = profilePictureUrl
-                ?: R.drawable.baseline_person_24, // Default profile picture if none is set
-            contentDescription = "Profile Picture",
-            modifier = Modifier
-                .size(100.dp)
-                .clip(CircleShape)
-                .border(2.dp, Color.Gray, CircleShape)
-                .clickable { launcherPFP.launch("image/*") } // When clicked, allow the user to select a new image
-        )
-
-        // First Name input field.
-        OutlinedTextField(
-            value = firstName,
-            modifier = Modifier.fillMaxWidth(),
-            onValueChange = {
-                firstName = it
-                if (firstName.isNotBlank()) firstNameError =
-                    false // Clears the error if input is provided.
-            },
-            label = { Text("First Name") },
-            supportingText = { if (firstNameError) Text("First name cannot be blank") }, // Shows an error message if there's an error.
-            isError = firstNameError // Indicates that there's an error if firstNameError is true.
-        )
-
-        // Last Name input field.
-        OutlinedTextField(
-            value = lastName,
-            modifier = Modifier.fillMaxWidth(),
-            onValueChange = {
-                lastName = it
-                if (lastName.isNotBlank()) lastNameError =
-                    false // Clears the error if input is provided.
-            },
-            label = { Text("Last Name") },
-            supportingText = { if (lastNameError) Text("Last name cannot be blank") }, // Shows an error message if there's an error.
-            isError = lastNameError // Indicates that there's an error if lastNameError is true.
-        )
-
-//        OutlinedTextField(
-//            value = email,
-//            onValueChange = { email = it },
-//            label = { Text("Email") },
-//            enabled = false // Prevent email from being edited
-//        )
-
-        // Bio input field.
-        OutlinedTextField(
-            value = bio,
-            modifier = Modifier.fillMaxWidth(),
-            onValueChange = { bio = it },
-            label = { Text("Bio") }
-        )
-
-        if (isTutor) {
-            OutlinedTextField(
-                value = startingPrice,
-                modifier = Modifier.fillMaxWidth(),
-                onValueChange = { startingPrice = it },
-                label = { Text("Starting Price per Hour") }
+            Text(
+                text = "Edit Profile",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF42A5F5)
             )
+
+            // Circular profile picture with a click to change.
+            Box(contentAlignment = Alignment.Center) {
+                AsyncImage(
+                    model = profilePictureUrl ?: R.drawable.editprofilepicture,
+                    contentDescription = "Profile Picture",
+                    modifier = Modifier
+                        .size(160.dp)
+                        .clip(CircleShape)
+                        .border(4.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                        .clickable { launcherPFP.launch("image/*") }
+                )
+            }
+
+            // First Name input field.
             OutlinedTextField(
-                value = experience,
+                value = firstName,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = { experience = it },
-                label = { Text("Experience (Years)") }
+                onValueChange = {
+                    firstName = it
+                    if (firstName.isNotBlank()) firstNameError =
+                        false // Clears the error if input is provided.
+                },
+                label = { Text("First Name") },
+                supportingText = { if (firstNameError) Text("First name cannot be blank") }, // Shows an error message if there's an error.
+                isError = firstNameError // Indicates that there's an error if firstNameError is true.
             )
-        }
 
+            // Last Name input field.
+            OutlinedTextField(
+                value = lastName,
+                modifier = Modifier.fillMaxWidth(),
+                onValueChange = {
+                    lastName = it
+                    if (lastName.isNotBlank()) lastNameError =
+                        false // Clears the error if input is provided.
+                },
+                label = { Text("Last Name") },
+                supportingText = { if (lastNameError) Text("Last name cannot be blank") }, // Shows an error message if there's an error.
+                isError = lastNameError // Indicates that there's an error if lastNameError is true.
+            )
 
+            // Bio input field.
+            OutlinedTextField(
+                value = bio,
+                modifier = Modifier.fillMaxWidth(),
+                onValueChange = { bio = it },
+                label = { Text("Bio") }
+            )
 
-        // Tutor-Specific Fields.
-        if (isTutor) {
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (subjectError) {
-                Text(
-                    "You must be able to teach at least 1 subject",
-                    color = Color.Red
-                )
-            }
-
-            Text("Subjects You Teach")
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    "Tap the  +  to add a subject",
-                    color = Color.Gray
-                )
-
-                Spacer(modifier = Modifier.width(50.dp))
-
-                // Add Subject button.
-                IconButton(
-                    onClick = {
-                        tutorSubjects =
-                            tutorSubjects + TutorSubject("", "", "", "") // Add empty entry
-                    },
-                    modifier = Modifier.size(36.dp),
-                    colors = IconButtonColors(
-                        Color(0xFF06C59C),
-                        contentColor = Color.White,
-                        disabledContainerColor = Color(0xFF06C59C),
-                        disabledContentColor = Color.White
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add Subject",
-                        tint = Color.White
-                    )
-                }
-            }
-
-            // Default text if no subjects added
-            if (tutorSubjects.isEmpty()) {
-                Text(
-                    text = "No subjects added",
-                    color = Color.Gray
-                )
-            }
-
-            // Display list of subjects the tutor teaches.
-            Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
-                LazyColumn {
-                    itemsIndexed(tutorSubjects) { index, tutorSubject ->
-                        SubjectGradeItem(
-                            tutorSubject = tutorSubject, // Pass the entire TutorSubject object
-                            availableSubjects = availableSubjects,
-                            availableGradeLevels = availableGradeLevels,
-                            availableGradeLevelsBPC = availableGradeLevelsBPC,
-                            availablePrice = availablePrice,
-                            grade10Specs = grade10Specs,
-                            grade1112Specs = grade1112Specs,
-                            onSubjectChange = { newSubject ->
-                                tutorSubjects = tutorSubjects.toMutableList().apply {
-                                    this[index] = this[index].copy(subject = newSubject)
-                                }
-                            },
-                            onGradeChange = { newGrade ->
-                                tutorSubjects = tutorSubjects.toMutableList().apply {
-                                    this[index] = this[index].copy(grade = newGrade)
-                                }
-                            },
-                            onSpecChange = { newSpec ->
-                                tutorSubjects = tutorSubjects.toMutableList().apply {
-                                    this[index] = this[index].copy(specialization = newSpec)
-                                }
-                            },
-                            onPriceChange = { newPrice ->
-                                tutorSubjects = tutorSubjects.toMutableList().apply {
-                                    this[index] = this[index].copy(price = newPrice)
-                                }
-                            },
-
-                            onRemove = {
-                                tutorSubjects =
-                                    tutorSubjects.toMutableList().apply { removeAt(index) }
-                            },
-                            subjectError = tutorSubjectErrors.getOrNull(index)?.subjectError
-                                ?: false,
-                            gradeError = tutorSubjectErrors.getOrNull(index)?.gradeError ?: false,
-                            specError = tutorSubjectErrors.getOrNull(index)?.specError ?: false,
-                            priceError = tutorSubjectErrors.getOrNull(index)?.priceError ?: false,
-                            duplicateError = tutorSubjectErrors.getOrNull(index)?.duplicateError ?: false
-                        )
-                    }
-                }
-            }
-
-            // Certification file upload section.
-            Text("Your Certifications", style = MaterialTheme.typography.titleMedium)
-
-            // Button to trigger file upload.
-            Button(
-                onClick = { launcherCT.launch("*/*") },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Upload a file")
-            }
-
-            // Display selected files if any.
-            if (selectedFiles.isNotEmpty()) {
-                Column(
+            if (isTutor) {
+                OutlinedTextField(
+                    value = startingPrice,
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    onValueChange = { startingPrice = it },
+                    label = { Text("Starting Price per Hour") }
+                )
+                OutlinedTextField(
+                    value = experience,
+                    modifier = Modifier.fillMaxWidth(),
+                    onValueChange = { experience = it },
+                    label = { Text("Experience (Years)") }
+                )
+            }
+
+
+            // Tutor-Specific Fields.
+            if (isTutor) {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                if (subjectError) {
+                    Text(
+                        "You must be able to teach at least 1 subject",
+                        color = Color.Red
+                    )
+                }
+
+                Text(
+                    text = "Subjects You Teach",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    selectedFiles.forEach { uri ->
-                        val fileName =
-                            certificationViewModel.getFileNameFromUri(context, uri)
-                        SelectedFileItem(           // images not being displayed if being retrieved from db
-                            fileName = fileName,
-                            fileUri = uri,
-                            onRemove = { certificationViewModel.removeSelectedFile(uri) }
+                    Text(
+                        "Tap the  +  to add a subject",
+                        color = Color.Gray,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    Spacer(modifier = Modifier.width(50.dp))
+
+                    // Add Subject button.
+                    IconButton(
+                        onClick = {
+                            tutorSubjects =
+                                tutorSubjects + TutorSubject("", "", "", "") // Add empty entry
+                        },
+                        modifier = Modifier.size(32.dp),
+                        colors = IconButtonColors(
+                            Color(0xFF06C59C),
+                            contentColor = Color.White,
+                            disabledContainerColor = Color(0xFF06C59C),
+                            disabledContentColor = Color.White
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add Subject",
+                            tint = Color.White
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
-            } else {
-                Text(text = "No files selected.", color = Color.Gray)
-            }
-
-
-        } else {
-            Spacer(modifier = Modifier.height(16.dp))
-
-            LaunchedEffect(userProfile) {
-                userProfile?.let {
-                    progress.clear()
-                    progress.addAll(it.progress.map { progress -> progress.copy() }) // Ensures a separate copy
+                // Default text if no subjects added
+                if (tutorSubjects.isEmpty()) {
+                    Text(
+                        text = "No subjects added",
+                        color = Color.Gray
+                    )
                 }
-            }
-            Button(onClick = {
-                var newItem = ProgressItem("", "")
-                progress.add(newItem)
-            }
-            )
-            { Text("add progress") }
 
-            Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
-                LazyColumn {
-                    itemsIndexed(progress) { index, item ->
-                        ProgressInput(
-                            progressItem = item,
-                            onProgressChange = { updatedTitle, updatedGrade ->
+                // Display list of subjects the tutor teaches.
+                Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
+                    LazyColumn {
+                        itemsIndexed(tutorSubjects) { index, tutorSubject ->
+                            SubjectGradeItem(
+                                tutorSubject = tutorSubject, // Pass the entire TutorSubject object
+                                availableSubjects = availableSubjects,
+                                availableGradeLevels = availableGradeLevels,
+                                availableGradeLevelsBPC = availableGradeLevelsBPC,
+                                availablePrice = availablePrice,
+                                grade10Specs = grade10Specs,
+                                grade1112Specs = grade1112Specs,
+                                onSubjectChange = { newSubject ->
+                                    tutorSubjects = tutorSubjects.toMutableList().apply {
+                                        this[index] = this[index].copy(subject = newSubject)
+                                    }
+                                },
+                                onGradeChange = { newGrade ->
+                                    tutorSubjects = tutorSubjects.toMutableList().apply {
+                                        this[index] = this[index].copy(grade = newGrade)
+                                    }
+                                },
+                                onSpecChange = { newSpec ->
+                                    tutorSubjects = tutorSubjects.toMutableList().apply {
+                                        this[index] = this[index].copy(specialization = newSpec)
+                                    }
+                                },
+                                onPriceChange = { newPrice ->
+                                    tutorSubjects = tutorSubjects.toMutableList().apply {
+                                        this[index] = this[index].copy(price = newPrice)
+                                    }
+                                },
+
+                                onRemove = {
+                                    tutorSubjects =
+                                        tutorSubjects.toMutableList().apply { removeAt(index) }
+                                },
+                                subjectError = tutorSubjectErrors.getOrNull(index)?.subjectError
+                                    ?: false,
+                                gradeError = tutorSubjectErrors.getOrNull(index)?.gradeError ?: false,
+                                specError = tutorSubjectErrors.getOrNull(index)?.specError ?: false,
+                                priceError = tutorSubjectErrors.getOrNull(index)?.priceError ?: false,
+                                duplicateError = tutorSubjectErrors.getOrNull(index)?.duplicateError ?: false
+                            )
+                        }
+                    }
+                }
+
+                // Certification file upload section.
+                Text("Your Certifications", style = MaterialTheme.typography.titleMedium)
+
+                // Button to trigger file upload.
+                Button(
+                    onClick = { launcherCT.launch("*/*") },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Upload a file")
+                }
+
+                // Display selected files if any.
+                if (selectedFiles.isNotEmpty()) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        selectedFiles.forEach { uri ->
+                            val fileName =
+                                certificationViewModel.getFileNameFromUri(context, uri)
+                            SelectedFileItem(           // images not being displayed if being retrieved from db
+                                fileName = fileName,
+                                fileUri = uri,
+                                onRemove = { certificationViewModel.removeSelectedFile(uri) }
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                } else {
+                    Text(text = "No files selected.", color = Color.Gray)
+                }
+
+            } else {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                LaunchedEffect(userProfile) {
+                    userProfile?.let {
+                        progress.clear()
+                        progress.addAll(it.progress.map { progress -> progress.copy() }) // Ensures a separate copy
+                    }
+                }
+                Button(onClick = {
+                    var newItem = ProgressItem("", "")
+                    progress.add(newItem)
+                }
+                )
+                { Text("add progress") }
+
+                Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
+                    LazyColumn {
+                        itemsIndexed(progress) { index, item ->
+                            ProgressInput(
+                                progressItem = item,
+                                onProgressChange = { updatedTitle, updatedGrade ->
                                     progress=progress.apply{
                                         this[index]=item.copy(title = updatedTitle, grade = updatedGrade)}},
-                            onRemove={
+                                onRemove={
                                     progress=progress.apply{removeAt(index)}}
-                        )
+                            )
+                        }
+                    }
+                }
+                //------------------INTERESTS--------------------------------------
+                Spacer(modifier = Modifier.height(16.dp))
+
+
+                LaunchedEffect(userProfile) {
+                    userProfile?.let {
+                        interests.clear()
+                        interests.addAll(it.interests.map { interest -> interest.copy() }) // Ensures a separate copy
+                    }
+                }
+                Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
+                    LazyColumn {
+                        itemsIndexed(interests) { index, interest ->
+                            InterestItem(
+                                interest = interest,
+                                onInterestChange = { isSelected ->
+                                    interests[index] = interest.copy(isSelected = isSelected)
+                                }
+                            )
+                        }
                     }
                 }
             }
-            //------------------INTERESTS--------------------------------------
+
             Spacer(modifier = Modifier.height(16.dp))
+            Row {
+                Button(onClick = {
+                    // Error checks
 
+                    tutorSubjectErrors = validateTutorSubjects(tutorSubjects)
+                    subjectError = ((isTutor) && (tutorSubjects.isEmpty()))
+                    firstNameError = firstName.isEmpty()
+                    lastNameError = lastName.isEmpty()
 
-            LaunchedEffect(userProfile) {
-                userProfile?.let {
-                    interests.clear()
-                    interests.addAll(it.interests.map { interest -> interest.copy() }) // Ensures a separate copy
-                }
-            }
-            Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
-                LazyColumn {
-                    itemsIndexed(interests) { index, interest ->
-                        InterestItem(
-                            interest = interest,
-                            onInterestChange = { isSelected ->
-                                interests[index] = interest.copy(isSelected = isSelected)
-                            }
-                        )
-                    }
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-        Row {
-            Button(onClick = {
-                // Error checks
-
-                tutorSubjectErrors = validateTutorSubjects(tutorSubjects)
-                subjectError = ((isTutor) && (tutorSubjects.isEmpty()))
-                firstNameError = firstName.isEmpty()
-                lastNameError = lastName.isEmpty()
 
                 if (!(tutorSubjectErrors.any { it.subjectError || it.gradeError || it.specError || it.priceError || it.duplicateError }) &&
                         !subjectError && !firstNameError && !lastNameError
                     ) {
-                    //val  finalInterests=updatedInterests.toList()
-                    editProfileViewModel.updateProfile(firstName, lastName, tutorSubjects, bio, startingPrice, experience ,progress, interests)
-                    certificationViewModel.updateCertifications(context)
-                    navController.navigate("profile/") // Navigate back to profile
+                        //val  finalInterests=updatedInterests.toList()
+                        editProfileViewModel.updateProfile(firstName, lastName, tutorSubjects, bio, startingPrice, experience ,progress, interests)
+                        certificationViewModel.updateCertifications(context)
+                        navController.navigate("profile/") // Navigate back to profile
+                    }
+                },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Save Changes")
                 }
-            },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Save Changes")
-            }
 
-            Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(8.dp))
 
-            Button(onClick = {
-                editProfileViewModel._profilePictureUrl.value =
-                    originalProfilePictureUrl // Restore old picture
-                navController.navigate("profile/") // Navigate back to profile
-            },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Cancel")
+                Button(onClick = {
+                    editProfileViewModel._profilePictureUrl.value =
+                        originalProfilePictureUrl // Restore old picture
+                    navController.navigate("profile/") // Navigate back to profile
+                },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Cancel")
+                }
             }
         }
     }

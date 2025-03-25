@@ -1,5 +1,6 @@
 package com.example.chalkitup.ui.screens
 
+
 import android.util.Log
 import android.widget.Space
 import androidx.compose.ui.res.painterResource
@@ -15,11 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.navigation.NavController
 import androidx.compose.runtime.*
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
 import androidx.compose.ui.graphics.Color
-import com.kizitonwose.calendar.compose.*
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.daysOfWeek
@@ -31,18 +28,12 @@ import androidx.compose.foundation.border
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import java.lang.Exception
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.clickable
-import androidx.compose.ui.*
 import java.time.LocalDate
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.Brush
 import java.util.Locale
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
@@ -264,7 +255,9 @@ fun CalendarScreen(
                 .clip(RoundedCornerShape(12.dp))
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = listOf(Color(0xFFE3F2FD), Color(0xFFF1F8E9))
+                        colors = listOf(Color(0xFFCAEBFF), Color(0xFFEDFFEF))
+                        //og: Color(0xFFE3F2FD), Color(0xFFF1F8E9))
+                        // not bad: (Color(0xFFA9D5FC), Color(0xFFA7FFEB)
                     )
                 )
                 .padding(16.dp)
