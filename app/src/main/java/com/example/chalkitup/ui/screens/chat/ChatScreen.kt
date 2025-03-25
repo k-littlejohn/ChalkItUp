@@ -26,7 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.chalkitup.ui.viewmodel.ChatViewModel
+import com.example.chalkitup.ui.viewmodel.chat.ChatViewModel
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch

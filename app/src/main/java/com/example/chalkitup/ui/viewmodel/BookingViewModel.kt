@@ -9,6 +9,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+import com.google.protobuf.Internal.ListAdapter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +22,10 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
+import java.io.File
+import org.json.JSONArray
+import org.json.JSONObject
+
 
 class BookingViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
@@ -548,7 +553,9 @@ class BookingViewModel : ViewModel() {
             )
 
             sendEmail(
-                onSuccess = { onSuccess() }
+                onSuccess = {
+                    onSuccess()
+                }
             )
         }
     }
@@ -737,3 +744,141 @@ data class EmailMessage(
     var html: String = "",
     var body: String = "",
 )
+
+
+object BookingManager {
+    private lateinit var userFile: File
+
+    // Initialize function to set up the bookings file if it doesn't exist
+    fun init(fileDirectory: File) {
+        userFile = File(fileDirectory, "bookings.json")
+        if (!userFile.exists()) {
+            userFile.writeText(JSONArray().toString())  // Initialize with an empty array
+            println("Booking file initialized.")
+        }
+    }
+
+    // Function to add a new booking
+    fun addBooking(app: Appointment) {
+        val jsonArray = JSONArray(userFile.readText())
+
+        val jsonObject = JSONObject().apply {
+            put("appointmentID", app.appointmentID)
+            put("studentId", app.studentID)
+            put("tutorId", app.tutorID)
+            put("tutorName", app.tutorName)
+            put("studentName", app.studentName)
+            put("date", app.date)
+            put("time", app.time)
+            put("subject", app.subject)
+            put("mode", app.mode)
+            put("comments", app.comments)
+            put("subjectObject", app.subjectObject)  // subjectObject is still a Map
+        }
+
+        jsonArray.put(jsonObject)
+        userFile.writeText(jsonArray.toString(4)) // Pretty print with indentation
+    }
+
+    // Function to remove a booking
+    fun removeBooking(appointmentID: String) {
+        val jsonArray = JSONArray(userFile.readText())
+
+        val filteredArray = JSONArray()
+        for (i in 0 until jsonArray.length()) {
+            val obj = jsonArray.getJSONObject(i)
+            if (obj.getString("appointmentID") != appointmentID) {
+                filteredArray.put(obj)
+            }
+        }
+
+        userFile.writeText(filteredArray.toString(4))
+    }
+
+    // Function to read all bookings from the file
+    fun readBookings(): List<Appointment> {
+        val jsonArray = JSONArray(userFile.readText())
+        val bookings = mutableListOf<Appointment>()
+
+        for (i in 0 until jsonArray.length()) {
+            val obj = jsonArray.getJSONObject(i)
+
+            // Safely retrieve values with optString for missing or null keys
+            val appointmentID = obj.optString("appointmentID", "")
+            val studentID = obj.optString("studentID", "")
+            val tutorID = obj.optString("tutorID", "")
+            val tutorName = obj.optString("tutorName", "")
+            val studentName = obj.optString("studentName", "")
+            val date = obj.optString("date", "")
+            val time = obj.optString("time", "")
+            val subject = obj.optString("subject", "")
+            val mode = obj.optString("mode", "")
+            val comments = obj.optString("comments", "")
+
+            // Convert subjectObject to a Map<String, Any> using the safe optJSONObject and toMap()
+            val subjectObject = obj.optJSONObject("subjectObject")?.toMap() ?: emptyMap()
+
+            // Create the Appointment object
+            val booking = Appointment(
+                appointmentID = appointmentID,
+                studentID = studentID,
+                tutorID = tutorID,
+                tutorName = tutorName,
+                studentName = studentName,
+                date = date,
+                time = time,
+                subject = subject,
+                mode = mode,
+                comments = comments,
+                subjectObject = subjectObject
+            )
+
+            bookings.add(booking)
+        }
+
+        return bookings
+    }
+
+    // Function to clear all bookings (i.e., empty the file)
+    fun clearBookings() {
+        userFile.writeText(JSONArray().toString()) // Overwrite with an empty JSON array
+        println("All bookings cleared.")
+    }
+}
+
+// Extension function to convert a JSONObject to a Map<String, Any>
+fun JSONObject.toMap(): Map<String, Any> {
+    val map = mutableMapOf<String, Any>()
+    val keys = this.keys()
+    while (keys.hasNext()) {
+        val key = keys.next()
+        map[key] = this.get(key)  // Gets the value for the key (could be any type)
+    }
+    return map
+}
+
+fun JSONObject.toMapFromJSONObject(): Map<String, Any> {
+    val map = mutableMapOf<String, Any>()
+    val keys = this.keys()
+    while (keys.hasNext()) {
+        val key = keys.next()
+        map[key] = this.get(key)  // Gets the value for the key (could be any type)
+    }
+    return map
+}
+
+
+
+//BookingManager.addBooking(
+//appointmentID,
+//studentID,
+//matchedTutorId,
+//tutorName,
+//studentName,
+//date,
+//time,
+//subject,
+//mode,
+//comments,
+//subjectObject
+//)
