@@ -345,7 +345,8 @@ fun EditProfileScreen(
                                 ?: false,
                             gradeError = tutorSubjectErrors.getOrNull(index)?.gradeError ?: false,
                             specError = tutorSubjectErrors.getOrNull(index)?.specError ?: false,
-                            priceError = tutorSubjectErrors.getOrNull(index)?.priceError ?: false
+                            priceError = tutorSubjectErrors.getOrNull(index)?.priceError ?: false,
+                            duplicateError = tutorSubjectErrors.getOrNull(index)?.duplicateError ?: false
                         )
                     }
                 }
@@ -450,7 +451,7 @@ fun EditProfileScreen(
                 firstNameError = firstName.isEmpty()
                 lastNameError = lastName.isEmpty()
 
-                if (!(tutorSubjectErrors.any { it.subjectError || it.gradeError || it.specError }) &&
+                if (!(tutorSubjectErrors.any { it.subjectError || it.gradeError || it.specError || it.priceError || it.duplicateError }) &&
                         !subjectError && !firstNameError && !lastNameError
                     ) {
                     //val  finalInterests=updatedInterests.toList()
