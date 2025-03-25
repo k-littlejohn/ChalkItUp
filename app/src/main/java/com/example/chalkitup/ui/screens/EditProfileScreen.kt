@@ -113,6 +113,9 @@ fun EditProfileScreen(
     var email by remember { mutableStateOf("") }
     var tutorSubjects by remember { mutableStateOf<List<TutorSubject>>(emptyList()) } // To store selected subjects
     var bio by remember { mutableStateOf("") }
+    var startingPrice by remember { mutableStateOf("") }
+    var experience by remember { mutableStateOf("") }
+
 
     // Lists for available subjects and grade levels.
     val availableSubjects = listOf("Math", "Science", "English", "Social", "Biology", "Physics", "Chemistry")
@@ -143,6 +146,8 @@ fun EditProfileScreen(
             email = it.email
             tutorSubjects = it.subjects
             bio = it.bio
+            startingPrice = it.startingPrice
+            experience = it.experience
             originalProfilePictureUrl = profilePictureUrl // Save original profile picture
         }
     }
@@ -228,6 +233,23 @@ fun EditProfileScreen(
             onValueChange = { bio = it },
             label = { Text("Bio") }
         )
+
+        if (isTutor) {
+            OutlinedTextField(
+                value = startingPrice,
+                modifier = Modifier.fillMaxWidth(),
+                onValueChange = { startingPrice = it },
+                label = { Text("Starting Price per Hour") }
+            )
+            OutlinedTextField(
+                value = experience,
+                modifier = Modifier.fillMaxWidth(),
+                onValueChange = { experience = it },
+                label = { Text("Experience (Years)") }
+            )
+        }
+
+
 
         // Tutor-Specific Fields.
         if (isTutor) {
@@ -433,7 +455,7 @@ fun EditProfileScreen(
                         !subjectError && !firstNameError && !lastNameError
                     ) {
                     //val  finalInterests=updatedInterests.toList()
-                    editProfileViewModel.updateProfile(firstName, lastName, tutorSubjects, bio, progress, interests)
+                    editProfileViewModel.updateProfile(firstName, lastName, tutorSubjects, bio, startingPrice, experience ,progress, interests)
                     certificationViewModel.updateCertifications(context)
                     navController.navigate("profile/") // Navigate back to profile
                 }

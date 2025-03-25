@@ -1,5 +1,6 @@
 package com.example.chalkitup.ui.screens
 
+import android.util.Log
 import android.widget.Space
 import androidx.compose.ui.res.painterResource
 import com.example.chalkitup.R
@@ -47,7 +48,9 @@ import java.util.Locale
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.chalkitup.Connection
 import com.example.chalkitup.ui.viewmodel.Appointment
+import com.example.chalkitup.ui.viewmodel.BookingManager
 import com.example.chalkitup.ui.viewmodel.HomeViewModel
 import com.example.chalkitup.ui.viewmodel.WeatherViewModel
 
@@ -349,7 +352,7 @@ fun UpcomingAppointments(
     homeViewModel: HomeViewModel = viewModel(),
     onAppointmentClick: (Appointment) -> Unit
 ) {
-    val appointments by homeViewModel.appointments.collectAsState()
+
 
     //Start of UI for Upcoming Appointments
     Column(modifier = Modifier.padding(16.dp)) {
@@ -359,25 +362,67 @@ fun UpcomingAppointments(
             color = Color.Black
         )
 
-        appointments.forEach { appointment ->
-            // Format the date properly using "MMM d"
-            val formattedDate = try {
-                val date = LocalDate.parse(appointment.date, DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US))
-                date.format(DateTimeFormatter.ofPattern("MMM d", Locale.US)) // Outputs "Mar 6"
-            } catch (e: Exception) {
-                "Invalid Date"
-            }
+        val context = LocalContext.current
+        val connection = Connection.getInstance(context)
+        val isConnected by connection.connectionStatus.collectAsState(initial = false)
+        if(isConnected) {
+            val appointments by homeViewModel.appointments.collectAsState()
+            BookingManager.clearBookings()
+            appointments.forEach { appointment ->
+                // Format the date properly using "MMM d"
+                val formattedDate = try {
+                    val date = LocalDate.parse(
+                        appointment.date,
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US)
+                    )
+                    date.format(DateTimeFormatter.ofPattern("MMM d", Locale.US)) // Outputs "Mar 6"
+                } catch (e: Exception) {
+                    "Invalid Date"
+                }
 
-            UpcomingAppointmentItem(
-                title = appointment.subject,
-                date = formattedDate,
-                tutor = appointment.tutorName,
-                student = appointment.studentName,
-                mode = appointment.mode,
-                time = appointment.time,
-                backgroundColor = Color.White,
-                onClick = { onAppointmentClick(appointment) }
-            )
+                UpcomingAppointmentItem(
+                    title = appointment.subject,
+                    date = formattedDate,
+                    tutor = appointment.tutorName,
+                    student = appointment.studentName,
+                    mode = appointment.mode,
+                    time = appointment.time,
+                    backgroundColor = Color.White,
+                    onClick = { onAppointmentClick(appointment) }
+                )
+                BookingManager.addBooking(appointment)
+                Log.d("offlineApp", "App logged: $appointment.appointmentID")
+            }
+        }
+        else{
+            val appointments=BookingManager.readBookings()
+            appointments.forEach { appointment ->
+                    // Format the date properly using "MMM d"
+                val formattedDate = try {
+                    val date = LocalDate.parse(
+                        appointment.date,
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US)
+                    )
+                    date.format(DateTimeFormatter.ofPattern("MMM d", Locale.US)) // Outputs "Mar 6"
+                } catch (e: Exception) {
+                    "Invalid Date"
+                }
+
+                UpcomingAppointmentItem(
+                    title = appointment.subject,
+                    date = formattedDate,
+                    tutor = appointment.tutorName,
+                    student = appointment.studentName,
+                    mode = appointment.mode,
+                    time = appointment.time,
+                    backgroundColor = Color.White,
+                    onClick = { onAppointmentClick(appointment) }
+                )
+
+                Log.d("offlineApp", "OfflineApp logged: $appointment.appointmentID")
+
+
+            }
         }
     }
 }
@@ -508,12 +553,25 @@ fun UpcomingAppointmentItem(
 fun AppointmentPopup(
     navController: NavController,
     homeViewModel: HomeViewModel = viewModel(),
-    appointment: Appointment, onDismiss: () -> Unit
+    appointment: Appointment,
+    onDismiss: () -> Unit
 ) {
     val userType by homeViewModel.userType.collectAsState()
 
+    val context = LocalContext.current
+    val connection = Connection.getInstance(context)
+    val isConnected by connection.connectionStatus.collectAsState(initial = false)
+    // Track error message for network issues
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    //var rebooking by remember { mutableStateOf(false) }
+//    var selectedDate by remember { mutableStateOf(appointment.date) }
+    //var availableDates by remember { mutableStateOf(false) }
+
     AlertDialog(
         onDismissRequest = {
+            //rebooking = false // Reset
+            errorMessage = null
+
             onDismiss()
         },
         title = { Text(text = "Appointment Details") },
@@ -529,6 +587,14 @@ fun AppointmentPopup(
                 Text(text = "Subject: ${appointment.subject}")
                 Text(text = "Location: ${appointment.mode}")
                 Text(text = "Comments: ${appointment.comments}")
+
+                errorMessage?.let {
+                    Text(
+                        text = it,
+                        color = Color.Red,
+                        //style = MaterialTheme.typography.body2
+                    )
+                }
             }
         },
         confirmButton = {
@@ -542,10 +608,17 @@ fun AppointmentPopup(
             Column {
                 Button(
                     onClick = {
-                        homeViewModel.cancelAppointment(appointment) {
-                            onDismiss()
-                            homeViewModel.fetchAppointments()
+                        if (isConnected){
+                            homeViewModel.cancelAppointment(appointment) {
+                                //rebooking = false // Reset After Cancelling
+                                onDismiss()
+                                homeViewModel.fetchAppointments()
+                            }
                         }
+                        else {
+                            errorMessage="Error: Try canceling when you are back online!"
+                        }
+
                     },
                 ) {
                     Text("Cancel Appointment")
@@ -553,15 +626,25 @@ fun AppointmentPopup(
                 if (userType == "Student") {
                     Button(
                         onClick = {
-                            homeViewModel.cancelAppointment(appointment) {
-                                onDismiss()
-                                navController.navigate("booking")
+
+//                            bookingViewModel.rebookAppointment(appointment)
+                            if(isConnected) {
+                                homeViewModel.cancelAppointment(appointment) {
+                                    //rebooking = false // Reset After Cancelling
+                                    onDismiss()
+                                    navController.navigate("booking")
+                                }
+                            }
+                            else{
+                                errorMessage="Error: Try rebooking when you are back online!"
+
                             }
                         },
                     ) {
                         Text("Rebook Appointment")
                     }
                 }
+
             }
         }
     )
