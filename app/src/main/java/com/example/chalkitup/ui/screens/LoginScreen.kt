@@ -267,7 +267,7 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 // Google Sign-In Button
 
-               // GoogleSignInScreen()
+                GoogleSignInScreen()
                 //Spacer(modifier = Modifier.height(16.dp)) // Keep if we are placing other logins
 
             }
