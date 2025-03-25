@@ -208,7 +208,7 @@ fun ProfileScreen(
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
                     //Bottom line
                     Box(
                         modifier = Modifier
@@ -578,7 +578,6 @@ fun ProfileScreen(
                         }
                     }
 
-                    //------------------------------Academic Performance---------------------------------------------
                     //------------------------------Academic Performance---------------------------------------------
                     val addedProgress: MutableList<Pair<String, String>> = mutableListOf()
                     userProfile?.let {

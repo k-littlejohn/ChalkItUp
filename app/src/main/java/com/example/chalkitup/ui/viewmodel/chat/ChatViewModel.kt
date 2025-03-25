@@ -7,6 +7,7 @@ import com.example.chalkitup.domain.model.User
 import com.example.chalkitup.domain.model.Message
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,15 +49,28 @@ class ChatViewModel : ViewModel() {
             val userDoc = db.collection("users").document(userId)
                 .get()
                 .await()
-            User(
+
+            // Get profile picture URL from Storage
+            val storage = FirebaseStorage.getInstance()
+            val storageRef = storage.reference.child("$userId/profilePicture.jpg")
+            val profileUrl = try {
+                storageRef.metadata.await() // Check if file exists
+                storageRef.downloadUrl.await().toString()
+            } catch (e: Exception) {
+                "" // If no picture
+            }
+
+            val user = User(
                 id = userDoc.id,
                 firstName = userDoc.getString("firstName") ?: "",
                 lastName = userDoc.getString("lastName") ?: "",
                 userType = userDoc.getString("userType") ?: "",
-                userProfilePictureUrl = userDoc.getString("userProfilePictureUrl") ?: ""
+                userProfilePictureUrl = profileUrl
             )
+            Log.d("ChatViewModel", "Fetched user: $user")
+            user
         } catch (e: Exception) {
-            println("Error fetching user info: ${e.message}")
+            Log.e("ChatViewModel", "Error fetching user: ${e.message}")
             User()
         }
     }

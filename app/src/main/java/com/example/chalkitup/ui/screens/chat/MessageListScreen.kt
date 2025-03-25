@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -40,6 +41,7 @@ import com.example.chalkitup.domain.model.Conversation
 import com.example.chalkitup.domain.model.User
 import com.example.chalkitup.ui.components.ProfilePictureIcon
 import com.example.chalkitup.ui.viewmodel.chat.MessageListViewModel
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 @Composable
@@ -51,7 +53,7 @@ fun MessageListScreen(
 
     // Collect states from View Model
     val currentUserId = messageListViewModel.currentUserId
-    val users by messageListViewModel.users.collectAsState() // List of users with opposite user type as current user
+    val users by messageListViewModel.users.collectAsState()
     val isConversationsLoading by messageListViewModel.isConversationsLoading.collectAsState()
     val searchQuery by messageListViewModel.searchQuery.collectAsState()
     val error by messageListViewModel.error.collectAsState()
@@ -160,12 +162,14 @@ fun ConversationItem(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(8.dp)
+            .height(80.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
+//                .fillMaxWidth()
+                .fillMaxSize()
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -202,7 +206,6 @@ fun ConversationItem(
     }
 }
 
-// Helper function to format the timestamp
 private fun formatTimestamp(timestamp: Long): String {
     val currentTime = System.currentTimeMillis()
     val difference = currentTime - timestamp
@@ -212,6 +215,7 @@ private fun formatTimestamp(timestamp: Long): String {
         difference < TimeUnit.DAYS.toMillis(1) -> "${TimeUnit.MILLISECONDS.toHours(difference)} h ago"
         difference < TimeUnit.DAYS.toMillis(2) -> "Yesterday"
         difference < TimeUnit.DAYS.toMillis(7) -> "${TimeUnit.MILLISECONDS.toDays(difference)} days ago"
-        else -> java.text.SimpleDateFormat("MMM dd, yyyy").format(java.util.Date(timestamp)) // "Feb 15, 2024"
+        else -> java.text.SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+            .format(java.util.Date(timestamp)) // "Feb 15, 2024"
     }
 }

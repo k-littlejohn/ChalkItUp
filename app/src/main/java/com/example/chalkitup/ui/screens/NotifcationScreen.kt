@@ -263,12 +263,14 @@ fun PastNotifications(
                 notifLine3 = notif.comments
 
             // Rescheduled may not happen, for the time being it is not added
-//            }
-//            else if (notif.notifType == "Session" && notif.sessInfo.sessType == "Rescheduled") {
-//                subjMessage = "${notif.notifType} - ${notif.sessInfo.sessType}"
-//                notifLine1 = "${notif.sessInfo.sessDate} | ${notif.sessInfo.sessTime}"
-//                notifLine2 = "${notif.sessInfo.sessDate} | ${notif.sessInfo.sessTime}"
-//                notifLine3 = "${notif.sessInfo.sessDate} | ${notif.sessInfo.sessTime}"
+            }
+            else if (notif.notifType == "Session" && notif.sessType == "Rescheduled") {
+                subjMessage = "${notif.notifType} - ${notif.sessType}"
+                notifLine1 = "${notif.sessDate} | ${notif.sessTime}"
+                notifLine2 = "${notif.subject} ${notif.grade} ${notif.spec}"
+                notifLine3 =
+                    if (userType == "Student") "Tutor: " + notif.otherName
+                    else "Student: " + notif.otherName
 
             } else if (notif.notifType == "Session" && (
                         notif.sessType == "Booked" || notif.sessType == "Cancelled")) {
@@ -323,17 +325,16 @@ fun NotifLargeForm(
 
     AlertDialog(
         onDismissRequest = {
-            //rebooking = false // Reset
             onDismiss()
         },
-        // ADD TO
-        // NOT FINISHED
+
+        // Handles: Sessions (Booked/ Rescheduled/ Cancelled), Update, Messages
         title = { Text(text = "Notification Details") },
         text = {
             Column {
                 when (notif.notifType) {
                     "Session" -> {
-                        Text(text = "$userType Session Booked")
+                        Text(text = "$userType Session ${notif.sessType}")
                         if (userType == "Tutor") {
                             Text(text = "Student: ${notif.otherName}")
                         } else {
@@ -346,6 +347,7 @@ fun NotifLargeForm(
                         Text(text = "Subject: ${notif.subject}")
                         Text(text = "Grade: ${notif.grade}")
                         Text(text = "Specialization: ${notif.spec}")
+                        Text(text = "Price: ${notif.price}")
                         Text(text = "Location: ${notif.mode}")
                         Text(text = "Session Comments: ${notif.comments}")
                     }
@@ -354,7 +356,6 @@ fun NotifLargeForm(
                         Text(text = "Notification Time & Date: ${notif.notifTime} ${notif.notifDate}")
                         Text(text = "Comments: ${notif.comments}")
                     }
-                    // Messages not included for the time being as it's not connected to the messages page yet
                     "Messages" -> {
                         Text(text =
                         if (userType == "Student") "Message - Tutor"

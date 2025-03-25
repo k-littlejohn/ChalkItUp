@@ -117,12 +117,12 @@ fun UserItem(
     user: User,
     onClick: () -> Unit
 ) {
-    val userProfilePictureUrl = user?.userProfilePictureUrl
+    val userProfilePictureUrl = user.userProfilePictureUrl
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(8.dp)
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {

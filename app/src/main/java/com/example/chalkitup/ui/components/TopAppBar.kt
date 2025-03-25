@@ -18,6 +18,9 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.ui.res.painterResource
 import com.example.chalkitup.R
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.ui.Alignment
 
 // Top app bar
 
@@ -59,28 +62,71 @@ fun MyTopBar(
     val backgroundColor = when (currentRoute) {
         //"home" -> Color(0xFFFFFFFF)//MaterialTheme.colorScheme.primary
         "profile","tutorAvailability","booking","home","start","login","signup","forgotPassword","termsAndCond","adminHome" -> Color(0xFF54A4FF) // Fill top-screen white space
-        "checkEmail","awaitingApproval" -> Color(0xFF06C59C) // Fill top-screen white space
+        "checkEmail","awaitingApproval", "editProfile" -> Color(0xFF06C59C) // Fill top-screen white space
         else -> Color.White
     }
 
     // Change text dynamically
-    // Changes the text at the top based on what screen the user
-    // is on
+    // Changes the text at the top based on what screen the user is on
     CenterAlignedTopAppBar(
+        modifier = Modifier.height(80.dp), // Increased height for icon, felt 80.dp looked the best
         title = {
-            Text(
-                text = when (currentRoute) {
-                    "home" -> ""
-                    "profile" -> "Profile"
-                    "settings" -> "Settings"
-                    "booking" -> ""
-                    "messages" -> "Messages"
-                    "notifications" -> "Notifications"
-                    "newMessage" -> "New Chat"
-                    "start","login","signup","forgotPassword","checkEmail","tutorAvailability","termsAndCond","adminHome","awaitingApproval" -> ""
-                    else -> "ChalkItUp Tutors"
+            if (currentRoute == "home" || currentRoute == "editProfile") {
+                Image(
+                    painter = painterResource(id = R.drawable.chalk_eraser2),
+                    contentDescription = "Chalk & Eraser",
+                    modifier = Modifier.size(80.dp)
+                )
+            } else if (currentRoute == "booking") { //May switch images around
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.chalk1),
+                        contentDescription = "Chalk 1",
+                        modifier = Modifier.size(80.dp)
+                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.chalk_eraser2),
+                        contentDescription = "Chalk Eraser2",
+                        modifier = Modifier.size(80.dp)
+                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.chalk2),
+                        contentDescription = "Chalk 2",
+                        modifier = Modifier.size(80.dp)
+                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.chalk_eraser1),
+                        contentDescription = "Chalk Eraser1",
+                        modifier = Modifier.size(80.dp)
+                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.chalk3),
+                        contentDescription = "Chalk 3",
+                        modifier = Modifier.size(80.dp)
+                    )
                 }
-            )
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = when (currentRoute) {
+                            "profile" -> "Profile"
+                            "settings" -> "Settings"
+                            "messages" -> "Messages"
+                            "notifications" -> "Notifications"
+                            "newMessage" -> "New Chat"
+                            "start", "login", "signup", "forgotPassword", "checkEmail", "tutorAvailability", "termsAndCond", "adminHome", "awaitingApproval" -> ""
+                            else -> "ChalkItUp Tutors"
+                        }
+                    )
+                }
+            }
         },
 
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -95,9 +141,20 @@ fun MyTopBar(
                 // the navigation drawer
                 "home" -> {
                     IconButton(onClick = onMenuClick) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                        Icon(Icons.Default.Menu, contentDescription = "Menu",
+                            modifier = Modifier.size(30.dp)
+                        )
                     }
                 }
+                "profile" -> {
+                    IconButton(onClick = { navController.navigate("settings") }) {
+                        Icon(
+                            Icons.Default.Settings, contentDescription = "Settings",
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
+                }
+
                 // On the login and signup page currently,          // Here are the alternative back buttons on login & signup screen
                 // there is a back button in the top left
                 "login","signup","awaitingApproval" -> {
@@ -130,7 +187,10 @@ fun MyTopBar(
                 // there is a settings button in the top right
                 "home" -> {
                     IconButton(onClick = { navController.navigate("settings") }) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                        Icon(
+                            Icons.Default.Settings, contentDescription = "Settings",
+                            modifier = Modifier.size(30.dp)
+                        )
                     }
                 }
                 "profile" -> {

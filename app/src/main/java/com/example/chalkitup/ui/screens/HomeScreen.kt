@@ -1,5 +1,6 @@
 package com.example.chalkitup.ui.screens
 
+
 import android.util.Log
 import androidx.compose.ui.res.painterResource
 import com.example.chalkitup.R
@@ -248,7 +249,9 @@ fun CalendarScreen(
                 .clip(RoundedCornerShape(12.dp))
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = listOf(Color(0xFFE3F2FD), Color(0xFFF1F8E9))
+                        colors = listOf(Color(0xFFCAEBFF), Color(0xFFEDFFEF))
+                        //og: Color(0xFFE3F2FD), Color(0xFFF1F8E9))
+                        // not bad: (Color(0xFFA9D5FC), Color(0xFFA7FFEB)
                     )
                 )
                 .padding(16.dp)
