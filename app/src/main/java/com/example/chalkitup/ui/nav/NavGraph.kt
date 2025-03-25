@@ -1,6 +1,8 @@
 package com.example.chalkitup.ui.nav
 
 import ForgotPasswordScreen
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -40,6 +42,7 @@ import com.example.chalkitup.ui.viewmodel.admin.AdminHomeViewModel
 // Navigation Center, NavHost with navController
 // On app launch, opens startScreen
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun NavGraph(navController: NavHostController) {
 
@@ -134,9 +137,7 @@ fun NavGraph(navController: NavHostController) {
             val selectedUserId = backStackEntry.arguments?.getString("selectedUserId") ?: ""
             val conversationIdArg = backStackEntry.arguments?.getString("conversationId") ?: ""
 
-            val conversationId =
-                if (conversationIdArg == "null") null
-                else conversationIdArg
+            val conversationId = if (conversationIdArg == "null") null else conversationIdArg
 
             val chatViewModel: ChatViewModel = viewModel()
             ChatScreen(
