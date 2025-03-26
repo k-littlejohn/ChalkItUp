@@ -31,8 +31,16 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.storage
 import androidx.compose.material3.OutlinedTextField
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.ListenerRegistration
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 // Handles logic for ProfileScreen
 // - fetches user information from firebase and loads it
@@ -51,10 +59,96 @@ class ProfileViewModel : ViewModel() {
     private val _profilePictureUrl = MutableLiveData<String?>()
     val profilePictureUrl: LiveData<String?> get() = _profilePictureUrl
 
+    private val db = FirebaseFirestore.getInstance()
+    private val _totalSessions = MutableStateFlow(0)
+    val totalSessions: StateFlow<Int> = _totalSessions
+
+    private val _totalHours = MutableStateFlow(0.0)
+    val totalHours: StateFlow<Double> = _totalHours
+
+    private var sessionListener: ListenerRegistration? = null
+
+    // Formatters for parsing date and time strings
+    private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    private val timeFormatter = DateTimeFormatter.ofPattern("h:mm a")
+
     init {
         // Automatically load user profile when ViewModel is created
         loadUserProfile()
     }
+
+    fun startListeningForPastSessions(userIdInput: String? = "") {
+        val userId: String = if (userIdInput.isNullOrEmpty()) {
+            FirebaseAuth.getInstance().currentUser?.uid ?: ""
+        } else {
+            userIdInput
+        }
+        sessionListener = db.collection("appointments")
+            .whereEqualTo("tutorID", userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Log.e("ProfileViewModel", "Error fetching past sessions", error)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null) {
+                    var sessionCount = 0
+                    var totalHours = 0.0
+                    val currentDate = LocalDate.now()
+
+                    for (doc in snapshot.documents) {
+                        val timeRange = doc.getString("time") // Example: "11:30 AM - 12:30 PM"
+                        val dateString = doc.getString("date") // Example: "2025-03-25"
+
+                        if (timeRange != null && dateString != null) {
+                            val sessionDate = LocalDate.parse(dateString, dateFormatter)
+
+                            if (sessionDate.isBefore(currentDate)) { // Only count past sessions
+                                val parts = timeRange.split(" - ")
+                                if (parts.size == 2) {
+                                    val startTime = LocalTime.parse(parts[0], timeFormatter)
+                                    val endTime = LocalTime.parse(parts[1], timeFormatter)
+
+                                    // Calculate session duration in hours
+                                    val duration = ChronoUnit.MINUTES.between(startTime, endTime) / 60.0
+                                    totalHours += duration
+                                    sessionCount++
+                                    println("Session duration: $duration hours")
+                                    println("Total hours: $totalHours")
+                                    println("Session count: $sessionCount")
+                                }
+                            }
+                        }
+                    }
+
+                    // Update state
+                    _totalSessions.value = sessionCount
+                    _totalHours.value = totalHours
+
+                    // Update Firestore user document
+                    updateTutorStats(userId, sessionCount, totalHours)
+                }
+            }
+    }
+
+    private fun updateTutorStats(userId: String, sessionCount: Int, totalHours: Double) {
+        db.collection("users").document(userId)
+            .update(mapOf(
+                "totalSessions" to sessionCount,
+                "totalHoursTutored" to totalHours
+            ))
+            .addOnFailureListener { e ->
+                Log.e("ProfileViewModel", "Error updating tutor stats", e)
+            }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        sessionListener?.remove() // Clean up Firestore listener
+    }
+
+
+
 
     // Function to load the user profile when the ViewModel is initialized
     fun loadUserProfile(targetedUser: String? = "") {
