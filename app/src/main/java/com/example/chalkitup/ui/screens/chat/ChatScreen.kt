@@ -190,29 +190,35 @@ fun ChatScreen(
                     onTextChange = { text = it },
                     onSend = {
                         if (text.isNotBlank()) {
+
+                            val messageToSend = text
+                            text = ""
+
                             coroutineScope.launch {
 
                                 if (conversationId.isNullOrEmpty()) {
                                     // Fetch user details
-                                    val currentUser = chatViewModel.fetchUser(chatViewModel.currentUserId)
+                                    val currentUser =
+                                        chatViewModel.fetchUser(chatViewModel.currentUserId)
                                     val selectedUser = chatViewModel.fetchUser(selectedUserId)
 
                                     // Create a new conversation
-                                    val newConversationId = chatViewModel.createConversation(currentUser, selectedUser)
+                                    val newConversationId =
+                                        chatViewModel.createConversation(currentUser, selectedUser)
 
                                     // If the conversation was successfully created, send the message
                                     if (!newConversationId.isNullOrEmpty()) {
                                         chatViewModel.setConversationId(newConversationId)
-                                        chatViewModel.sendMessage(newConversationId, text)
+                                        chatViewModel.sendMessage(newConversationId, messageToSend)
                                         text = ""
                                     } else {
                                         Log.e("Chat", "Failed to create a new conversation.")
                                     }
                                 } else {
-                                    chatViewModel.sendMessage(conversationId, text)
+                                    chatViewModel.sendMessage(conversationId, messageToSend)
                                     text = ""
 
-                                    // Scroll after message is sent
+                                    // Scroll to latest message after message is sent
                                     withContext(Dispatchers.Main.immediate) {
                                         if (messages.size > 0) {
                                             scrollState.animateScrollToItem(messages.size - 1)
