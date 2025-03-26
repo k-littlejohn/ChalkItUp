@@ -149,11 +149,13 @@ fun MyTopBar(
                     }
                 }
                 "profile" -> {
-                    IconButton(onClick = { navController.navigate("settings") }) {
-                        Icon(
-                            Icons.Default.Settings, contentDescription = "Settings",
-                            modifier = Modifier.size(30.dp)
-                        )
+                    if (!targetedProfileView) {
+                        IconButton(onClick = { navController.navigate("settings") }) {
+                            Icon(
+                                Icons.Default.Settings, contentDescription = "Settings",
+                                modifier = Modifier.size(30.dp)
+                            )
+                        }
                     }
                 }
 
