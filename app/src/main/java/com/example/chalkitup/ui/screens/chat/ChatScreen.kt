@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -24,10 +22,12 @@ import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -185,36 +185,20 @@ fun ChatScreen(
                 }
 
                 // Chat input bar
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TextField(
-                        value = text,
-                        onValueChange = { text = it },
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(end = 6.dp),
-                        placeholder = { Text("Message...") }
-                    )
-
-                    // Send messages
-                    Button(onClick = {
+                ChatInputBar(
+                    text = text,
+                    onTextChange = { text = it },
+                    onSend = {
                         if (text.isNotBlank()) {
-//                        chatViewModel.viewModelScope.launch {
                             coroutineScope.launch {
 
                                 if (conversationId.isNullOrEmpty()) {
                                     // Fetch user details
-                                    val currentUser =
-                                        chatViewModel.fetchUser(chatViewModel.currentUserId)
+                                    val currentUser = chatViewModel.fetchUser(chatViewModel.currentUserId)
                                     val selectedUser = chatViewModel.fetchUser(selectedUserId)
 
                                     // Create a new conversation
-                                    val newConversationId =
-                                        chatViewModel.createConversation(currentUser, selectedUser)
+                                    val newConversationId = chatViewModel.createConversation(currentUser, selectedUser)
 
                                     // If the conversation was successfully created, send the message
                                     if (!newConversationId.isNullOrEmpty()) {
@@ -237,10 +221,8 @@ fun ChatScreen(
                                 }
                             }
                         }
-                    }) {
-                        Text("Send")
                     }
-                }
+                )
             }
         }
     }
@@ -277,8 +259,7 @@ fun ChatBubble(
 }
 
 private fun formatTime(timestamp: Long): String {
-    // "9:11 AM" format
-    return SimpleDateFormat("h:mm a", Locale.getDefault())
+    return SimpleDateFormat("h:mm a", Locale.getDefault())  // "9:11 AM" format
         .format(Date(timestamp))
 }
 
@@ -305,6 +286,37 @@ private fun formatDateHeader(timestamp: Long): String {
         }
     }
 
+}
+
+@Composable
+fun ChatInputBar(
+    text: String,
+    onTextChange: (String) -> Unit,
+    onSend: () -> Unit
+) {
+    OutlinedTextField(
+        value = text,
+        onValueChange = onTextChange,
+        placeholder = {
+            Text(
+                text = "Message...",
+                style = MaterialTheme.typography.body1
+            )
+        },
+        textStyle = MaterialTheme.typography.body1,
+        shape = RoundedCornerShape(24.dp), // Rounded corners
+        trailingIcon = {
+            IconButton(onClick = onSend) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Send,
+                    contentDescription = "Send"
+                )
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp)
+    )
 }
 
 @Composable
