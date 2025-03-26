@@ -164,6 +164,32 @@ class BookingViewModel : ViewModel() {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> get() = _error
 
+    // Function to get the 'active' field for the current user
+    fun getCurrentUserActiveStatus(onComplete: (Boolean) -> Unit) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId == null) {
+            // If no user is signed in, return false (or handle it however you'd like)
+            onComplete(false)
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                // Fetch the current user's document by their userId
+                val userDoc = db.collection("users").document(userId).get().await()
+
+                // Get the 'active' field (defaults to false if not found)
+                val activeStatus = userDoc.getBoolean("active") ?: false
+
+                // Call the onComplete lambda with the active status
+                onComplete(activeStatus)
+            } catch (e: Exception) {
+                Log.e("AdminViewModel", "Error fetching user active status: ${e.message}")
+                onComplete(false) // Return false if there's an error
+            }
+        }
+    }
+
     fun toggleIsCurrentMonth() {
         _isCurrentMonth.value = !_isCurrentMonth.value
     }
@@ -220,6 +246,7 @@ class BookingViewModel : ViewModel() {
             try {
                 db.collection("users")
                     .whereEqualTo("userType", "Tutor") // Filter for tutors only
+                    .whereEqualTo("active", true) // Filter for active tutors only
                     .get()
                     .addOnSuccessListener { querySnapshot ->
                         val matchedTutorIds = mutableListOf<String>()

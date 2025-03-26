@@ -1,5 +1,6 @@
 package com.example.chalkitup.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -65,7 +66,13 @@ import androidx.compose.foundation.Image
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
 
 
 /**
@@ -117,6 +124,8 @@ fun ProfileScreen(
         )
     )
 
+    var showReportDialog by remember { mutableStateOf(false) }
+
     //------------------------------VARIABLES-END---------------------------------------------
 
     // Trigger to reload user profile when the profile screen is launched.
@@ -138,6 +147,28 @@ fun ProfileScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
+            Row (
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // Report button
+                IconButton(onClick = { showReportDialog = true }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_report_gmailerrorred_24),
+                        contentDescription = "Report button",
+                        modifier = Modifier.size(30.dp),
+                    )
+                }
+                if (showReportDialog) {
+                    ReportDialog(
+                        onDismiss = { showReportDialog = false },
+                        viewModel = profileViewModel,
+                        targetedUser
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(30.dp))
 
             // Row to align profile picture with icons
@@ -646,6 +677,55 @@ fun ProfileScreen(
             }
         }
     }
+}
+
+@Composable
+fun ReportDialog(onDismiss: () -> Unit, viewModel: ProfileViewModel, userID: String) {
+    var reportReason by remember { mutableStateOf("") }
+    val context = LocalContext.current
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Report User") },
+        text = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("Are you sure you want to report this user?")
+                OutlinedTextField(
+                    value = reportReason,
+                    onValueChange = { reportReason = it },
+                    label = { Text("Reason") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    viewModel.reportUser(userID, reportReason, onSuccess = {
+                        Toast.makeText(context, "Report submitted successfully", Toast.LENGTH_SHORT).show()
+                        onDismiss()
+                    })
+                    onDismiss()
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF06C59C),
+                )
+            ) {
+                Text("Report")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF54A4FF),
+                )
+            ) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 // Qualification card using for Tutors Achievements, currently not editable by user, using it right now more for looks.

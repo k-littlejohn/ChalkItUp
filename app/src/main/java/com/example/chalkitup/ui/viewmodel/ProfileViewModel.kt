@@ -1,5 +1,7 @@
 package com.example.chalkitup.ui.viewmodel
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -30,6 +32,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.storage
 import androidx.compose.material3.OutlinedTextField
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FieldValue
 
 // Handles logic for ProfileScreen
 // - fetches user information from firebase and loads it
@@ -97,6 +100,27 @@ class ProfileViewModel : ViewModel() {
         }.addOnFailureListener {
             _profilePictureUrl.value = null // Set to null if no profile picture exists
         }
+    }
+
+
+    fun reportUser(userId: String, reportMessage: String, onSuccess: () -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val reportsCollection = db.collection("reports")
+
+        val reportData = hashMapOf(
+            "userId" to userId,
+            "reportMessage" to reportMessage,
+            "timestamp" to FieldValue.serverTimestamp() // Firestore-generated timestamp
+        )
+
+        reportsCollection.add(reportData)
+            .addOnSuccessListener { documentReference ->
+                Log.d("AddReport", "Report added with ID: ${documentReference.id}")
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                Log.e("AddReport", "Error adding report", e)
+            }
     }
 }
 
