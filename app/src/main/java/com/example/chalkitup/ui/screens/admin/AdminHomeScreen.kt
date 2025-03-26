@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,7 +53,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -66,12 +64,7 @@ import com.example.chalkitup.ui.viewmodel.admin.AdminHomeViewModel
 import com.example.chalkitup.ui.viewmodel.admin.Report
 import com.example.chalkitup.ui.viewmodel.admin.User
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
-import com.google.firebase.Timestamp
-import androidx.compose.foundation.rememberScrollState
-
-
 
 @Composable
 fun AdminHome(
@@ -88,7 +81,7 @@ fun AdminHome(
     val usersWithReports by viewModel.usersWithReports.collectAsState()
 
     val expandedTutorId = remember { mutableStateOf<String?>(null) }
-    val expandedTutorReports = remember { mutableStateOf<String?>(null) } //TODO
+    val expandedTutorReports = remember { mutableStateOf<String?>(null) }
     val expandUserReports = remember { mutableStateOf<String?>(null) }
 
     val showDialog = remember { mutableStateOf(false) }
@@ -102,7 +95,6 @@ fun AdminHome(
     var reason by remember { mutableStateOf("") }
 
     val reports by viewModel.reports.collectAsState()
-
 
     // Gradient Background
     val gradientBrush = Brush.verticalGradient(
@@ -118,96 +110,75 @@ fun AdminHome(
             .background(gradientBrush),
         contentAlignment = Alignment.TopCenter
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-        ) {
+        Column {
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(modifier = Modifier.weight(1f))
+                IconButton(onClick = {
+                    viewModel.signout()
+                    navController.navigate("start")
+                }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_logout_24),
+                        contentDescription = "Logout",
+                        tint = Color.White
+                    )
+                }
+            }
             Column(
                 modifier = Modifier
-                    .padding(32.dp)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
             ) {
-
-                Text(
-                    "ChalkItUp Admin",
-                    modifier = Modifier.padding(16.dp),
-                    fontSize = 25.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                Spacer(modifier = Modifier.height(40.dp))
-
                 Column(
-                    horizontalAlignment = Alignment.Start,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .padding(32.dp)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
-                        "New Tutors",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        "${unapprovedTutors.size} Tutors need to be approved",
-                        fontSize = 18.sp
+                        "ChalkItUp Admin",
+                        modifier = Modifier.padding(16.dp),
+                        fontSize = 25.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
+
+                    Spacer(modifier = Modifier.height(40.dp))
+
                     Column(
-                        modifier = Modifier.heightIn(max = 700.dp)
+                        horizontalAlignment = Alignment.Start,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .verticalScroll(rememberScrollState())
-                        ) {
-                            unapprovedTutors.forEach { tutor ->
+                        Text(
+                            "New Tutors",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp
+                        )
 
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = 16.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Card(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        border = BorderStroke(
-                                            2.dp,
-                                            MaterialTheme.colorScheme.surface
-                                        ),
-                                        colors = CardColors(
-                                            containerColor = Color(0xFFd2e5fa),
-                                            contentColor = Color.Black,
-                                            disabledContainerColor = Color.LightGray,
-                                            disabledContentColor = Color.DarkGray
-                                        ),
-                                        onClick = {
-                                            expandedTutorId.value =
-                                                if (expandedTutorId.value == tutor.id) {
-                                                    null // Collapse the card if already expanded
-                                                } else {
-                                                    tutor.id // Expand the clicked tutor's card
-                                                }
-                                        }
-                                    ) {
-                                        Text(
-                                            "${tutor.firstName} ${tutor.lastName}",
-                                            modifier = Modifier.padding(
-                                                vertical = 22.dp,
-                                                horizontal = 20.dp
-                                            ),
-                                            fontWeight = FontWeight.Bold, fontSize = 18.sp
-                                        )
-                                    }
-                                }
-                                if (expandedTutorId.value == tutor.id) {
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            "${unapprovedTutors.size} Tutors need to be approved",
+                            fontSize = 18.sp
+                        )
+                        Column(
+                            modifier = Modifier.heightIn(max = 700.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .verticalScroll(rememberScrollState())
+                            ) {
+                                unapprovedTutors.forEach { tutor ->
+
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(bottom = 8.dp),
+                                            .padding(top = 16.dp),
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
@@ -223,80 +194,123 @@ fun AdminHome(
                                                 disabledContainerColor = Color.LightGray,
                                                 disabledContentColor = Color.DarkGray
                                             ),
+                                            onClick = {
+                                                expandedTutorId.value =
+                                                    if (expandedTutorId.value == tutor.id) {
+                                                        null // Collapse the card if already expanded
+                                                    } else {
+                                                        tutor.id // Expand the clicked tutor's card
+                                                    }
+                                            }
                                         ) {
-                                            Column(
-                                                modifier = Modifier.padding(16.dp),
+                                            Text(
+                                                "${tutor.firstName} ${tutor.lastName}",
+                                                modifier = Modifier.padding(
+                                                    vertical = 22.dp,
+                                                    horizontal = 20.dp
+                                                ),
+                                                fontWeight = FontWeight.Bold, fontSize = 18.sp
+                                            )
+                                        }
+                                    }
+                                    if (expandedTutorId.value == tutor.id) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(bottom = 8.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Card(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                border = BorderStroke(
+                                                    2.dp,
+                                                    MaterialTheme.colorScheme.surface
+                                                ),
+                                                colors = CardColors(
+                                                    containerColor = Color(0xFFd2e5fa),
+                                                    contentColor = Color.Black,
+                                                    disabledContainerColor = Color.LightGray,
+                                                    disabledContentColor = Color.DarkGray
+                                                ),
                                             ) {
-                                                Row {
+                                                Column(
+                                                    modifier = Modifier.padding(16.dp),
+                                                ) {
+                                                    Row {
+                                                        Text(
+                                                            "Email:    ",
+                                                            fontWeight = FontWeight.Bold,
+                                                            fontSize = 18.sp
+                                                        )
+                                                        Text(
+                                                            tutor.email, color = Color(0xFF2196F3),
+                                                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                                                            fontSize = 18.sp
+                                                        )
+                                                    }
+                                                    Spacer(modifier = Modifier.height(16.dp))
+
                                                     Text(
-                                                        "Email:    ",
+                                                        "Subjects Offered",
                                                         fontWeight = FontWeight.Bold,
                                                         fontSize = 18.sp
                                                     )
+
+                                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                                    SubjectDisplay(tutor)
+
+                                                    Spacer(modifier = Modifier.height(16.dp))
+
                                                     Text(
-                                                        tutor.email, color = Color(0xFF2196F3),
-                                                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                                                        "Certifications",
+                                                        fontWeight = FontWeight.Bold,
                                                         fontSize = 18.sp
                                                     )
-                                                }
-                                                Spacer(modifier = Modifier.height(16.dp))
 
-                                                Text(
-                                                    "Subjects Offered",
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 18.sp
-                                                )
+                                                    Spacer(modifier = Modifier.height(8.dp))
 
-                                                Spacer(modifier = Modifier.height(8.dp))
+                                                    CertificationDisplay(
+                                                        tutor,
+                                                        certificationViewModel
+                                                    )
 
-                                                SubjectDisplay(tutor)
+                                                    Spacer(modifier = Modifier.height(16.dp))
 
-                                                Spacer(modifier = Modifier.height(16.dp))
-
-                                                Text(
-                                                    "Certifications",
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 18.sp
-                                                )
-
-                                                Spacer(modifier = Modifier.height(8.dp))
-
-                                                CertificationDisplay(tutor, certificationViewModel)
-
-                                                Spacer(modifier = Modifier.height(16.dp))
-
-                                                Row(
-                                                    horizontalArrangement = Arrangement.Center,
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    Button(
-                                                        modifier = Modifier.weight(0.6f),
-                                                        shape = RoundedCornerShape(8.dp),
-                                                        colors = ButtonDefaults.buttonColors(
-                                                            containerColor = Color(0xFF06C59C),
-                                                        ),
-                                                        onClick = {
-                                                            showDialog.value = true
-                                                            tutorToApprove.value = tutor
-                                                        }
+                                                    Row(
+                                                        horizontalArrangement = Arrangement.Center,
+                                                        verticalAlignment = Alignment.CenterVertically
                                                     ) {
-                                                        Text("Approve", color = Color.White)
-                                                    }
-
-                                                    Spacer(modifier = Modifier.width(16.dp))
-
-                                                    Button(
-                                                        modifier = Modifier.weight(0.4f),
-                                                        shape = RoundedCornerShape(8.dp),
-                                                        colors = ButtonDefaults.buttonColors(
-                                                            containerColor = Color.Red,
-                                                        ),
-                                                        onClick = {
-                                                            showDenyDialog.value = true
-                                                            tutorToDeny.value = tutor
+                                                        Button(
+                                                            modifier = Modifier.weight(0.6f),
+                                                            shape = RoundedCornerShape(8.dp),
+                                                            colors = ButtonDefaults.buttonColors(
+                                                                containerColor = Color(0xFF06C59C),
+                                                            ),
+                                                            onClick = {
+                                                                showDialog.value = true
+                                                                tutorToApprove.value = tutor
+                                                            }
+                                                        ) {
+                                                            Text("Approve", color = Color.White)
                                                         }
-                                                    ) {
-                                                        Text("Deny", color = Color.White)
+
+                                                        Spacer(modifier = Modifier.width(16.dp))
+
+                                                        Button(
+                                                            modifier = Modifier.weight(0.4f),
+                                                            shape = RoundedCornerShape(8.dp),
+                                                            colors = ButtonDefaults.buttonColors(
+                                                                containerColor = Color.Red,
+                                                            ),
+                                                            onClick = {
+                                                                showDenyDialog.value = true
+                                                                tutorToDeny.value = tutor
+                                                            }
+                                                        ) {
+                                                            Text("Deny", color = Color.White)
+                                                        }
                                                     }
                                                 }
                                             }
@@ -305,106 +319,336 @@ fun AdminHome(
                                 }
                             }
                         }
-                    }
 
-                    Spacer(modifier = Modifier.height(30.dp))
+                        Spacer(modifier = Modifier.height(30.dp))
 
-                    Text(
-                        "Active Tutors",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp
-                    )
+                        Text(
+                            "Active Tutors",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp
+                        )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    Text(
-                        "${approvedTutors.size} Tutors currently having sessions",
-                        fontSize = 18.sp
-                    )
+                        Text(
+                            "${approvedTutors.size} Tutors currently having sessions",
+                            fontSize = 18.sp
+                        )
 
-                    Column(
-                        modifier = Modifier.heightIn(max = 700.dp)
-                    ) {
                         Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .verticalScroll(rememberScrollState())
+                            modifier = Modifier.heightIn(max = 700.dp)
                         ) {
-                            approvedTutors.forEach { tutor ->
-                                val tutorReports = reports.filter { it.userId == tutor.id }
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = 16.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Card(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        border = BorderStroke(
-                                            2.dp,
-                                            MaterialTheme.colorScheme.surface
-                                        ),
-                                        colors = CardColors(
-                                            containerColor = Color(0xFFd2e5fa),
-                                            contentColor = Color.Black,
-                                            disabledContainerColor = Color.LightGray,
-                                            disabledContentColor = Color.DarkGray
-                                        ),
-                                        onClick = {
-                                            expandedTutorId.value =
-                                                if (expandedTutorId.value == tutor.id) {
-                                                    null // Collapse the card if already expanded
-                                                } else {
-                                                    tutor.id // Expand the clicked tutor's card
-                                                }
-                                        }
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .verticalScroll(rememberScrollState())
+                            ) {
+                                approvedTutors.forEach { tutor ->
+                                    val tutorReports = reports.filter { it.userId == tutor.id }
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 16.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically
+                                        Card(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            border = BorderStroke(
+                                                2.dp,
+                                                MaterialTheme.colorScheme.surface
+                                            ),
+                                            colors = CardColors(
+                                                containerColor = Color(0xFFd2e5fa),
+                                                contentColor = Color.Black,
+                                                disabledContainerColor = Color.LightGray,
+                                                disabledContentColor = Color.DarkGray
+                                            ),
+                                            onClick = {
+                                                expandedTutorId.value =
+                                                    if (expandedTutorId.value == tutor.id) {
+                                                        null // Collapse the card if already expanded
+                                                    } else {
+                                                        tutor.id // Expand the clicked tutor's card
+                                                    }
+                                            }
                                         ) {
-                                            // profile picture
-                                            Spacer(modifier = Modifier.width(16.dp))
-                                            AsyncImage(
-                                                model = profilePictures[tutor.id]
-                                                    ?: R.drawable.chalkitup,
-                                                contentDescription = "Profile Picture",
-                                                modifier = Modifier
-                                                    .size(50.dp)
-                                                    .clip(CircleShape)
-                                                    .border(2.dp, Color.Gray, CircleShape)
-                                                    .clickable {
-                                                        expandedTutorId.value =
-                                                            if (expandedTutorId.value == tutor.id) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                // profile picture
+                                                Spacer(modifier = Modifier.width(16.dp))
+                                                AsyncImage(
+                                                    model = profilePictures[tutor.id]
+                                                        ?: R.drawable.chalkitup,
+                                                    contentDescription = "Profile Picture",
+                                                    modifier = Modifier
+                                                        .size(50.dp)
+                                                        .clip(CircleShape)
+                                                        .border(2.dp, Color.Gray, CircleShape)
+                                                        .clickable {
+                                                            expandedTutorId.value =
+                                                                if (expandedTutorId.value == tutor.id) {
+                                                                    null // Collapse the card if already expanded
+                                                                } else {
+                                                                    tutor.id // Expand the clicked tutor's card
+                                                                }
+                                                        }
+                                                )
+
+                                                Text(
+                                                    "${tutor.firstName} ${tutor.lastName}",
+                                                    modifier = Modifier.padding(
+                                                        vertical = 22.dp,
+                                                        horizontal = 20.dp
+                                                    ),
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 18.sp,
+                                                )
+                                                if (tutorReports.isNotEmpty()) {
+                                                    Box(modifier = Modifier.weight(1f))
+                                                    Text(
+                                                        "${tutorReports.size}",
+                                                        color = Color.Red,
+                                                        fontWeight = FontWeight.Bold,
+                                                        fontSize = 18.sp
+                                                    )
+                                                    IconButton(onClick = {
+                                                        expandedTutorReports.value =
+                                                            if (expandedTutorReports.value == tutor.id) {
                                                                 null // Collapse the card if already expanded
                                                             } else {
                                                                 tutor.id // Expand the clicked tutor's card
                                                             }
                                                     }
-                                            )
-
-                                            Text(
-                                                "${tutor.firstName} ${tutor.lastName}",
-                                                modifier = Modifier.padding(
-                                                    vertical = 22.dp,
-                                                    horizontal = 20.dp
+                                                    ) {
+                                                        Icon(
+                                                            painter = painterResource(id = R.drawable.baseline_report_gmailerrorred_24),
+                                                            contentDescription = "Report icon",
+                                                            tint = Color.Red,
+                                                            modifier = Modifier.size(24.dp)
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (expandedTutorId.value == tutor.id && tutorReports.isNotEmpty()) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Card(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .heightIn(max = 200.dp),
+                                                border = BorderStroke(
+                                                    2.dp,
+                                                    MaterialTheme.colorScheme.surface
                                                 ),
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 18.sp,
-                                            )
-                                            if (tutorReports.isNotEmpty()) {
+                                                colors = CardColors(
+                                                    containerColor = Color(0xFFd2e5fa),
+                                                    contentColor = Color.Black,
+                                                    disabledContainerColor = Color.LightGray,
+                                                    disabledContentColor = Color.DarkGray
+                                                ),
+                                            ) {
+                                                Column(
+                                                    modifier = Modifier
+                                                        .padding(16.dp)
+                                                        .verticalScroll(rememberScrollState()),
+                                                ) {
+                                                    Text(
+                                                        "${tutorReports.size} Reports",
+                                                        fontWeight = FontWeight.Bold,
+                                                        fontSize = 18.sp
+                                                    )
+
+                                                    tutorReports.forEach { report ->
+                                                        ReportItem(report, viewModel = viewModel)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (expandedTutorId.value == tutor.id) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(bottom = 8.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Card(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                border = BorderStroke(
+                                                    2.dp,
+                                                    MaterialTheme.colorScheme.surface
+                                                ),
+                                                colors = CardColors(
+                                                    containerColor = Color(0xFFd2e5fa),
+                                                    contentColor = Color.Black,
+                                                    disabledContainerColor = Color.LightGray,
+                                                    disabledContentColor = Color.DarkGray
+                                                ),
+                                            ) {
+                                                Column(
+                                                    modifier = Modifier.padding(16.dp),
+                                                ) {
+                                                    Row {
+                                                        Text(
+                                                            "Email:    ",
+                                                            fontWeight = FontWeight.Bold,
+                                                            fontSize = 18.sp
+                                                        )
+                                                        Text(
+                                                            tutor.email, color = Color(0xFF2196F3),
+                                                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                                                            fontSize = 18.sp
+                                                        )
+                                                    }
+                                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                                    Row(
+                                                        horizontalArrangement = Arrangement.Center,
+                                                        verticalAlignment = Alignment.CenterVertically
+                                                    ) {
+                                                        Button(
+                                                            modifier = Modifier.weight(0.6f),
+                                                            shape = RoundedCornerShape(8.dp),
+                                                            colors = ButtonDefaults.buttonColors(
+                                                                containerColor = Color(0xFF06C59C),
+                                                            ),
+                                                            onClick = {
+                                                                // go to tutors profile
+                                                                println("Tutor ID: ${tutor.id}")
+                                                                navController.navigate("profile/${tutor.id}")
+                                                            }
+                                                        ) {
+                                                            Text(
+                                                                "View Profile",
+                                                                color = Color.White
+                                                            )
+                                                        }
+
+                                                        Spacer(modifier = Modifier.width(16.dp))
+
+                                                        Button(
+                                                            modifier = Modifier.weight(0.4f),
+                                                            shape = RoundedCornerShape(8.dp),
+                                                            colors = ButtonDefaults.buttonColors(
+                                                                containerColor = Color.Red,
+                                                            ),
+                                                            onClick = {
+                                                                showDeactivateDialog.value = true
+                                                                tutorToDeactivate.value = tutor
+                                                            }
+                                                        ) {
+                                                            Text("Deactivate", color = Color.White)
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+
+                        Spacer(modifier = Modifier.height(30.dp))
+
+                        Text(
+                            "Reported Users",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            "${usersWithReports.size} Reported Users",
+                            fontSize = 18.sp
+                        )
+
+                        Column(
+                            modifier = Modifier.heightIn(max = 700.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .verticalScroll(rememberScrollState())
+                            ) {
+                                // REPORTED USERS
+                                usersWithReports.forEach { user ->
+                                    val usersReports = reports.filter { it.userId == user.id }
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 16.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Card(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            border = BorderStroke(
+                                                2.dp,
+                                                MaterialTheme.colorScheme.surface
+                                            ),
+                                            colors = CardColors(
+                                                containerColor = Color(0xFFd2e5fa),
+                                                contentColor = Color.Black,
+                                                disabledContainerColor = Color.LightGray,
+                                                disabledContentColor = Color.DarkGray
+                                            ),
+                                            onClick = {
+                                                expandUserReports.value =
+                                                    if (expandUserReports.value == user.id) {
+                                                        null // Collapse the card if already expanded
+                                                    } else {
+                                                        user.id // Expand the clicked tutor's card
+                                                    }
+                                            }
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                // profile picture
+                                                Spacer(modifier = Modifier.width(16.dp))
+                                                AsyncImage(
+                                                    model = profilePicturesReported[user.id]
+                                                        ?: R.drawable.chalkitup,
+                                                    contentDescription = "Profile Picture",
+                                                    modifier = Modifier
+                                                        .size(50.dp)
+                                                        .clip(CircleShape)
+                                                        .border(2.dp, Color.Gray, CircleShape)
+                                                )
+
+                                                Text(
+                                                    "${user.firstName} ${user.lastName}",
+                                                    modifier = Modifier.padding(
+                                                        vertical = 22.dp,
+                                                        horizontal = 20.dp
+                                                    ),
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 18.sp,
+                                                )
+
                                                 Box(modifier = Modifier.weight(1f))
                                                 Text(
-                                                    "${tutorReports.size}",
+                                                    "${usersReports.size}",
                                                     color = Color.Red,
                                                     fontWeight = FontWeight.Bold, fontSize = 18.sp
                                                 )
                                                 IconButton(onClick = {
-                                                    expandedTutorReports.value =
-                                                        if (expandedTutorReports.value == tutor.id) {
+                                                    expandUserReports.value =
+                                                        if (expandUserReports.value == user.id) {
                                                             null // Collapse the card if already expanded
                                                         } else {
-                                                            tutor.id // Expand the clicked tutor's card
+                                                            user.id // Expand the clicked tutor's card
                                                         }
                                                 }
                                                 ) {
@@ -415,352 +659,126 @@ fun AdminHome(
                                                         modifier = Modifier.size(24.dp)
                                                     )
                                                 }
+
                                             }
                                         }
                                     }
-                                }
-                                if (expandedTutorId.value == tutor.id && tutorReports.isNotEmpty()) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Card(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .heightIn(max = 200.dp),
-                                            border = BorderStroke(
-                                                2.dp,
-                                                MaterialTheme.colorScheme.surface
-                                            ),
-                                            colors = CardColors(
-                                                containerColor = Color(0xFFd2e5fa),
-                                                contentColor = Color.Black,
-                                                disabledContainerColor = Color.LightGray,
-                                                disabledContentColor = Color.DarkGray
-                                            ),
-                                        ) {
-                                            Column(
-                                                modifier = Modifier
-                                                    .padding(16.dp)
-                                                    .verticalScroll(rememberScrollState()),
-                                            ) {
-                                                Text(
-                                                    "${tutorReports.size} Reports",
-                                                    fontWeight = FontWeight.Bold, fontSize = 18.sp
-                                                )
-
-                                                tutorReports.forEach { report ->
-                                                    ReportItem(report, viewModel = viewModel)
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                if (expandedTutorId.value == tutor.id) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(bottom = 8.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Card(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            border = BorderStroke(
-                                                2.dp,
-                                                MaterialTheme.colorScheme.surface
-                                            ),
-                                            colors = CardColors(
-                                                containerColor = Color(0xFFd2e5fa),
-                                                contentColor = Color.Black,
-                                                disabledContainerColor = Color.LightGray,
-                                                disabledContentColor = Color.DarkGray
-                                            ),
-                                        ) {
-                                            Column(
-                                                modifier = Modifier.padding(16.dp),
-                                            ) {
-                                                Row {
-                                                    Text(
-                                                        "Email:    ",
-                                                        fontWeight = FontWeight.Bold,
-                                                        fontSize = 18.sp
-                                                    )
-                                                    Text(
-                                                        tutor.email, color = Color(0xFF2196F3),
-                                                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                                                        fontSize = 18.sp
-                                                    )
-                                                }
-                                                Spacer(modifier = Modifier.height(16.dp))
-
-                                                // TODO total tutor hours
-                                                // TODO total session count
-                                                // TODO sessions this week
-
-
-                                                Row(
-                                                    horizontalArrangement = Arrangement.Center,
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    Button(
-                                                        modifier = Modifier.weight(0.6f),
-                                                        shape = RoundedCornerShape(8.dp),
-                                                        colors = ButtonDefaults.buttonColors(
-                                                            containerColor = Color(0xFF06C59C),
-                                                        ),
-                                                        onClick = {
-                                                            // go to tutors profile
-                                                            println("Tutor ID: ${tutor.id}")
-                                                            navController.navigate("profile/${tutor.id}")
-                                                        }
-                                                    ) {
-                                                        Text("View Profile", color = Color.White)
-                                                    }
-
-                                                    Spacer(modifier = Modifier.width(16.dp))
-
-                                                    Button(
-                                                        modifier = Modifier.weight(0.4f),
-                                                        shape = RoundedCornerShape(8.dp),
-                                                        colors = ButtonDefaults.buttonColors(
-                                                            containerColor = Color.Red,
-                                                        ),
-                                                        onClick = {
-                                                            showDeactivateDialog.value = true
-                                                            tutorToDeactivate.value = tutor
-                                                        }
-                                                    ) {
-                                                        Text("Deactivate", color = Color.White)
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-
-                    Spacer(modifier = Modifier.height(30.dp))
-
-                    Text(
-                        "Reported Users",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        "${usersWithReports.size} Reported Users",
-                        fontSize = 18.sp
-                    )
-
-                    Column(
-                        modifier = Modifier.heightIn(max = 700.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .verticalScroll(rememberScrollState())
-                        ) {
-                            // REPORTED USERS
-                            usersWithReports.forEach { user ->
-                                val usersReports = reports.filter { it.userId == user.id }
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = 16.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Card(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        border = BorderStroke(
-                                            2.dp,
-                                            MaterialTheme.colorScheme.surface
-                                        ),
-                                        colors = CardColors(
-                                            containerColor = Color(0xFFd2e5fa),
-                                            contentColor = Color.Black,
-                                            disabledContainerColor = Color.LightGray,
-                                            disabledContentColor = Color.DarkGray
-                                        ),
-                                        onClick = {
-                                            expandUserReports.value =
-                                                if (expandUserReports.value == user.id) {
-                                                    null // Collapse the card if already expanded
-                                                } else {
-                                                    user.id // Expand the clicked tutor's card
-                                                }
-                                        }
-                                    ) {
+                                    if (expandUserReports.value == user.id) {
                                         Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            // profile picture
-                                            Spacer(modifier = Modifier.width(16.dp))
-                                            AsyncImage(
-                                                model = profilePicturesReported[user.id]
-                                                    ?: R.drawable.chalkitup,
-                                                contentDescription = "Profile Picture",
+                                            Card(
                                                 modifier = Modifier
-                                                    .size(50.dp)
-                                                    .clip(CircleShape)
-                                                    .border(2.dp, Color.Gray, CircleShape)
-                                            )
-
-                                            Text(
-                                                "${user.firstName} ${user.lastName}",
-                                                modifier = Modifier.padding(
-                                                    vertical = 22.dp,
-                                                    horizontal = 20.dp
+                                                    .fillMaxWidth()
+                                                    .heightIn(max = 200.dp),
+                                                border = BorderStroke(
+                                                    2.dp,
+                                                    MaterialTheme.colorScheme.surface
                                                 ),
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 18.sp,
-                                            )
-
-                                            Box(modifier = Modifier.weight(1f))
-                                            Text(
-                                                "${usersReports.size}",
-                                                color = Color.Red,
-                                                fontWeight = FontWeight.Bold, fontSize = 18.sp
-                                            )
-                                            IconButton(onClick = {
-                                                expandUserReports.value =
-                                                    if (expandUserReports.value == user.id) {
-                                                        null // Collapse the card if already expanded
-                                                    } else {
-                                                        user.id // Expand the clicked tutor's card
-                                                    }
-                                            }
+                                                colors = CardColors(
+                                                    containerColor = Color(0xFFd2e5fa),
+                                                    contentColor = Color.Black,
+                                                    disabledContainerColor = Color.LightGray,
+                                                    disabledContentColor = Color.DarkGray
+                                                ),
                                             ) {
-                                                Icon(
-                                                    painter = painterResource(id = R.drawable.baseline_report_gmailerrorred_24),
-                                                    contentDescription = "Report icon",
-                                                    tint = Color.Red,
-                                                    modifier = Modifier.size(24.dp)
-                                                )
-                                            }
-
-                                        }
-                                    }
-                                }
-                                if (expandUserReports.value == user.id) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Card(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .heightIn(max = 200.dp),
-                                            border = BorderStroke(
-                                                2.dp,
-                                                MaterialTheme.colorScheme.surface
-                                            ),
-                                            colors = CardColors(
-                                                containerColor = Color(0xFFd2e5fa),
-                                                contentColor = Color.Black,
-                                                disabledContainerColor = Color.LightGray,
-                                                disabledContentColor = Color.DarkGray
-                                            ),
-                                        ) {
-                                            Column(
-                                                modifier = Modifier
-                                                    .padding(16.dp)
-                                                    .verticalScroll(rememberScrollState()),
-                                            ) {
-                                                Text(
-                                                    "${usersReports.size} Reports",
-                                                    fontWeight = FontWeight.Bold, fontSize = 18.sp
-                                                )
-
-                                                usersReports.forEach { report ->
-                                                    ReportItem(report, viewModel = viewModel)
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                if (expandUserReports.value == user.id) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(bottom = 8.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Card(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            border = BorderStroke(
-                                                2.dp,
-                                                MaterialTheme.colorScheme.surface
-                                            ),
-                                            colors = CardColors(
-                                                containerColor = Color(0xFFd2e5fa),
-                                                contentColor = Color.Black,
-                                                disabledContainerColor = Color.LightGray,
-                                                disabledContentColor = Color.DarkGray
-                                            ),
-                                        ) {
-                                            Column(
-                                                modifier = Modifier.padding(16.dp),
-                                            ) {
-                                                Row {
+                                                Column(
+                                                    modifier = Modifier
+                                                        .padding(16.dp)
+                                                        .verticalScroll(rememberScrollState()),
+                                                ) {
                                                     Text(
-                                                        "Email:    ",
+                                                        "${usersReports.size} Reports",
                                                         fontWeight = FontWeight.Bold,
                                                         fontSize = 18.sp
                                                     )
-                                                    Text(
-                                                        user.email, color = Color(0xFF2196F3),
-                                                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                                                        fontSize = 18.sp
-                                                    )
-                                                }
-                                                Spacer(modifier = Modifier.height(16.dp))
 
-                                                Row(
-                                                    horizontalArrangement = Arrangement.Center,
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    Button(
-                                                        modifier = Modifier.weight(0.6f),
-                                                        shape = RoundedCornerShape(8.dp),
-                                                        colors = ButtonDefaults.buttonColors(
-                                                            containerColor = Color(0xFF06C59C),
-                                                        ),
-                                                        onClick = {
-                                                            // go to tutors profile
-                                                            println("Tutor ID: ${user.id}")
-                                                            navController.navigate("profile/${user.id}")
-                                                        }
-                                                    ) {
-                                                        Text("View Profile", color = Color.White)
+                                                    usersReports.forEach { report ->
+                                                        ReportItem(report, viewModel = viewModel)
                                                     }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (expandUserReports.value == user.id) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(bottom = 8.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Card(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                border = BorderStroke(
+                                                    2.dp,
+                                                    MaterialTheme.colorScheme.surface
+                                                ),
+                                                colors = CardColors(
+                                                    containerColor = Color(0xFFd2e5fa),
+                                                    contentColor = Color.Black,
+                                                    disabledContainerColor = Color.LightGray,
+                                                    disabledContentColor = Color.DarkGray
+                                                ),
+                                            ) {
+                                                Column(
+                                                    modifier = Modifier.padding(16.dp),
+                                                ) {
+                                                    Row {
+                                                        Text(
+                                                            "Email:    ",
+                                                            fontWeight = FontWeight.Bold,
+                                                            fontSize = 18.sp
+                                                        )
+                                                        Text(
+                                                            user.email, color = Color(0xFF2196F3),
+                                                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                                                            fontSize = 18.sp
+                                                        )
+                                                    }
+                                                    Spacer(modifier = Modifier.height(16.dp))
 
-                                                    Spacer(modifier = Modifier.width(16.dp))
-
-                                                    Button(
-                                                        modifier = Modifier.weight(0.4f),
-                                                        shape = RoundedCornerShape(8.dp),
-                                                        colors = ButtonDefaults.buttonColors(
-                                                            containerColor = Color.Red,
-                                                        ),
-                                                        onClick = {
-                                                            showDeactivateDialog.value = true
-                                                            tutorToDeactivate.value =
-                                                                user // TODO does this work -- deactivate students too
-                                                        }
+                                                    Row(
+                                                        horizontalArrangement = Arrangement.Center,
+                                                        verticalAlignment = Alignment.CenterVertically
                                                     ) {
-                                                        Text("Deactivate", color = Color.White)
+                                                        Button(
+                                                            modifier = Modifier.weight(0.6f),
+                                                            shape = RoundedCornerShape(8.dp),
+                                                            colors = ButtonDefaults.buttonColors(
+                                                                containerColor = Color(0xFF06C59C),
+                                                            ),
+                                                            onClick = {
+                                                                // go to tutors profile
+                                                                println("Tutor ID: ${user.id}")
+                                                                navController.navigate("profile/${user.id}")
+                                                            }
+                                                        ) {
+                                                            Text(
+                                                                "View Profile",
+                                                                color = Color.White
+                                                            )
+                                                        }
+
+                                                        Spacer(modifier = Modifier.width(16.dp))
+
+                                                        Button(
+                                                            modifier = Modifier.weight(0.4f),
+                                                            shape = RoundedCornerShape(8.dp),
+                                                            colors = ButtonDefaults.buttonColors(
+                                                                containerColor = Color.Red,
+                                                            ),
+                                                            onClick = {
+                                                                showDeactivateDialog.value = true
+                                                                tutorToDeactivate.value =
+                                                                    user
+                                                            }
+                                                        ) {
+                                                            Text("Deactivate", color = Color.White)
+                                                        }
                                                     }
                                                 }
                                             }
@@ -771,27 +789,6 @@ fun AdminHome(
                         }
                     }
                 }
-
-                Row (
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Button(
-                        modifier = Modifier.padding(40.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF2196F3),
-                        ),
-                        onClick = {
-                            viewModel.signout()
-                            navController.navigate("start")
-                        }
-                    ) {
-                        Text("Logout") //TODO move this to topappbar
-                    }
-                }
-
-
             }
         }
     }
@@ -952,7 +949,7 @@ fun AdminHome(
                             viewModel.denyTutor(tutor,reason,"deactivate")
                             viewModel.fetchUnapprovedTutors()
                             viewModel.fetchApprovedTutors()
-                            viewModel.fetchReportsAndUsers() //TODO
+                            viewModel.fetchReportsAndUsers()
                             reason = ""
                         }
                         showDeactivateDialog.value = false
@@ -1079,7 +1076,6 @@ fun SubjectDisplay(tutor: User) {
     }
 }
 
-//TODO
 @Composable
 fun ReportItem(report: Report, viewModel: AdminHomeViewModel) {
     var showResolveDialog by remember { mutableStateOf(false) }
@@ -1135,7 +1131,6 @@ fun ReportItem(report: Report, viewModel: AdminHomeViewModel) {
             .padding(10.dp)
             .clickable {
                 // Handle report item click
-                // TODO open dialog to resolve report and remove from firestore
                 showResolveDialog = true
             }
     ) {

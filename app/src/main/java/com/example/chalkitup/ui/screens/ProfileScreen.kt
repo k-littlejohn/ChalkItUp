@@ -147,25 +147,27 @@ fun ProfileScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            Row (
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                // Report button
-                IconButton(onClick = { showReportDialog = true }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_report_gmailerrorred_24),
-                        contentDescription = "Report button",
-                        modifier = Modifier.size(30.dp),
-                    )
-                }
-                if (showReportDialog) {
-                    ReportDialog(
-                        onDismiss = { showReportDialog = false },
-                        viewModel = profileViewModel,
-                        targetedUser
-                    )
+            if(targetedUser.isNotEmpty()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    // Report button
+                    IconButton(onClick = { showReportDialog = true }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_report_gmailerrorred_24),
+                            contentDescription = "Report button",
+                            modifier = Modifier.size(30.dp),
+                        )
+                    }
+                    if (showReportDialog) {
+                        ReportDialog(
+                            onDismiss = { showReportDialog = false },
+                            viewModel = profileViewModel,
+                            targetedUser
+                        )
+                    }
                 }
             }
 
