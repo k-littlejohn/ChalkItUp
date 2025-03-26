@@ -28,16 +28,17 @@ import androidx.compose.ui.graphics.Brush
 // Title, then description.
 data class TextEntry(val title: String, val description: String)
 
-// Screen Gradient
-val gradientBrush = Brush.verticalGradient(
-    colors = listOf(
-        Color(0xFF54A4FF), // 5% Blue
-        Color.White, Color.White, Color.White, Color.White // 95% White
-    )
-)
-
 @Composable
 fun StartScreen(navController: NavController) {
+    // Screen Gradient
+    val gradientBrush = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF54A4FF), // 5% Blue
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface,
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface // 95% White
+        )
+    )
+
     var currentImageIndex by remember { mutableStateOf(0) }
 
     val images = listOf(
@@ -116,7 +117,7 @@ fun StartScreen(navController: NavController) {
                 text = textEntries[currentImageIndex].title,
                 fontSize = 29.4.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontFamily = AtkinsonFont
             )
             Text(
@@ -159,13 +160,13 @@ fun StartScreen(navController: NavController) {
             Row {
                 Text(
                     text = "Don't have an account? ",
-                    color = Color.Black,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 15.sp,
                     fontFamily = AtkinsonFont
                 )
                 Text(
                     text = "Sign Up",
-                    color = Color.Black,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,
                     fontFamily = AtkinsonFont,

@@ -1,6 +1,8 @@
 package com.example.chalkitup.ui.screens
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
@@ -12,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.chalkitup.ui.components.BottomNavigationBar
+import com.example.chalkitup.ui.components.MovingCharacterGif
 import com.example.chalkitup.ui.components.MyTopBar
 import com.example.chalkitup.ui.components.NavigationDrawer
 import com.example.chalkitup.ui.nav.NavGraph
@@ -29,6 +32,7 @@ import kotlinx.coroutines.launch
  * and conditional visibility of top and bottom bars based on the current route.
  * It also observes the user's authentication state and navigates to the home screen if the user is logged in.
  */
+@RequiresApi(Build.VERSION_CODES.TIRAMISU) // Removing this gives an minimum required API error on the NavGraph call -Jeremelle
 @Composable
 fun MainScreen() {
     //------------------------------VARIABLES----------------------------------------------
@@ -141,6 +145,7 @@ fun MainScreen() {
                     )
                 }
             },
+
             bottomBar = {
                 // Conditionally show the bottom navigation bar based on the current route.
                 if (showBottomBar) {
@@ -151,6 +156,9 @@ fun MainScreen() {
             Box(modifier = Modifier.padding(paddingValues)) {
                 // Display the screens based on the navigation graph.
                 NavGraph(navController)
+
+                // Moving GIF Character
+                MovingCharacterGif()
             }
         }
     }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,7 +32,7 @@ fun AwaitingApproval(
     val gradientBrushEmail = Brush.verticalGradient(
         colors = listOf(
             Color(0xFF06C59C), // 5% Blue
-            Color.White, Color.White, Color.White, Color(0xFF54A4FF) // 95% White
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface, Color(0xFF54A4FF) // 95% White
         )
     )
 
@@ -56,7 +57,7 @@ fun AwaitingApproval(
                 fontFamily = AtkinsonFontEmail,
                 fontWeight = FontWeight.Bold,
                 fontSize = 22.sp,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onSurface
             )
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -67,7 +68,7 @@ fun AwaitingApproval(
                             "When an Admin has approved your account you will be able to login.",
                     fontFamily = AtkinsonFontEmail,
                     fontSize = 16.sp,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
             Spacer(modifier = Modifier.height(32.dp))

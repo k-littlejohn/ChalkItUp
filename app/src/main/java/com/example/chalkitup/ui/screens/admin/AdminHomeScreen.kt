@@ -26,6 +26,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -80,7 +81,7 @@ fun AdminHome(
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
             Color(0xFF54A4FF), // 5% Blue
-            Color.White, Color.White
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface
         )
     )
 
@@ -133,7 +134,7 @@ fun AdminHome(
                         ) {
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
-                                border = BorderStroke(2.dp, Color.White),
+                                border = BorderStroke(2.dp, MaterialTheme.colorScheme.surface),
                                 colors = CardColors(
                                     containerColor = Color(0xFFd2e5fa),
                                     contentColor = Color.Black,
@@ -248,7 +249,7 @@ fun AdminHome(
                         ) {
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
-                                border = BorderStroke(2.dp, Color.White),
+                                border = BorderStroke(2.dp, MaterialTheme.colorScheme.surface),
                                 colors = CardColors(
                                     containerColor = Color(0xFFd2e5fa),
                                     contentColor = Color.Black,

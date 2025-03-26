@@ -148,7 +148,8 @@ fun EditProfileScreen(
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
             Color(0xFF06C59C),//Color(0xFF54A4FF), // 5% Blue
-            Color.White, Color.White, Color.White, Color.White //95% white
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface,
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface //95% white
         )
     )
 
@@ -326,7 +327,6 @@ fun EditProfileScreen(
                         color = Color.Gray
                     )
                 }
-
                 // Display list of subjects the tutor teaches.
                 Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
                     LazyColumn {
@@ -384,7 +384,8 @@ fun EditProfileScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Upload a file")
+                    Text("Upload a file",
+                    color = Color.White)
                 }
 
                 // Display selected files if any.
@@ -486,7 +487,8 @@ fun EditProfileScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Save Changes")
+                    Text("Save Changes",
+                    color = Color.White)
                 }
 
                 Spacer(modifier = Modifier.width(8.dp))
@@ -499,12 +501,10 @@ fun EditProfileScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Cancel")
+                    Text("Cancel",
+                    color = Color.White)
                 }
             }
         }
     }
 }
-
-
-

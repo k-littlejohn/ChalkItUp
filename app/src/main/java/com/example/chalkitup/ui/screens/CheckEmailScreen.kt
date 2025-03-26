@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.unit.dp
 
 
@@ -36,20 +37,21 @@ val AtkinsonFontEmail = FontFamily(
     Font(R.font.atkinson_extrabold, FontWeight.ExtraBold)
 )
 
-val gradientBrushEmail = Brush.verticalGradient(
-    colors = listOf(
-        Color(0xFF06C59C), // 5% Blue
-        Color.White, Color.White, Color.White, Color(0xFF54A4FF) // 95% White
-    )
-)
-
 // UI for the check email screen
 
 @Composable
 fun CheckEmailScreen(
     viewModel: AuthViewModel,
     checkType: String,  // "verify" or "reset"
-    navController: NavController) {
+    navController: NavController
+) {
+    val gradientBrushEmail = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF06C59C), // 5% Blue
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface,
+            MaterialTheme.colorScheme.surface, Color(0xFF54A4FF) // 95% White
+        )
+    )
 
     var successMessage by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -69,7 +71,7 @@ fun CheckEmailScreen(
                 fontFamily = AtkinsonFontEmail,
                 fontWeight = FontWeight.Bold,
                 fontSize = 22.sp,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -86,7 +88,7 @@ fun CheckEmailScreen(
                                 "                          email address.",
                         fontFamily = AtkinsonFontEmail,
                         fontSize = 16.sp,
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
 
@@ -95,7 +97,7 @@ fun CheckEmailScreen(
                 Text("Didn't receive an email?",
                     fontFamily = AtkinsonFontEmail,
                     fontSize = 14.sp,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -109,7 +111,8 @@ fun CheckEmailScreen(
                     )
                 }
                 ) {
-                    Text("Send another email")
+                    Text("Send another email",
+                        color = MaterialTheme.colorScheme.onSurface)
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))
@@ -124,7 +127,8 @@ fun CheckEmailScreen(
                         imageVector = Icons.Outlined.ArrowBack,
                         contentDescription = "Back to Home"
                     )
-                    Text("Back to Home")
+                    Text("Back to Home",
+                        color = MaterialTheme.colorScheme.onSurface)
                 }
 
                 if (successMessage.isNotEmpty()) {
@@ -147,7 +151,7 @@ fun CheckEmailScreen(
                                 "                          your password.",
                         fontFamily = AtkinsonFontEmail,
                         fontSize = 16.sp,
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
 
@@ -160,7 +164,8 @@ fun CheckEmailScreen(
                         imageVector = Icons.Outlined.ArrowBack,
                         contentDescription = "Back to Home"
                     )
-                    Text("Back to Home")
+                    Text("Back to Home",
+                        color = MaterialTheme.colorScheme.onSurface)
                 }
 
             }

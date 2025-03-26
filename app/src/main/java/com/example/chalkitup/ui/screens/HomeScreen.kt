@@ -2,7 +2,6 @@ package com.example.chalkitup.ui.screens
 
 
 import android.util.Log
-import android.widget.Space
 import androidx.compose.ui.res.painterResource
 import com.example.chalkitup.R
 import androidx.compose.foundation.Image
@@ -28,12 +27,14 @@ import androidx.compose.foundation.border
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import java.lang.Exception
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.clickable
 import java.time.LocalDate
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.Brush
 import java.util.Locale
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
@@ -69,7 +70,7 @@ fun HomeScreen(
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
             Color(0xFF54A4FF), // 5% Blue
-            Color.White, Color.White
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface
         )
     )
 
@@ -101,13 +102,6 @@ fun HomeScreen(
                     tint = Color.White
                 )
             }
-
-            // Show dialog when showDialog is true
-//            if (showTutorial) {
-//                userType?.let { TutorialDialog(onDismiss = { showTutorial = false }, userType = it) }
-//            }
-
-
 
             Row(
                 modifier = Modifier
@@ -163,12 +157,12 @@ fun GreetingSection(userName: String, modifier: Modifier = Modifier) {
         Text(
             text = "$greetingText,",
             style = MaterialTheme.typography.headlineMedium,
-            color = Color.Black
+            color = MaterialTheme.colorScheme.onSurface
         )
         Text(
             text = userName,
             style = MaterialTheme.typography.headlineMedium,
-            color = Color.Black
+            color = MaterialTheme.colorScheme.onSurface
             )
     }
 }
@@ -352,7 +346,7 @@ fun UpcomingAppointments(
         Text(
             text = "Upcoming Appointments",
             fontSize = 20.sp,
-            color = Color.Black
+            color = MaterialTheme.colorScheme.onSurface
         )
 
         val context = LocalContext.current
@@ -380,7 +374,7 @@ fun UpcomingAppointments(
                     student = appointment.studentName,
                     mode = appointment.mode,
                     time = appointment.time,
-                    backgroundColor = Color.White,
+                    backgroundColor = MaterialTheme.colorScheme.surface,
                     onClick = { onAppointmentClick(appointment) }
                 )
                 BookingManager.addBooking(appointment)
@@ -408,7 +402,7 @@ fun UpcomingAppointments(
                     student = appointment.studentName,
                     mode = appointment.mode,
                     time = appointment.time,
-                    backgroundColor = Color.White,
+                    backgroundColor = MaterialTheme.colorScheme.surface,
                     onClick = { onAppointmentClick(appointment) }
                 )
 
@@ -651,7 +645,7 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(12.dp),
-            color = Color.White,
+            color = MaterialTheme.colorScheme.surface,
             modifier = Modifier
                 .requiredWidth(380.dp)
                 .padding(16.dp)
@@ -702,7 +696,6 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                 Text(
                                     "Click on this icon in the home screen any time to view this tutorial again",
                                     fontSize = 15.sp,
-                                    color = Color.DarkGray,
                                 )
                             }
                         }
@@ -720,11 +713,9 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                 verticalArrangement = Arrangement.Center,
                             ) {
                                 Text("This is your Home Page",
-                                    fontSize = 15.sp,
-                                    color = Color.DarkGray,)
+                                    fontSize = 15.sp)
                                 Text("Find your upcoming appointment dates, times, and details",
-                                    fontSize = 15.sp,
-                                    color = Color.DarkGray,)
+                                    fontSize = 15.sp,)
                             }
                         }
 
@@ -742,8 +733,7 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                 verticalArrangement = Arrangement.Center,
                             ) {
                                 Text("Tap on an upcoming appointment to find more details and view your $otherUserType's profile",
-                                    fontSize = 15.sp,
-                                    color = Color.DarkGray,)
+                                    fontSize = 15.sp,)
                             }
                         }
 
@@ -759,8 +749,7 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                 "Booking"
                             }
                             Text("Use the icons on the bottom of the screen to navigate between your Home Page, $secondIcon, Messages, and your Profile",
-                                fontSize = 15.sp,
-                                color = Color.DarkGray,)
+                                fontSize = 15.sp,)
 
                             // Photo
                             //IFELSE
@@ -780,14 +769,11 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                     verticalArrangement = Arrangement.Center,
                                 ) {
                                     Text("This is your availability page",
-                                        fontSize = 15.sp,
-                                        color = Color.DarkGray,)
+                                        fontSize = 15.sp,)
                                     Text("You can enter your availability for the current month and the next month and edit it whenever you please",
-                                        fontSize = 15.sp,
-                                        color = Color.DarkGray,)
+                                        fontSize = 15.sp,)
                                     Text("You'll be notified in the last week of the current month to remember to enter availability for the upcoming month",
-                                        fontSize = 15.sp,
-                                        color = Color.DarkGray,)
+                                        fontSize = 15.sp,)
                                 }
                             }
                             Spacer(modifier = Modifier.height(16.dp))
@@ -802,8 +788,7 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                     verticalArrangement = Arrangement.Center,
                                 ) {
                                     Text("Enter any availability you have for online appointments, in person appointments, or both!",
-                                        fontSize = 15.sp,
-                                        color = Color.DarkGray,)
+                                        fontSize = 15.sp,)
                                 }
                             }
                         } else {
@@ -818,14 +803,11 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                     verticalArrangement = Arrangement.Center,
                                 ) {
                                     Text("This is your Booking page",
-                                        fontSize = 15.sp,
-                                        color = Color.DarkGray,)
+                                        fontSize = 15.sp,)
                                     Text("Book a new appointment with a tutor here!",
-                                        fontSize = 15.sp,
-                                        color = Color.DarkGray,)
+                                        fontSize = 15.sp,)
                                     Text("Pick a subject, price range, date, and time, and be automatically matched with a qualified tutor!",
-                                        fontSize = 15.sp,
-                                        color = Color.DarkGray,)
+                                        fontSize = 15.sp,)
                                 }
                             }
                         }
@@ -843,11 +825,9 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                 verticalArrangement = Arrangement.Center,
                             ) {
                                 Text("This is your Messages page",
-                                    fontSize = 15.sp,
-                                    color = Color.DarkGray,)
+                                    fontSize = 15.sp,)
                                 Text("Find all your new and old messages here!",
-                                    fontSize = 15.sp,
-                                    color = Color.DarkGray,)
+                                    fontSize = 15.sp,)
                             }
                         }
 
@@ -865,8 +845,7 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                 verticalArrangement = Arrangement.Center,
                             ) {
                                 Text("Search for a $otherUserType to start a new chat with them!",
-                                    fontSize = 15.sp,
-                                    color = Color.DarkGray,)
+                                    fontSize = 15.sp,)
                             }
                         }
 
@@ -884,11 +863,9 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                 verticalArrangement = Arrangement.Center,
                             ) {
                                 Text("This is your Profile Page. This is how you'll appear to other users",
-                                    fontSize = 15.sp,
-                                    color = Color.DarkGray,)
+                                    fontSize = 15.sp,)
                                 Text("Edit your profile here!",
-                                    fontSize = 15.sp,
-                                    color = Color.DarkGray,)
+                                    fontSize = 15.sp,)
                             }
                         }
 
@@ -906,11 +883,9 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                 verticalArrangement = Arrangement.Center,
                             ) {
                                 Text("Edit your interests, subjects, bio, and more!",
-                                    fontSize = 15.sp,
-                                    color = Color.DarkGray,)
+                                    fontSize = 15.sp,)
                                 Text("Customize it to your liking!",
-                                    fontSize = 15.sp,
-                                    color = Color.DarkGray,)
+                                    fontSize = 15.sp,)
                             }
                         }
 
@@ -927,8 +902,7 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                 verticalArrangement = Arrangement.Center,
                             ) {
                                 Text("Enter your settings from the home page here",
-                                    fontSize = 15.sp,
-                                    color = Color.DarkGray,)
+                                    fontSize = 15.sp,)
                             }
                         }
 
@@ -945,8 +919,7 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                 verticalArrangement = Arrangement.Center,
                             ) {
                                 Text("Logout or delete your account here ... tbd are we adding more here??",
-                                    fontSize = 15.sp,
-                                    color = Color.DarkGray,)
+                                    fontSize = 15.sp,)
                             }
                         }
 
@@ -966,7 +939,8 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                     ),
                     shape = RoundedCornerShape(12.dp),
                 ) {
-                    Text("Close")
+                    Text("Close",
+                        color = Color.White)
                 }
             }
         }
