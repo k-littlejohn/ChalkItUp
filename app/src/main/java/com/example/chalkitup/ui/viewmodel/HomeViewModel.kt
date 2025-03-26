@@ -3,9 +3,11 @@ package com.example.chalkitup.ui.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -148,6 +150,64 @@ class HomeViewModel : ViewModel() {
         return weekNumber
     }
 
+    // Email Class info
+    data class Email (
+        var to: String = "",
+        var message: EmailMessage
+    )
+
+    data class EmailMessage(
+        var subject: String = "",
+        var html: String = "",
+        var body: String = "",
+    )
+
+    // Sends an email about a cancelled session
+    private fun sendEmail(
+        appointment: Appointment,
+        userID: String) {
+
+        val db = FirebaseFirestore.getInstance()
+        var userEmail = ""
+
+        viewModelScope.launch {
+            try {
+                val tempRef = db.collection("users").document(userID).get().await()
+                userEmail = tempRef.getString("email") ?: "Unknown"
+
+            } catch (e: Exception) {
+                println("Error fetching user email: ${e.message}")
+            }
+        }
+
+        val formattedSubject =
+            "${appointment.subjectObject["subject"]} ${appointment.subjectObject["grade"]} ${appointment.subjectObject["specialization"]}"
+
+        val emailSubj = "Your appointment for $formattedSubject has been cancelled"
+
+        val emailHTML =
+            "<p> Hi ${if (userID == appointment.studentID) appointment.studentName
+            else appointment.tutorName},<br><br> Your appointment for <b>$formattedSubject</b>" +
+                    " with ${if (userID == appointment.studentID) appointment.tutorName
+                    else appointment.studentName} at ${appointment.date}: ${appointment.time} has been cancelled. </p>" +
+                    "<p> The appointment has been removed from your calendar. </p>" +
+                    "<p> Have a good day! </p>" +
+                    "<p> -ChalkItUp Tutors </p>"
+
+        val email = Email(
+            to = userEmail,
+            message = EmailMessage(emailSubj, html = emailHTML)
+        )
+
+        db.collection("mail").add(email)
+            .addOnSuccessListener {
+                println("Appointment cancelled successfully!")
+            }
+            .addOnFailureListener { e ->
+                println("Error cancelling appointment: ${e.message}")
+            }
+    }
+
     fun cancelAppointment(appointment: Appointment, onComplete: () -> Unit) {
         val db = FirebaseFirestore.getInstance()
         val appointmentRef = db.collection("appointments").document(appointment.appointmentID)
@@ -197,6 +257,98 @@ class HomeViewModel : ViewModel() {
             .addOnFailureListener { e ->
                 Log.e("Appointment", "Error fetching appointment details", e)
             }
+
+        // Add the cancellation session notifications to firebase
+        addNotification(
+            notifUserID = appointment.tutorID,
+            notifUserName = appointment.tutorName,
+            notifTime = LocalTime.now().toString(),
+            notifDate = LocalDate.now().toString(),
+            comments = appointment.comments,
+            sessDate = appointment.date,
+            sessTime = appointment.time,
+            otherID = appointment.studentID,
+            otherName = appointment.studentName,
+            subject = appointment.subjectObject["subject"].toString(),
+            grade = appointment.subjectObject["grade"].toString(),
+            spec = appointment.subjectObject["specialization"].toString(),
+            mode = appointment.mode,
+            price = appointment.subjectObject["price"].toString()
+        )
+
+        addNotification(
+            notifUserID = appointment.studentID,
+            notifUserName = appointment.studentName,
+            notifTime = LocalTime.now().toString(),
+            notifDate = LocalDate.now().toString(),
+            comments = appointment.comments,
+            sessDate = appointment.date,
+            sessTime = appointment.time,
+            otherID = appointment.tutorID,
+            otherName = appointment.tutorName,
+            subject = appointment.subjectObject["subject"].toString(),
+            grade = appointment.subjectObject["grade"].toString(),
+            spec = appointment.subjectObject["specialization"].toString(),
+            mode = appointment.mode,
+            price = appointment.subjectObject["price"].toString()
+        )
+
+        // Send two emails about the cancelled sessions
+        sendEmail(
+            appointment = appointment,
+            userID = appointment.tutorID
+        )
+
+        sendEmail(
+            appointment = appointment,
+            userID = appointment.studentID
+        )
+    }
+
+    // Firebase order: notifications/actual notification info
+    private fun addNotification(
+        notifUserID: String,
+        notifUserName: String, // Name of the person in the notification
+        notifTime: String,
+        notifDate: String,
+        comments: String,
+        sessDate: String,
+        sessTime: String,
+        otherID: String, // ID of the other person in the notification
+        otherName: String, // ID of the other person in the notification
+        subject: String,
+        grade: String,
+        spec: String,
+        mode: String,
+        price: String
+    ) {
+        viewModelScope.launch {
+            val db = FirebaseFirestore.getInstance()
+
+            val notifData = hashMapOf(
+                "notifID" to "",
+                "notifType" to "Session",
+                "notifUserID" to notifUserID,
+                "notifUserName" to notifUserName,
+                "notifTime" to notifTime,
+                "notifDate" to notifDate,
+                "comments" to comments,
+                "sessType" to "Cancelled",
+                "sessDate" to sessDate,
+                "sessTime" to sessTime,
+                "otherID" to otherID,
+                "otherName" to otherName,
+                "subject" to subject,
+                "grade" to grade,
+                "spec" to spec,
+                "mode" to mode,
+                "price" to price
+            )
+
+            db.collection("notifications")
+                .add(notifData)
+                .await()
+        }
     }
 
     private fun markTimesAsAvailable(tutorId: String, date: String, timeSlots: List<String>) {

@@ -1,31 +1,31 @@
 package com.example.chalkitup.ui.viewmodel
 
+import com.example.chalkitup.ui.viewmodel.NotificationViewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.chalkitup.ui.components.TutorSubject
+import com.example.chalkitup.ui.screens.NotificationScreen
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
-import com.google.protobuf.Internal.ListAdapter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.File
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
-import java.io.File
-import org.json.JSONArray
-import org.json.JSONObject
-
 
 class BookingViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
@@ -99,9 +99,26 @@ class BookingViewModel : ViewModel() {
         }
     }
 
-    private fun sendEmail(onSuccess: () -> Unit) {
+    // Sends an email to the student and the tutor for the session.
+    private fun sendEmail(
+        tutorID: String,
+        onSuccess: () -> Unit) {
 
         Log.d("MessagesScreen", "fName: ${fName.value}, email: ${userEmail.value}")
+
+        var tutorEmail = ""
+
+        viewModelScope.launch {
+            try {
+                val tempRef = db.collection("users").document(tutorID)
+                    .get()
+                    .await()
+                tutorEmail = tempRef.getString("email") ?: "Unknown"
+
+            } catch (e: java.lang.Exception) {
+                println("Error fetching user email: ${e.message}")
+            }
+        }
 
         val formattedSubject =
             "${userSubject.value!!.subject} ${userSubject.value!!.grade} ${userSubject.value!!.specialization}"
@@ -115,12 +132,36 @@ class BookingViewModel : ViewModel() {
                     "<p> Have a good day! </p>" +
                     "<p> -ChalkItUp Tutors </p>"
 
-        val email = Email(
+        val tutorEmailHTML =
+            "<p> Hi ${tutorName.value},<br><br> Your appointment for <b>$formattedSubject</b>" +
+                    " with ${fName.value} has been booked at ${date.value}: ${timeSlot.value}. </p>" +
+                    "<p> The rate of the appointment is: ${price.value} <p>" +
+                    "<p> The appointment has been added to your calendar. </p>" +
+                    "<p> Have a good day! </p>" +
+                    "<p> -ChalkItUp Tutors </p>"
+
+
+        // Sends an email to student and the tutor
+        val studEmail = Email(
             to = userEmail.value!!,
             message = EmailMessage(emailSubj, emailHTML)
         )
 
-        db.collection("mail").add(email)
+        db.collection("mail").add(studEmail)
+            .addOnSuccessListener {
+                println("Appointment booked successfully!")
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                println("Error booking appointment: ${e.message}")
+            }
+
+        val tutEmail = Email(
+            to = tutorEmail,
+            message = EmailMessage(emailSubj, tutorEmailHTML)
+        )
+
+        db.collection("mail").add(tutEmail)
             .addOnSuccessListener {
                 println("Appointment booked successfully!")
                 onSuccess()
@@ -161,6 +202,32 @@ class BookingViewModel : ViewModel() {
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> get() = _error
+
+    // Function to get the 'active' field for the current user
+    fun getCurrentUserActiveStatus(onComplete: (Boolean) -> Unit) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId == null) {
+            // If no user is signed in, return false (or handle it however you'd like)
+            onComplete(false)
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                // Fetch the current user's document by their userId
+                val userDoc = db.collection("users").document(userId).get().await()
+
+                // Get the 'active' field (defaults to false if not found)
+                val activeStatus = userDoc.getBoolean("active") ?: false
+
+                // Call the onComplete lambda with the active status
+                onComplete(activeStatus)
+            } catch (e: Exception) {
+                Log.e("AdminViewModel", "Error fetching user active status: ${e.message}")
+                onComplete(false) // Return false if there's an error
+            }
+        }
+    }
 
     fun toggleIsCurrentMonth() {
         _isCurrentMonth.value = !_isCurrentMonth.value
@@ -218,6 +285,7 @@ class BookingViewModel : ViewModel() {
             try {
                 db.collection("users")
                     .whereEqualTo("userType", "Tutor") // Filter for tutors only
+                    .whereEqualTo("active", true) // Filter for active tutors only
                     .get()
                     .addOnSuccessListener { querySnapshot ->
                         val matchedTutorIds = mutableListOf<String>()
@@ -553,6 +621,7 @@ class BookingViewModel : ViewModel() {
             )
 
             sendEmail(
+                tutorID = tutorId,
                 onSuccess = {
                     onSuccess()
                 }
@@ -713,6 +782,42 @@ class BookingViewModel : ViewModel() {
         db.collection("appointments")
             .add(sessionData)
             .await()
+
+        // To add the information for a notification
+        // One to show for the tutor and one for the student
+        addNotification(
+            notifUserID = studentId,
+            notifUserName = studentFullName,
+            notifTime = LocalTime.now().toString(),
+            notifDate = LocalDate.now().toString(),
+            comments = comments,
+            sessDate = day.toString(),
+            sessTime = formattedTimeRange,
+            otherID = tutorId,
+            otherName = tutorFullName,
+            subject = formattedSubject,
+            grade = subject.grade,
+            spec = subject.specialization,
+            mode = formattedSessionType,
+            price = subject.price
+        )
+
+        addNotification(
+            notifUserID = tutorId,
+            notifUserName = tutorFullName,
+            notifTime = LocalTime.now().toString(),
+            notifDate = LocalDate.now().toString(),
+            comments = comments,
+            sessDate = day.toString(),
+            sessTime = formattedTimeRange,
+            otherID = studentId,
+            otherName = studentFullName,
+            subject = formattedSubject,
+            grade = subject.grade,
+            spec = subject.specialization,
+            mode = formattedSessionType,
+            price = subject.price
+        )
     }
 
     private suspend fun fetchUserFullName(userId: String): String {
@@ -728,6 +833,52 @@ class BookingViewModel : ViewModel() {
         } catch (e: Exception) {
             // Handle errors (e.g., Firestore network issues)
             ""
+        }
+    }
+
+    // Firebase order: notifications/actual notification info
+    private fun addNotification(
+        notifUserID: String,
+        notifUserName: String, // Name of the person in the notification
+        notifTime: String,
+        notifDate: String,
+        comments: String,
+        sessDate: String,
+        sessTime: String,
+        otherID: String, // ID of the other person in the notification
+        otherName: String, // ID of the other person in the notification
+        subject: String,
+        grade: String,
+        spec: String,
+        mode: String,
+        price: String
+    ) {
+        viewModelScope.launch {
+            val db = FirebaseFirestore.getInstance()
+
+            val notifData = hashMapOf(
+                "notifID" to "",
+                "notifType" to "Session",
+                "notifUserID" to notifUserID,
+                "notifUserName" to notifUserName,
+                "notifTime" to notifTime,
+                "notifDate" to notifDate,
+                "comments" to comments,
+                "sessType" to "Booked",
+                "sessDate" to sessDate,
+                "sessTime" to sessTime,
+                "otherID" to otherID,
+                "otherName" to otherName,
+                "subject" to subject,
+                "grade" to grade,
+                "spec" to spec,
+                "mode" to mode,
+                "price" to price
+            )
+
+            db.collection("notifications")
+                .add(notifData)
+                .await()
         }
     }
 

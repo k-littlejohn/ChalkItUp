@@ -2,6 +2,8 @@ package com.example.chalkitup.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,8 +11,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -32,6 +37,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.chalkitup.R
@@ -123,7 +129,8 @@ fun SubjectGradeItem(
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text(text = tutorSubject.subject.ifEmpty { "Subject" }, fontSize = 14.sp)
+                Text(text = tutorSubject.subject.ifEmpty { "Subject" }, fontSize = 14.sp,
+                    color = Color.White)
             }
 
             // Subject dropdown menu
@@ -149,7 +156,8 @@ fun SubjectGradeItem(
                             text = {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
 
-                                    Text(subj)
+                                    Text(subj,
+                                        color = Color.Black)
 
                                     Box(modifier = Modifier.weight(1f))
 
@@ -199,7 +207,8 @@ fun SubjectGradeItem(
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text(text = tutorSubject.grade.ifEmpty { "Gr" }, fontSize = 14.sp)
+                Text(text = tutorSubject.grade.ifEmpty { "Gr" }, fontSize = 14.sp,
+                    color = Color.White)
             }
 
             // Determine the list of available grade levels based on the subject
@@ -228,7 +237,8 @@ fun SubjectGradeItem(
                             .background(Color.White, shape = RoundedCornerShape(8.dp))
                     ) {
                         DropdownMenuItem(
-                            text = { Text(grade) },
+                            text = { Text(grade,
+                                color = Color.Black) },
                             onClick = {
                                 onGradeChange(grade) // Update the grade when a selection is made
                                 onSpecChange("") // Reset specialization when grade level changes
@@ -260,7 +270,8 @@ fun SubjectGradeItem(
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text(text = tutorSubject.specialization.ifEmpty { "Level" }, fontSize = 14.sp)
+                    Text(text = tutorSubject.specialization.ifEmpty { "Level" },
+                        color = Color.White, fontSize = 14.sp)
                 }
 
                 // Determine the list of available specializations based on the grade
@@ -290,7 +301,8 @@ fun SubjectGradeItem(
                                 .background(Color.White, shape = RoundedCornerShape(8.dp))
                         ) {
                             DropdownMenuItem(
-                                text = { Text(spec) },
+                                text = { Text(spec,
+                                    color = Color.Black) },
                                 onClick = {
                                     onSpecChange(spec) // Update the specialization when a selection is made
                                     expandedSpec = false // Close the dropdown
@@ -309,61 +321,77 @@ fun SubjectGradeItem(
 
     //--------------------------price start-----------------
     Column()
-        {
+    {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(100.dp)
                 .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically)
-        {
+            verticalAlignment = Alignment.Top
+        ) {
             Box(modifier = Modifier.weight(3.5f)) {
 
                 Button(
-                    onClick = { expandPrice = true }, // Show the subject dropdown when clicked
+                    onClick = { expandPrice = !expandPrice }, // Toggle the price list visibility
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = when {
                             priceError || duplicateError -> errorButtonColor
-                            tutorSubject.price.isNotEmpty() -> selectedButtonColor
+                            tutorSubject.price.isNotEmpty() -> Color(0xFF78cca4)
                             else -> defaultButtonColor
                         }
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text(text = tutorSubject.price.ifEmpty { "Price" }, fontSize = 14.sp)
+                    Text(text = tutorSubject.price.ifEmpty { "Price" }, fontSize = 14.sp,
+                        color = Color.White)
                 }
 
-                DropdownMenu(
-                    expanded = expandPrice,
-                    onDismissRequest = { expandPrice = false },
-                    shadowElevation = 0.dp,
-                    containerColor = Color.Transparent,
-                    modifier = Modifier.width(75.dp)
-                ) {
-                    availablePrice.forEach { price -> // Iterate through available grade levels
-                        Box(
-                            modifier = Modifier
-                                .padding(2.dp)
-                                .shadow(
-                                    6.dp,
-                                    shape = RoundedCornerShape(8.dp),
-                                    clip = true
-                                ) // Apply shadow properly
-                                .background(Color.White, shape = RoundedCornerShape(8.dp))
+                // Scrollable Price List
+                if (expandPrice) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 100.dp) // Set max height for the price list
+                            .background(Color.White, shape = RoundedCornerShape(8.dp))
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                    ) {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            DropdownMenuItem(
-                                text = { Text(price) },
-                                onClick = {
-                                    onPriceChange(price) // Update the price when a selection is made
-                                    expandPrice = false // Close the dropdown
+                            items(availablePrice) { price -> // Iterate through available price options
+                                Box(
+                                    modifier = Modifier
+                                        .padding(2.dp)
+                                        .fillMaxWidth()
+                                        .height(40.dp)
+                                        .background(
+                                            Color(0xFF78cca4),
+                                            shape = RoundedCornerShape(8.dp)
+                                        )
+                                        .clickable {
+                                            onPriceChange(price) // Update the price when selected
+                                            expandPrice = false // Close the price list
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = price,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier
+                                            .fillMaxWidth(),
+                                        fontSize = 14.sp,
+                                        color = Color.White,
+                                    )
                                 }
-                            )
+                            }
                         }
                     }
                 }
             }
 
-            ///------------------------------price fin
+        ///------------------------------price fin
 
             // Remove Button to delete the subject-grade-specialization item
             IconButton(onClick = onRemove) {
@@ -536,7 +564,8 @@ fun SubjectGradeItemNoPrice(
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text(text = tutorSubject.subject.ifEmpty { "Subject" }, fontSize = 14.sp)
+                Text(text = tutorSubject.subject.ifEmpty { "Subject" }, fontSize = 14.sp,
+                    color = Color.White)
             }
 
             // Subject dropdown menu
@@ -562,7 +591,8 @@ fun SubjectGradeItemNoPrice(
                             text = {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
 
-                                    Text(subj)
+                                    Text(subj,
+                                        color = Color.Black)
 
                                     Box(modifier = Modifier.weight(1f))
 
@@ -610,7 +640,8 @@ fun SubjectGradeItemNoPrice(
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text(text = tutorSubject.grade.ifEmpty { "Gr" }, fontSize = 14.sp)
+                Text(text = tutorSubject.grade.ifEmpty { "Gr" }, fontSize = 14.sp,
+                    color = Color.White)
             }
 
             // Determine the list of available grade levels based on the subject
@@ -639,7 +670,8 @@ fun SubjectGradeItemNoPrice(
                             .background(Color.White, shape = RoundedCornerShape(8.dp))
                     ) {
                         DropdownMenuItem(
-                            text = { Text(grade) },
+                            text = { Text(grade,
+                                color = Color.Black) },
                             onClick = {
                                 onGradeChange(grade) // Update the grade when a selection is made
                                 onSpecChange("") // Reset specialization when grade level changes
@@ -671,7 +703,8 @@ fun SubjectGradeItemNoPrice(
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text(text = tutorSubject.specialization.ifEmpty { "Level" }, fontSize = 14.sp)
+                    Text(text = tutorSubject.specialization.ifEmpty { "Level" }, fontSize = 14.sp,
+                        color = Color.White)
                 }
 
                 // Determine the list of available specializations based on the grade
@@ -701,7 +734,8 @@ fun SubjectGradeItemNoPrice(
                                 .background(Color.White, shape = RoundedCornerShape(8.dp))
                         ) {
                             DropdownMenuItem(
-                                text = { Text(spec) },
+                                text = { Text(spec,
+                                    color = Color.Black) },
                                 onClick = {
                                     onSpecChange(spec) // Update the specialization when a selection is made
                                     expandedSpec = false // Close the dropdown

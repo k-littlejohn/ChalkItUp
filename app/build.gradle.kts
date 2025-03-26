@@ -95,6 +95,7 @@ dependencies {
     implementation(libs.androidx.datastore)
     implementation(libs.gson)
 
+
     implementation(libs.firebase.database.ktx)
     implementation(libs.play.services.auth)
     implementation(libs.lifecycle.runtime.ktx.v262)
@@ -112,6 +113,7 @@ dependencies {
     implementation(libs.play.services.auth)
     implementation(libs.firebase.auth.v2100)
     implementation(libs.play.services.auth)
+    implementation(libs.protobuf.javalite)
 
     // ✅ Google Calendar API dependencies
     implementation(libs.google.api.client)  // Google API Client
@@ -120,4 +122,7 @@ dependencies {
 //    // JSON parsing su
 //    pport for Google APIs
     implementation(libs.google.http.client.gson)
+    // Gif display
+    implementation(libs.glide)
+    implementation(libs.glide.compose)
 }

@@ -82,18 +82,6 @@ fun SignupScreen(
 
     // Scroll states for the main form and the Terms & Conditions box.
     val scrollState = rememberScrollState() // Main form scroll state - entire screen
-//    val termsScrollState = rememberScrollState() // Terms & Conditions scroll state - inside Terms and Cond. box
-//
-//    // State variables for Terms and Conditions agreement.
-//    var hasScrolledToBottom by remember { mutableStateOf(false) }
-//    var hasAgreedToTerms by remember { mutableStateOf(false) }
-
-//    // Effect to track scrolling of the Terms & Conditions box.
-//    LaunchedEffect(termsScrollState.value) {
-//        if (!hasScrolledToBottom && termsScrollState.value == termsScrollState.maxValue) {
-//            hasScrolledToBottom = true
-//        }
-//    }
 
     // Context for accessing resources and system services.
     val context = LocalContext.current
@@ -172,7 +160,8 @@ fun SignupScreen(
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
             Color(0xFF54A4FF), // 5% Blue
-            Color.White, Color.White, Color.White, Color.White //95% white
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface,
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface //95% white
         )
     )
 
@@ -215,7 +204,7 @@ fun SignupScreen(
                 "Sign Up",
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onSurface
             ) // Not using rn : fontFamily = MontserratFont, -Kaitlyn
 
             Spacer(modifier = Modifier.height(75.dp))
@@ -598,7 +587,8 @@ fun SignupScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Upload a file")
+                    Text("Upload a file",
+                        color = Color.White)
                 }
 
                 // Display selected files if any.

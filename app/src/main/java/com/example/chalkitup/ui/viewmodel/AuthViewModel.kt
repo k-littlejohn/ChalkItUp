@@ -15,6 +15,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 //import kotlinx.coroutines.flow.internal.NoOpContinuation.context
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.time.LocalDate
+import java.time.LocalTime
 import org.json.JSONObject
 import java.io.File
 
@@ -223,7 +225,8 @@ class AuthViewModel : ViewModel() {
                                     "email" to email,
                                     "subjects" to subjects,
                                     "agreeToTerms" to false,
-                                    "adminApproved" to false
+                                    "adminApproved" to false,
+                                    "active" to true
                                 )
 
                                 // Save the user data in Firestore under their UID
@@ -251,6 +254,13 @@ class AuthViewModel : ViewModel() {
                                 // Handle errors if reloading the user data fails
                                 onError("Error reloading user: ${it.message}")
                             }
+
+                            addNotification(
+                                notifUserID = user.uid,
+                                notifUserName = firstName + lastName,
+                                notifTime = LocalTime.now().toString(),
+                                notifDate = LocalDate.now().toString(),
+                            )
                         } else {
                             // Handle case where user creation was successful but user is null
                             onError("Signup successful, but user is null")
@@ -355,11 +365,50 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Sends an app notification associated with a user's original sign up.
+     *
+     * @param notifUserID user id to send the notification to.
+     * @param notifUserName: user name to display on the notification
+     * @param notifTime time the notification occurred (grabbed from time).
+     */
+    private fun addNotification(
+        notifUserID: String,
+        notifUserName: String, // Name of the person in the notification
+        notifTime: String,
+        notifDate: String,
+    ) {
+        viewModelScope.launch {
+            val db = FirebaseFirestore.getInstance()
+
+            val notifData = hashMapOf(
+                "notifID" to "",
+                "notifType" to "Update",
+                "notifUserID" to notifUserID,
+                "notifUserName" to notifUserName,
+                "notifTime" to notifTime,
+                "notifDate" to notifDate,
+                "comments" to "Welcome to ChalkItUp Tutors!",
+                "sessType" to "",
+                "sessDate" to "",
+                "sessTime" to "",
+                "otherID" to "",
+                "otherName" to "",
+                "subject" to "",
+                "grade" to "",
+                "spec" to "",
+                "mode" to "",
+                "price" to "",
+            )
+
+            db.collection("notifications")
+                .add(notifData)
+                .await()
+        }
+    }
+
 
 }
-
-
-
 
 
 object OfflineDataManager {

@@ -31,6 +31,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.SliderDefaults
@@ -63,7 +64,6 @@ import com.example.chalkitup.ui.components.validateTutorSubjects
 import com.example.chalkitup.ui.components.SubjectGradeItemNoPrice
 import com.example.chalkitup.ui.components.TutorSubject
 import com.example.chalkitup.ui.components.TutorSubjectError
-import com.example.chalkitup.ui.viewmodel.BookingManager
 import com.example.chalkitup.ui.viewmodel.BookingViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -79,6 +79,15 @@ fun BookingScreen(
     viewModel: BookingViewModel
 ) {
     //------------------------------VARIABLES----------------------------------------------
+
+    var isActive by remember { mutableStateOf(false) }
+
+    LaunchedEffect(true) {
+        viewModel.getCurrentUserActiveStatus { activeStatus ->
+            isActive = activeStatus
+        }
+    }
+
 
     // Scroll state for the entire screen
     val scrollState = rememberScrollState()
@@ -188,7 +197,7 @@ fun BookingScreen(
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
             Color(0xFF54A4FF), // 5% Blue
-            Color.White, Color.White
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface
         )
     )
 
@@ -210,8 +219,16 @@ fun BookingScreen(
                 SuccessAlertDialog(onDismiss = { showSuccessDialog = false })
             }
 
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(40.dp))
+/*
+            Image(
+                painter = painterResource(id = R.drawable.chalkitup),
+                contentDescription = "Chalk It Up",
+                modifier = Modifier.size(300.dp)
+            )
 
+*/
+            Spacer(modifier = Modifier.height(10.dp))
             Text(
                 "Book an Appointment",
                 modifier = Modifier.padding(16.dp),
@@ -229,8 +246,7 @@ fun BookingScreen(
 
                 // Session Type Selection
                 Text(
-                    text = "Pick a Location",
-                    color = Color.Black,
+                    text = "Pick a Mode",
                     modifier = Modifier.padding(16.dp)
                 )
 
@@ -288,7 +304,6 @@ fun BookingScreen(
 
                 Text(
                     text = "Select your Subject",
-                    color = Color.Black,
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
 
@@ -350,7 +365,6 @@ fun BookingScreen(
                 ) {
                     Text(
                         text = "Hourly Rate          ",
-                        color = Color.Black
                     )
                     Text(
                         text = "\$${priceRange.start.toInt()} - \$${priceRange.endInclusive.toInt()}",
@@ -385,13 +399,10 @@ fun BookingScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 32.dp, vertical = 16.dp),
-                //   horizontalAlignment = Alignment.CenterHorizontally
-
             ) {
                 // Comments Box
                 Text(
                     text = "Add notes for your Tutor",
-                    color = Color.Black,
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
 
@@ -445,7 +456,7 @@ fun BookingScreen(
                     contentColor = Color.White
                 ),
                 shape = RoundedCornerShape(8.dp),
-                enabled = !continueSuccess
+                enabled = if (isActive) !continueSuccess else false
             ) {
                 Text("Continue", fontSize = 16.sp, modifier = Modifier.padding(4.dp))
             }
@@ -601,7 +612,8 @@ fun BookingScreen(
                                             .height(55.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Text(day)
+                                        Text(day,
+                                            color = Color.Black,)
                                     }
                                 }
                             }
@@ -699,7 +711,6 @@ fun BookingScreen(
                                 Text(
                                     "Select a Start time",
                                     modifier = Modifier.padding(16.dp),
-                                    color = Color.Black
                                 )
 
                                 Divider(
@@ -757,7 +768,6 @@ fun BookingScreen(
                                 Text(
                                     "Select an End time",
                                     modifier = Modifier.padding(16.dp),
-                                    color = Color.Black
                                 )
                                 Divider(
                                     color = Color.Gray, // Color of the divider

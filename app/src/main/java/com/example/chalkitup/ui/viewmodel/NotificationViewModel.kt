@@ -1,6 +1,5 @@
 package com.example.chalkitup.ui.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -11,7 +10,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.lang.Exception
 import java.time.LocalDate
-import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -40,7 +38,6 @@ class NotificationViewModel: ViewModel() {
         }
     }
 
-    // UNFINISHED!!
     private fun grabNotifications() {
         viewModelScope.launch {
             val currentUserID = FirebaseAuth.getInstance().currentUser?.uid
@@ -56,12 +53,9 @@ class NotificationViewModel: ViewModel() {
                         .get()
                         .await()
                         .documents
-                    
-                    println("User ID: $userNotifications")
 
                     _notifications.value = userNotifications
                         .mapNotNull {
-                            //it.getString("date")?.replace("\"", "") }
                             doc ->
                             val notification = doc.toObject(NotifClass::class.java)?.copy(notifID = doc.id)
 
@@ -79,8 +73,7 @@ class NotificationViewModel: ViewModel() {
                             LocalDate.parse(notification.notifDate,
                                 DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US))
                         }
-
-                    println("Notifs: $notifications")
+                    println("Notifications: $userNotifications")
 
                 } catch (e: Exception) {
                     println("Error fetching notifications: ${e.message}")
@@ -90,8 +83,9 @@ class NotificationViewModel: ViewModel() {
     }
 
     // Firebase order: notifications/actual notification info
-    fun addNotification(
+    private fun addNotification(
         notifType: String, // Update, Session, Message
+        notifUserID: String,
         notifUserName: String, // Name of the person in the notification
         notifTime: String,
         notifDate: String,
@@ -104,35 +98,35 @@ class NotificationViewModel: ViewModel() {
         subject: String,
         grade: String,
         spec: String,
-        mode: String
+        mode: String,
+        price: String
     ) {
         viewModelScope.launch {
-            val currentUserID = FirebaseAuth.getInstance().currentUser?.uid
-            if (currentUserID != null) {
-                val db = FirebaseFirestore.getInstance()
+            val db = FirebaseFirestore.getInstance()
 
-                val notifData = hashMapOf(
-                    "notifType" to notifType,
-                    "notifUserID" to currentUserID,
-                    "notifUserName" to notifUserName,
-                    "notifTime" to notifTime,
-                    "notifDate" to notifDate,
-                    "comments" to comments,
-                    "sessType" to sessType,
-                    "sessDate" to sessDate,
-                    "sessTime" to sessTime,
-                    "otherID" to otherID,
-                    "otherName" to otherName,
-                    "subject" to subject,
-                    "grade" to grade,
-                    "spec" to spec,
-                    "mode" to mode
-                )
+            val notifData = hashMapOf(
+                "notifID" to "",
+                "notifType" to notifType,
+                "notifUserID" to notifUserID,
+                "notifUserName" to notifUserName,
+                "notifTime" to notifTime,
+                "notifDate" to notifDate,
+                "comments" to comments,
+                "sessType" to sessType,
+                "sessDate" to sessDate,
+                "sessTime" to sessTime,
+                "otherID" to otherID,
+                "otherName" to otherName,
+                "subject" to subject,
+                "grade" to grade,
+                "spec" to spec,
+                "mode" to mode,
+                "price" to price
+            )
 
-                db.collection("notifications")
-                    .add(notifData)
-                    .await()
-            }
+            db.collection("notifications")
+                .add(notifData)
+                .await()
         }
     }
 }
@@ -161,5 +155,6 @@ data class NotifClass (
     val subject: String = "",
     val grade: String = "",
     val spec: String = "",
-    val mode: String = ""
+    val mode: String = "",
+    val price: String = ""
 )
