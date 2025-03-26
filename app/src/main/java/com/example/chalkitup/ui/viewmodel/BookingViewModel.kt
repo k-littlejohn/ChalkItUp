@@ -99,11 +99,26 @@ class BookingViewModel : ViewModel() {
         }
     }
 
-    // NOT FINISHED
-    // Need to grab emails for both the student and tutor
-    private fun sendEmail(onSuccess: () -> Unit) {
+    // Sends an email to the student and the tutor for the session.
+    private fun sendEmail(
+        tutorID: String,
+        onSuccess: () -> Unit) {
 
         Log.d("MessagesScreen", "fName: ${fName.value}, email: ${userEmail.value}")
+
+        var tutorEmail = ""
+
+        viewModelScope.launch {
+            try {
+                val tempRef = db.collection("users").document(tutorID)
+                    .get()
+                    .await()
+                tutorEmail = tempRef.getString("email") ?: "Unknown"
+
+            } catch (e: java.lang.Exception) {
+                println("Error fetching user email: ${e.message}")
+            }
+        }
 
         val formattedSubject =
             "${userSubject.value!!.subject} ${userSubject.value!!.grade} ${userSubject.value!!.specialization}"
@@ -117,12 +132,36 @@ class BookingViewModel : ViewModel() {
                     "<p> Have a good day! </p>" +
                     "<p> -ChalkItUp Tutors </p>"
 
-        val email = Email(
+        val tutorEmailHTML =
+            "<p> Hi ${tutorName.value},<br><br> Your appointment for <b>$formattedSubject</b>" +
+                    " with ${fName.value} has been booked at ${date.value}: ${timeSlot.value}. </p>" +
+                    "<p> The rate of the appointment is: ${price.value} <p>" +
+                    "<p> The appointment has been added to your calendar. </p>" +
+                    "<p> Have a good day! </p>" +
+                    "<p> -ChalkItUp Tutors </p>"
+
+
+        // Sends an email to student and the tutor
+        val studEmail = Email(
             to = userEmail.value!!,
             message = EmailMessage(emailSubj, emailHTML)
         )
 
-        db.collection("mail").add(email)
+        db.collection("mail").add(studEmail)
+            .addOnSuccessListener {
+                println("Appointment booked successfully!")
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                println("Error booking appointment: ${e.message}")
+            }
+
+        val tutEmail = Email(
+            to = tutorEmail,
+            message = EmailMessage(emailSubj, tutorEmailHTML)
+        )
+
+        db.collection("mail").add(tutEmail)
             .addOnSuccessListener {
                 println("Appointment booked successfully!")
                 onSuccess()
@@ -582,6 +621,7 @@ class BookingViewModel : ViewModel() {
             )
 
             sendEmail(
+                tutorID = tutorId,
                 onSuccess = {
                     onSuccess()
                 }
