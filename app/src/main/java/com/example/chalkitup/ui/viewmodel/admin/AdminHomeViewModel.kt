@@ -78,6 +78,9 @@ class AdminHomeViewModel : ViewModel() {
                 // Step 2: Fetch users by userId
                 val users = fetchUsersByIds(reportUserIds)
                 _usersWithReports.value = users
+
+                fetchProfilePicturesReported(users)
+
             } catch (e: Exception) {
                 Log.e("AdminViewModel", "Error fetching reports or users: ${e.message}")
             }
@@ -249,16 +252,6 @@ class AdminHomeViewModel : ViewModel() {
         notifTime: String,
         notifDate: String,
         comments: String,
-        sessDate: String,
-        sessTime: String,
-        otherID: String, // ID of the other person in the notification
-        otherName: String, // ID of the other person in the notification
-        subject: String,
-        grade: String,
-        spec: String,
-        mode: String,
-        price: String,
-        sessType: String,
         notifType: String
     ) {
         viewModelScope.launch {
@@ -272,16 +265,16 @@ class AdminHomeViewModel : ViewModel() {
                 "notifTime" to notifTime,
                 "notifDate" to notifDate,
                 "comments" to comments,
-                "sessType" to sessType,
-                "sessDate" to sessDate,
-                "sessTime" to sessTime,
-                "otherID" to otherID,
-                "otherName" to otherName,
-                "subject" to subject,
-                "grade" to grade,
-                "spec" to spec,
-                "mode" to mode,
-                "price" to price
+                "sessType" to "",
+                "sessDate" to "",
+                "sessTime" to "",
+                "otherID" to "",
+                "otherName" to "",
+                "subject" to "",
+                "grade" to "",
+                "spec" to "",
+                "mode" to "",
+                "price" to ""
             )
 
             db.collection("notifications")
@@ -298,7 +291,9 @@ class AdminHomeViewModel : ViewModel() {
 
         _unapprovedTutors.value = _unapprovedTutors.value.filterNot { it.id == tutor.id }
         _approvedTutors.value = _approvedTutors.value.filterNot { it.id == tutor.id }
-        _usersWithReports.value = _usersWithReports.value.filterNot { it.id == tutor.id } //TODO
+        _usersWithReports.value = _usersWithReports.value.filterNot { it.id == tutor.id }
+
+        deleteUserReports(tutor.id)
 
         tutorRef.update("adminApproved", true)
         tutorRef.update("active", false)
@@ -309,6 +304,30 @@ class AdminHomeViewModel : ViewModel() {
             .addOnFailureListener { e ->
                 Log.e("TutorDeactivation", "Error deactivating tutor ${tutor.id}", e)
             }
+    }
+
+    private fun deleteUserReports(userId: String) {
+        viewModelScope.launch {
+            try {
+                val db = FirebaseFirestore.getInstance()
+
+                val reportsSnapshot = db.collection("reports")
+                    .whereEqualTo("userId", userId)
+                    .get()
+                    .await()
+
+                for (report in reportsSnapshot.documents) {
+                    db.collection("reports").document(report.id)
+                        .delete()
+                        .await()
+                }
+
+                Log.d("AdminViewModel", "Tutor denied and reports deleted successfully")
+
+            } catch (e: Exception) {
+                Log.e("AdminViewModel", "Error denying tutor and deleting reports: ${e.message}")
+            }
+        }
     }
 
     private fun sendDeactivationEmail(tutor: User, reason: String, type: String) {
@@ -348,16 +367,6 @@ class AdminHomeViewModel : ViewModel() {
             notifDate = LocalDate.now().toString(),
             comments = "Your account has been $dType by an Admin. You have access to ChalkItUp with this account but will not be matched to any sessions." +
                     " Delete your account in app settings and sign up again to be reviewed again by an Admin. Admin Reason: $reason",
-            sessDate = "",
-            sessTime = "",
-            otherID = "",
-            otherName = "",
-            subject = "",
-            grade = "",
-            spec = "",
-            mode = "",
-            price = "",
-            sessType = "",
             notifType = "Deactivated"
         )
     }
@@ -392,16 +401,6 @@ class AdminHomeViewModel : ViewModel() {
             notifDate = LocalDate.now().toString(),
             comments = "Your Tutor account has been approved by an Admin! Admin Comments: " +
                     "Enter availability to start getting matched with Students! $reason",
-            sessDate = "",
-            sessTime = "",
-            otherID = "",
-            otherName = "",
-            subject = "",
-            grade = "",
-            spec = "",
-            mode = "",
-            price = "",
-            sessType = "",
             notifType = "Approved"
         )
     }
