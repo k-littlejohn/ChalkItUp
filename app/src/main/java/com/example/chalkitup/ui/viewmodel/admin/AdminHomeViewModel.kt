@@ -66,7 +66,7 @@ class AdminHomeViewModel : ViewModel() {
         }
     }
 
-    private fun fetchReportsAndUsers() {
+    fun fetchReportsAndUsers() {
         viewModelScope.launch {
             try {
                 // Step 1: Fetch all reports
@@ -197,7 +197,7 @@ class AdminHomeViewModel : ViewModel() {
     val storage = Firebase.storage
 
     // Function to load the profile picture from storage
-    private fun fetchProfilePictures(tutors: List<User>) { //TODO Have function to fetch pfp and variable to store them for reported users in fetchreportusers func
+    private fun fetchProfilePictures(tutors: List<User>) {
         viewModelScope.launch {
             val profileUrls = mutableMapOf<String, String?>()
 
@@ -214,6 +214,30 @@ class AdminHomeViewModel : ViewModel() {
             _profilePictureUrls.value = profileUrls
         }
     }
+
+    //TODO Have function to fetch pfp and variable to store them for reported users in fetchreportusers func
+    // LiveData to hold and observe the user's profile picture URL
+    private val _profilePictureUrlsReported = MutableStateFlow<Map<String, String?>>(emptyMap())
+    val profilePictureUrlsReported: StateFlow<Map<String, String?>> get() = _profilePictureUrlsReported
+    // Function to load the profile picture from storage
+    private fun fetchProfilePicturesReported(users: List<User>) {
+        viewModelScope.launch {
+            val profileUrls = mutableMapOf<String, String?>()
+
+            users.forEach { user ->
+                val storageRef = storage.reference.child("${user.id}/profilePicture.jpg")
+                try {
+                    val uri = storageRef.downloadUrl.await()
+                    profileUrls[user.id] = uri.toString()
+                } catch (e: Exception) {
+                    profileUrls[user.id] = null
+                }
+            }
+
+            _profilePictureUrlsReported.value = profileUrls
+        }
+    }
+
 
     fun signout() {
         FirebaseAuth.getInstance().signOut()
@@ -274,6 +298,7 @@ class AdminHomeViewModel : ViewModel() {
 
         _unapprovedTutors.value = _unapprovedTutors.value.filterNot { it.id == tutor.id }
         _approvedTutors.value = _approvedTutors.value.filterNot { it.id == tutor.id }
+        _usersWithReports.value = _usersWithReports.value.filterNot { it.id == tutor.id } //TODO
 
         tutorRef.update("adminApproved", true)
         tutorRef.update("active", false)
@@ -292,10 +317,10 @@ class AdminHomeViewModel : ViewModel() {
         } else {
             "deactivated"
         }
-        val emailSubj = "Your Tutor account for ChalkItUp has been $dType"
+        val emailSubj = "Your account for ChalkItUp has been $dType"
 
         val emailHTML =
-            "<p> Hi ${tutor.firstName},<br><br> Your Tutor account for <b>ChalkItUp</b> has been $dType by an Admin.<br><br></p>" +
+            "<p> Hi ${tutor.firstName},<br><br> Your account for <b>ChalkItUp</b> has been $dType by an Admin.<br><br></p>" +
                     "<p> <b> Admin Reason: </b> <p>" +
                     "<p> $reason </p>" +
                     "<p> You will have access to ChalkItUp with this account but will " +
@@ -321,7 +346,7 @@ class AdminHomeViewModel : ViewModel() {
             notifUserName = tutor.firstName,
             notifTime = LocalTime.now().toString(),
             notifDate = LocalDate.now().toString(),
-            comments = "Your Tutor account has been $dType by an Admin. You have access to ChalkItUp with this account but will not be matched to any sessions." +
+            comments = "Your account has been $dType by an Admin. You have access to ChalkItUp with this account but will not be matched to any sessions." +
                     " Delete your account in app settings and sign up again to be reviewed again by an Admin. Admin Reason: $reason",
             sessDate = "",
             sessTime = "",

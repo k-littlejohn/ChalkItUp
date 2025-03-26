@@ -81,6 +81,7 @@ fun AdminHome(
 ) {
 
     val profilePictures by viewModel.profilePictureUrls.collectAsState()
+    val profilePicturesReported by viewModel.profilePictureUrlsReported.collectAsState()
 
     val unapprovedTutors by viewModel.unapprovedTutors.collectAsState()
     val approvedTutors by viewModel.approvedTutors.collectAsState()
@@ -604,7 +605,7 @@ fun AdminHome(
                                             // profile picture
                                             Spacer(modifier = Modifier.width(16.dp))
                                             AsyncImage(
-                                                model = profilePictures[user.id]
+                                                model = profilePicturesReported[user.id]
                                                     ?: R.drawable.chalkitup,
                                                 contentDescription = "Profile Picture",
                                                 modifier = Modifier
@@ -929,9 +930,9 @@ fun AdminHome(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        "Are you sure you want to deactivate this tutor? " +
-                                "This tutor will be notified of their account's deactivation and prompted to delete their account. " +
-                                "They will have access to ChalkItUp but not be actively matched to sessions."
+                        "Are you sure you want to deactivate this user? " +
+                                "This user will be notified of their account's deactivation and be prompted to delete their account. " +
+                                "They will have access to ChalkItUp but cannot book sessions and wont be actively matched to sessions."
                     )
                     OutlinedTextField(
                         value = reason,
@@ -951,6 +952,7 @@ fun AdminHome(
                             viewModel.denyTutor(tutor,reason,"deactivate")
                             viewModel.fetchUnapprovedTutors()
                             viewModel.fetchApprovedTutors()
+                            viewModel.fetchReportsAndUsers() //TODO
                             reason = ""
                         }
                         showDeactivateDialog.value = false

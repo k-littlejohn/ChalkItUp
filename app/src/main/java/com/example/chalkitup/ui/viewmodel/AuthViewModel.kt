@@ -226,7 +226,7 @@ class AuthViewModel : ViewModel() {
                                     "subjects" to subjects,
                                     "agreeToTerms" to false,
                                     "adminApproved" to false,
-                                    "active" to true //TODO
+                                    "active" to true
                                 )
 
                                 // Save the user data in Firestore under their UID
