@@ -80,6 +80,15 @@ fun BookingScreen(
 ) {
     //------------------------------VARIABLES----------------------------------------------
 
+    var isActive by remember { mutableStateOf(false) }
+
+    LaunchedEffect(true) {
+        viewModel.getCurrentUserActiveStatus { activeStatus ->
+            isActive = activeStatus
+        }
+    }
+
+
     // Scroll state for the entire screen
     val scrollState = rememberScrollState()
 
@@ -447,7 +456,7 @@ fun BookingScreen(
                     contentColor = Color.White
                 ),
                 shape = RoundedCornerShape(8.dp),
-                enabled = !continueSuccess
+                enabled = if (isActive) !continueSuccess else false
             ) {
                 Text("Continue", fontSize = 16.sp, modifier = Modifier.padding(4.dp))
             }

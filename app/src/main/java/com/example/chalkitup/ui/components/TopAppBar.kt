@@ -61,7 +61,8 @@ fun MyTopBar(
     // screen the user is on
     val backgroundColor = when (currentRoute) {
         //"home" -> Color(0xFFFFFFFF)//MaterialTheme.colorScheme.primary
-        "profile","tutorAvailability","booking","home","start","login","signup","forgotPassword","termsAndCond","adminHome" -> Color(0xFF54A4FF) // Fill top-screen white space
+        "profile","tutorAvailability","booking","home","start","login","signup","forgotPassword","termsAndCond","adminHome",
+            "messages", "newMessage", "chat" -> Color(0xFF54A4FF) // Fill top-screen white space
         "checkEmail","awaitingApproval", "editProfile" -> Color(0xFF06C59C) // Fill top-screen white space
         else -> Color.White
     }
@@ -121,7 +122,8 @@ fun MyTopBar(
                             "messages" -> "Messages"
                             "notifications" -> "Notifications"
                             "newMessage" -> "New Chat"
-                            "start", "login", "signup", "forgotPassword", "checkEmail", "tutorAvailability", "termsAndCond", "adminHome", "awaitingApproval" -> ""
+                            "start", "login", "signup", "forgotPassword", "checkEmail", "tutorAvailability", "termsAndCond", "adminHome", "awaitingApproval",
+                                 "chat"-> ""
                             else -> "ChalkItUp Tutors"
                         }
                     )
@@ -147,11 +149,13 @@ fun MyTopBar(
                     }
                 }
                 "profile" -> {
-                    IconButton(onClick = { navController.navigate("settings") }) {
-                        Icon(
-                            Icons.Default.Settings, contentDescription = "Settings",
-                            modifier = Modifier.size(30.dp)
-                        )
+                    if (!targetedProfileView) {
+                        IconButton(onClick = { navController.navigate("settings") }) {
+                            Icon(
+                                Icons.Default.Settings, contentDescription = "Settings",
+                                modifier = Modifier.size(30.dp)
+                            )
+                        }
                     }
                 }
 
