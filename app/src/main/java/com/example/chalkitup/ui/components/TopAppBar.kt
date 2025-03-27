@@ -63,7 +63,7 @@ fun MyTopBar(
         //"home" -> Color(0xFFFFFFFF)//MaterialTheme.colorScheme.primary
         "profile","tutorAvailability","booking","home","start","login","signup","forgotPassword","termsAndCond","adminHome",
             "messages", "newMessage", "chat" -> Color(0xFF54A4FF) // Fill top-screen white space
-        "checkEmail","awaitingApproval", "editProfile" -> Color(0xFF06C59C) // Fill top-screen white space
+        "checkEmail","awaitingApproval", "editProfile","notifications" -> Color(0xFF06C59C) // Fill top-screen white space
         else -> Color.White
     }
 
@@ -117,9 +117,9 @@ fun MyTopBar(
                 ) {
                     Text(
                         text = when (currentRoute) {
-                            "profile" -> "Profile"
-                            "settings" -> "Settings"
-                            "messages" -> "Messages"
+                            "profile" -> ""
+                            "settings" -> ""
+                            "messages" -> ""
                             "notifications" -> "Notifications"
                             "newMessage" -> "New Chat"
                             "start", "login", "signup", "forgotPassword", "checkEmail", "tutorAvailability", "termsAndCond", "adminHome", "awaitingApproval",
@@ -175,7 +175,7 @@ fun MyTopBar(
                 }
             }
             // If viewing another user's profile, there is a back button
-            if (targetedProfileView) {
+            if (targetedProfileView || currentRoute == "notifications") {
                 IconButton(onClick = { navController.popBackStack() } ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",

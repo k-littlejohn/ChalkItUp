@@ -720,6 +720,12 @@ fun AppointmentPopup(
                     Text(text = appointment.subject)
                 }
                 Row {
+                    Text(text = "Price:          ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold)
+                    Text(text = appointment.subjectObject["price"] as? String ?: "N/A")
+                }
+                Row {
                     Text(text = "Mode:         ",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold)

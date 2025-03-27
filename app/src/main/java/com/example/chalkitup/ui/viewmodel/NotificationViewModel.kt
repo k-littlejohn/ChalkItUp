@@ -1,9 +1,13 @@
 package com.example.chalkitup.ui.viewmodel
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -24,6 +28,20 @@ class NotificationViewModel: ViewModel() {
     init {
         getUserName()
         grabNotifications()
+    }
+
+    // LiveData to hold and observe the user's profile picture URL
+    private val _profilePictureUrl = MutableLiveData<String?>()
+    val profilePictureUrl: LiveData<String?> get() = _profilePictureUrl
+
+    // Function to load the profile picture from storage
+    fun loadProfilePicture(userId: String) {
+        val storageRef = Firebase.storage.reference.child("$userId/profilePicture.jpg")
+        storageRef.downloadUrl.addOnSuccessListener { uri ->
+            _profilePictureUrl.value = uri.toString()
+        }.addOnFailureListener {
+            _profilePictureUrl.value = null // Set to null if no profile picture exists
+        }
     }
 
     private fun getUserName() {
