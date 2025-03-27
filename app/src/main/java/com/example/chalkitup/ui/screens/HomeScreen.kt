@@ -66,13 +66,6 @@ fun HomeScreen(
         println("showtutorial value is $showTutorial")
     }
 
-//    if (showTutorialOnFirstLogin.value) {
-//        showTutorial = true
-//    }
-//    LaunchedEffect(showTutorialOnFirstLogin.value) {
-//        showTutorial = showTutorialOnFirstLogin.value
-//    }
-
     var selectedAppointment by remember { mutableStateOf<Appointment?>(null) }
     val userName by homeViewModel.userName.collectAsState()
 
@@ -124,13 +117,13 @@ fun HomeScreen(
                     )
                 }
                 // Image to the right of the Info icon
-                Image(
-                    painter = painterResource(id = R.drawable.chalk_confused),
-                    contentDescription = "Confused Chalk",
-                    modifier = Modifier
-                        .size(80.dp)
-                        .offset(x = (-28).dp)
-                )
+//                Image(
+//                    painter = painterResource(id = R.drawable.chalk_confused),
+//                    contentDescription = "Confused Chalk",
+//                    modifier = Modifier
+//                        .size(80.dp)
+//                        .offset(x = (-28).dp)
+//                )
             }
 
 
@@ -659,35 +652,88 @@ fun AppointmentPopup(
         },
         text = {
             Column(modifier = Modifier.padding(16.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically
+                if (userType == "Tutor") {
+                    Text(text = "Student:              ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold)
+                } else {
+                    Text(text = "Tutor:              ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold)
+                }
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
+
                     // Profile Picture
                     AsyncImage(
                         model = profilePictureUrl ?: R.drawable.chalkitup,
                         contentDescription = "Profile Picture",
                         modifier = Modifier
-                            .size(170.dp)
+                            .size(90.dp)
                             .clip(CircleShape)
                             .border(2.dp, Color.Gray, CircleShape)
+                            .clickable {
+                                if (userType == "Tutor") {
+                                    navController.navigate("profile/${appointment.studentID}")
+                                } else {
+                                    navController.navigate("profile/${appointment.tutorID}")
+                                }
+                            }
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                if (userType == "Tutor") {
-                    Text(text = "Student:       ${appointment.studentName}")
-                } else {
-                    Text(text = "Tutor:             ${appointment.tutorName}")
-                }
+                    if (userType == "Tutor") {
+                        Text(
+                            text = appointment.studentName,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    } else {
+                        Text(
+                            text = appointment.tutorName,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
-                Text(text = "Date:              ${appointment.date}")
-                Text(text = "Time:             ${appointment.time}")
-                Text(text = "Subject:         ${appointment.subject}")
+                }
 
-                Text(text = "Mode:       ${appointment.mode}")
+                Spacer(modifier = Modifier.height(16.dp))
+                Row {
+                    Text(text = "Date:           ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold)
+                    Text(text = appointment.date)
+                }
+                Row {
+                    Text(text = "Time:          ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold)
+                    Text(text = appointment.time)
+                }
+                Row {
+                    Text(text = "Subject:      ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold)
+                    Text(text = appointment.subject)
+                }
+                Row {
+                    Text(text = "Mode:         ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold)
+                    Text(text = appointment.mode)
+                }
                 Spacer(modifier = Modifier.height(20.dp))
-                Text(text = "Comments: \n${appointment.comments}")
-
+                if (appointment.comments.isNotEmpty()) {
+                    Text(
+                        text = "Comments:              ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(text = appointment.comments)
+                }
                 errorMessage?.let {
                     Text(text = it, color = Color.Red)
                 }

@@ -35,9 +35,6 @@ class HomeViewModel : ViewModel() {
     private val _appointments = MutableStateFlow<List<Appointment>>(emptyList())
     val appointments: StateFlow<List<Appointment>> get() = _appointments
 
-//    private val _showTutorialDialog = MutableStateFlow(false)
-//    val showTutorialDialog: StateFlow<Boolean> = _showTutorialDialog
-
     fun checkFirstTimeLogin(onSuccess: () -> Unit) {
         val user = FirebaseAuth.getInstance().currentUser
         user?.let {
