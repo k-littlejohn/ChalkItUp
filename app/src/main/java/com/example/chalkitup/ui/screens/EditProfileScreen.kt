@@ -68,6 +68,8 @@ import com.example.chalkitup.ui.viewmodel.ProgressItem
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.ui.graphics.Brush
 
 
@@ -422,7 +424,9 @@ fun EditProfileScreen(
                 Button(onClick = {
                     var newItem = ProgressItem("", "")
                     progress.add(newItem)
-                }
+                },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06C59C)),
+                    shape = RoundedCornerShape(8.dp)
                 )
                 { Text("add progress") }
 
@@ -443,20 +447,35 @@ fun EditProfileScreen(
                 //------------------INTERESTS--------------------------------------
                 Spacer(modifier = Modifier.height(16.dp))
 
-
+                Text("Select your Interests", style = MaterialTheme.typography.titleMedium)
                 LaunchedEffect(userProfile) {
                     userProfile?.let {
                         interests.clear()
                         interests.addAll(it.interests.map { interest -> interest.copy() }) // Ensures a separate copy
                     }
                 }
-                Box(modifier = Modifier.heightIn(20.dp, 500.dp)) {
-                    LazyColumn {
-                        itemsIndexed(interests) { index, interest ->
+                Box(modifier = Modifier.heightIn(20.dp, 300.dp)) {
+//                    LazyColumn {
+//                        itemsIndexed(interests) { index, interest ->
+//                            InterestItem(
+//                                interest = interest,
+//                                onInterestChange = { isSelected ->
+//                                    interests[index] = interest.copy(isSelected = isSelected)
+//                                }
+//                            )
+//                        }
+//                    }
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2), // 3 columns
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(0.dp), // Spacing between rows
+                        horizontalArrangement = Arrangement.spacedBy(8.dp) // Spacing between columns
+                    ) {
+                        items(interests.size) { index ->
                             InterestItem(
-                                interest = interest,
+                                interest = interests[index],
                                 onInterestChange = { isSelected ->
-                                    interests[index] = interest.copy(isSelected = isSelected)
+                                    interests[index] = interests[index].copy(isSelected = isSelected)
                                 }
                             )
                         }
