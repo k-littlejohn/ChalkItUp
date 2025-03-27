@@ -85,7 +85,7 @@ fun MyTopBar(
     CenterAlignedTopAppBar(
         modifier = Modifier.height(110.dp), // Increased height for icon, felt 80.dp looked the best
         title = {
-            if (currentRoute == "home" || currentRoute == "editProfile") {
+            if (currentRoute == "home" || currentRoute == "editProfile" || currentRoute == "profile") {
                 Image(
                     painter = painterResource(id = R.drawable.logo1),
                     contentDescription = "Chalk & Eraser",
@@ -130,7 +130,7 @@ fun MyTopBar(
                 ) {
                     Text(
                         text = when (currentRoute) {
-                            "profile" -> ""
+                           // "profile" -> ""
                             "settings" -> ""
                             "messages" -> "Messages"
                             "notifications" -> "Notifications"
