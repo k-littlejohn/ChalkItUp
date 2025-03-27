@@ -261,7 +261,9 @@ fun ChatBubble(
                 text = message,
                 modifier = Modifier
                     .padding(horizontal = 8.dp, vertical = 6.dp),
-                color = if (isCurrentUser) Color.White else Color.White
+                color = if (isCurrentUser) Color.White else Color.White,
+                style = MaterialTheme.typography.body1
+
             )
         }
     }
