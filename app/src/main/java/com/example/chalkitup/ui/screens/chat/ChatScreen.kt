@@ -200,19 +200,23 @@ fun ChatScreen(
                             coroutineScope.launch {
 
                                 if (conversationId.isNullOrEmpty()) {
+
+                                    // First check if a conversation already exists
+                                    val existingConversationId = chatViewModel.getConversation(selectedUserId)
+
                                     // Fetch user details
-                                    val currentUser =
-                                        chatViewModel.fetchUser(chatViewModel.currentUserId)
+                                    val currentUser = chatViewModel.fetchUser(chatViewModel.currentUserId)
                                     val selectedUser = chatViewModel.fetchUser(selectedUserId)
 
-                                    // Create a new conversation
-                                    val newConversationId =
-                                        chatViewModel.createConversation(currentUser, selectedUser)
+//                                    // Create a new conversation
+//                                    val newConversationId = chatViewModel.createConversation(currentUser, selectedUser)
+
+                                    val finalConversationId = existingConversationId ?: chatViewModel.createConversation(currentUser, selectedUser)
 
                                     // If the conversation was successfully created, send the message
-                                    if (!newConversationId.isNullOrEmpty()) {
-                                        chatViewModel.setConversationId(newConversationId)
-                                        chatViewModel.sendMessage(newConversationId, messageToSend)
+                                    if (!finalConversationId.isNullOrEmpty()) {
+                                        chatViewModel.setConversationId(finalConversationId)
+                                        chatViewModel.sendMessage(finalConversationId, messageToSend)
                                         text = ""
                                     } else {
                                         Log.e("Chat", "Failed to create a new conversation.")
@@ -280,7 +284,7 @@ private fun formatDateHeader(timestamp: Long): String {
     val timeString = formatTime(timestamp)
 
     return when {
-        // If the message was sent yesterday
+        // If the message was sent today
         now.get(Calendar.YEAR) == messageTime.get(Calendar.YEAR) &&
             now.get(Calendar.DAY_OF_YEAR) == messageTime.get(Calendar.DAY_OF_YEAR) ->
             "Today, $timeString"
@@ -381,8 +385,8 @@ fun ChatAppBar(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth(),
-            color = Color.LightGray.copy(alpha = 0.5f),
-            thickness = 0.5.dp
+            color = Color.Gray.copy(alpha = 0.5f),
+            thickness = 1.dp
         )
 
     }
