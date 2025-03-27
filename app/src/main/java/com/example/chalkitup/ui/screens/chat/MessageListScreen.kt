@@ -101,7 +101,8 @@ fun MessageListScreen(
                     placeholder = { Text("Search") },
                     leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Search Icon") },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+
                 )
 
                 Spacer(modifier = Modifier.width(6.dp))
@@ -207,7 +208,7 @@ fun ConversationItem(
 
     Card(
         onClick = onClick,
-        colors = CardDefaults.cardColors(Color(0xFFF3F0FA)),
+        colors = CardDefaults.cardColors(Color.Transparent),
         shape = RectangleShape,
         elevation = CardDefaults.cardElevation(0.dp),
         modifier = Modifier

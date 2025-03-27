@@ -1,6 +1,8 @@
 package com.example.chalkitup.ui.viewmodel
 
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Firebase
@@ -8,6 +10,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -31,6 +34,34 @@ class HomeViewModel : ViewModel() {
 
     private val _appointments = MutableStateFlow<List<Appointment>>(emptyList())
     val appointments: StateFlow<List<Appointment>> get() = _appointments
+
+    fun checkFirstTimeLogin(onSuccess: () -> Unit) {
+        val user = FirebaseAuth.getInstance().currentUser
+        user?.let {
+            val creationTime = it.metadata?.creationTimestamp
+            val lastSignInTime = it.metadata?.lastSignInTimestamp
+
+            if (creationTime != null && lastSignInTime != null && creationTime == lastSignInTime) {
+                // First-time login
+                println("First-time login detected")
+                onSuccess()
+            }
+        }
+    }
+
+    // LiveData to hold and observe the user's profile picture URL
+    private val _profilePictureUrl = MutableLiveData<String?>()
+    val profilePictureUrl: LiveData<String?> get() = _profilePictureUrl
+
+    // Function to load the profile picture from storage
+    fun loadProfilePicture(userId: String) {
+        val storageRef = Firebase.storage.reference.child("$userId/profilePicture.jpg")
+        storageRef.downloadUrl.addOnSuccessListener { uri ->
+            _profilePictureUrl.value = uri.toString()
+        }.addOnFailureListener {
+            _profilePictureUrl.value = null // Set to null if no profile picture exists
+        }
+    }
 
     init {
         getUserName()
