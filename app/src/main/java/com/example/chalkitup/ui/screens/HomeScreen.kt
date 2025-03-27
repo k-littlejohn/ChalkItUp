@@ -32,18 +32,22 @@ import androidx.compose.foundation.clickable
 import java.time.LocalDate
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.Brush
 import java.util.Locale
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.example.chalkitup.Connection
 import com.example.chalkitup.ui.viewmodel.Appointment
 import com.example.chalkitup.ui.viewmodel.BookingManager
 import com.example.chalkitup.ui.viewmodel.HomeViewModel
 import com.example.chalkitup.ui.viewmodel.WeatherViewModel
+import androidx.compose.foundation.BorderStroke
 
 @Composable
 fun HomeScreen(
@@ -51,9 +55,16 @@ fun HomeScreen(
     homeViewModel: HomeViewModel = viewModel(),
     weatherViewModel: WeatherViewModel = viewModel()
 ) {
+
     val userType by homeViewModel.userType.collectAsState()
 
     var showTutorial by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        homeViewModel.checkFirstTimeLogin(
+            onSuccess = { showTutorial = true }
+        )
+        println("showtutorial value is $showTutorial")
+    }
 
     var selectedAppointment by remember { mutableStateOf<Appointment?>(null) }
     val userName by homeViewModel.userName.collectAsState()
@@ -91,16 +102,30 @@ fun HomeScreen(
                 .verticalScroll(rememberScrollState())
         ) {
 
-            // Information Icon Button
-            IconButton(
-                onClick = { showTutorial = true },
+            // Row to hold both icons
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.Info,
-                    contentDescription = "Tutorial",
-                    tint = Color.White
+                // Information Icon Button
+                IconButton(
+                    onClick = { showTutorial = true },
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = "Tutorial",
+                        tint = Color.White
+                    )
+                }
+                // Image to the right of the Info icon
+                Image(
+                    painter = painterResource(id = R.drawable.chalk_confused),
+                    contentDescription = "Confused Chalk",
+                    modifier = Modifier
+                        .size(80.dp)
+                        .offset(x = (-28).dp)
                 )
             }
+
 
             Row(
                 modifier = Modifier
@@ -228,12 +253,17 @@ fun CalendarScreen(
 ) {
     val bookedDates by homeViewModel.bookedDates.collectAsState()
 
+    val currentMonth = remember { mutableStateOf(YearMonth.now()) }
+
     // Current Visibility Set Up Is 3 Months Prior and 3 Months Forward
     val calendarState = rememberCalendarState(
         startMonth = YearMonth.now().minusMonths(3),
         endMonth = YearMonth.now().plusMonths(3),
         firstVisibleMonth = YearMonth.now(),
     )
+    LaunchedEffect(currentMonth.value) {
+        calendarState.animateScrollToMonth(currentMonth.value)
+    }
 
     Column(
         modifier = Modifier
@@ -262,12 +292,40 @@ fun CalendarScreen(
 
                 Spacer(modifier = Modifier.height(6.dp))
 
-                // Month Title Inside of Calendar
-                Text(
-                    text = calendarState.firstVisibleMonth.yearMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = Color.Black
-                )
+                // Month Navigation with Back and Forward Arrows
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Back Button (Previous Month)
+                    IconButton(onClick = {
+                        currentMonth.value = currentMonth.value.minusMonths(1)
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_arrow_back),
+                            contentDescription = "Previous Month",
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
+
+                    // Month Title Inside of Calendar
+                    Text(
+                        text = calendarState.firstVisibleMonth.yearMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = Color.Black
+                    )
+
+                    // Forward Button (Next Month)
+                    IconButton(onClick = {
+                        currentMonth.value = currentMonth.value.plusMonths(1)
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_arrow_forward),
+                            contentDescription = "Next Month",
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -509,14 +567,33 @@ fun UpcomingAppointmentItem(
                         color = Color.Gray
                     )
                 }
+                // Row to hold the arrow and image
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    // Conditionally load the image based on the mode
+                    val imageRes = when (mode.lowercase()) {
+                        "in person" -> R.drawable.chalk_eraser1
+                        "online" -> R.drawable.chalk3
+                        else -> R.drawable.chalk_cool
+                    }
 
-                // Right Arrow Icon
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                    contentDescription = "More",
-                    tint = Color.Gray,
-                    modifier = Modifier.size(20.dp)
-                )
+                    // Image for mode (either "inperson" or "online")
+                    Image(
+                        painter = painterResource(id = imageRes),
+                        contentDescription = "Mode Image",
+                        modifier = Modifier.size(65.dp)
+                    )
+
+                    // Right Arrow Icon
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                        contentDescription = "More",
+                        tint = Color.Gray,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
 
@@ -550,86 +627,205 @@ fun AppointmentPopup(
     // Track error message for network issues
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
+    LaunchedEffect(Unit) {
+        if (userType != "Tutor") {
+            homeViewModel.loadProfilePicture(appointment.tutorID)
+        } else {
+            homeViewModel.loadProfilePicture(appointment.studentID)
+        }
+    }
+
+    val profilePictureUrl by homeViewModel.profilePictureUrl.observeAsState()
+
     AlertDialog(
         onDismissRequest = {
             errorMessage = null
-
             onDismiss()
         },
-        title = { Text(text = "Appointment Details") },
+        title = {
+            Text(
+                text = "Appointment Details",
+                fontSize = 28.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
         text = {
-            Column {
+            Column(modifier = Modifier.padding(16.dp)) {
                 if (userType == "Tutor") {
-                    Text(text = "Student: ${appointment.studentName}")
+                    Text(text = "Student:              ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold)
                 } else {
-                    Text(text = "Tutor: ${appointment.tutorName}")
+                    Text(text = "Tutor:              ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold)
                 }
-                Text(text = "Date: ${appointment.date}")
-                Text(text = "Time: ${appointment.time}")
-                Text(text = "Subject: ${appointment.subject}")
-                Text(text = "Location: ${appointment.mode}")
-                Text(text = "Comments: ${appointment.comments}")
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
 
-                errorMessage?.let {
-                    Text(
-                        text = it,
-                        color = Color.Red,
+                    // Profile Picture
+                    AsyncImage(
+                        model = profilePictureUrl ?: R.drawable.chalkitup,
+                        contentDescription = "Profile Picture",
+                        modifier = Modifier
+                            .size(90.dp)
+                            .clip(CircleShape)
+                            .border(2.dp, Color.Gray, CircleShape)
+                            .clickable {
+                                if (userType == "Tutor") {
+                                    navController.navigate("profile/${appointment.studentID}")
+                                } else {
+                                    navController.navigate("profile/${appointment.tutorID}")
+                                }
+                            }
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    if (userType == "Tutor") {
+                        Text(
+                            text = appointment.studentName,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    } else {
+                        Text(
+                            text = appointment.tutorName,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Row {
+                    Text(text = "Date:           ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold)
+                    Text(text = appointment.date)
+                }
+                Row {
+                    Text(text = "Time:          ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold)
+                    Text(text = appointment.time)
+                }
+                Row {
+                    Text(text = "Subject:      ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold)
+                    Text(text = appointment.subject)
+                }
+                Row {
+                    Text(text = "Price:          ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold)
+                    Text(text = appointment.subjectObject["price"] as? String ?: "N/A")
+                }
+                Row {
+                    Text(text = "Mode:         ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold)
+                    Text(text = appointment.mode)
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+                if (appointment.comments.isNotEmpty()) {
+                    Text(
+                        text = "Comments:              ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(text = appointment.comments)
+                }
+                errorMessage?.let {
+                    Text(text = it, color = Color.Red)
                 }
             }
         },
         confirmButton = {
-            Button(
-                onClick = {
-                    onDismiss()
-                }
-            ) { Text("Close") }
-        },
-        dismissButton = {
-            Column {
-                Button(
-                    onClick = {
-                        if (isConnected){
-                            homeViewModel.cancelAppointment(appointment) {
-                                onDismiss()
-                                homeViewModel.fetchAppointments()
-                            }
-                        }
-                        else {
-                            errorMessage="Error: Try canceling when you are back online!"
-                        }
-
-                    },
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Rebook & Close in the same row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Cancel Appointment")
-                }
-                if (userType == "Student") {
-                    Button(
-                        onClick = {
-
-                            if(isConnected) {
-                                homeViewModel.cancelAppointment(appointment) {
-                                    onDismiss()
-                                    navController.navigate("booking")
+                    if (userType == "Student") {
+                        OutlinedButton(
+                            onClick = {
+                                if (isConnected) {
+                                    homeViewModel.cancelAppointment(appointment) {
+                                        onDismiss()
+                                        navController.navigate("booking")
+                                    }
+                                } else {
+                                    errorMessage = "Error: Try rebooking when you are back online!"
                                 }
-                            }
-                            else{
-                                errorMessage="Error: Try rebooking when you are back online!"
+                            },
+                            shape = RoundedCornerShape(4.dp),
+                            modifier = Modifier.weight(1f),
+                            border = BorderStroke(2.dp, Color(0xFF54A4FF))
+                        ) {
+                            Text("Rebook", color = Color(0xFF54A4FF))
+                        }
+                    }
 
-                            }
-                        },
+                    OutlinedButton(
+                        onClick = { onDismiss() },
+                        shape = RoundedCornerShape(4.dp),
+                        modifier = Modifier.weight(1f),
+                        border = BorderStroke(2.dp, Color.Gray)
                     ) {
-                        Text("Rebook Appointment")
+                        Text("Close", color = Color.Gray)
                     }
                 }
 
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Cancel button
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Image on the left side of the button
+                    Image(
+                        painter = painterResource(id = R.drawable.eraser_x),
+                        contentDescription = "Cancel Icon",
+                        modifier = Modifier.size(55.dp)
+                    )
+
+                    OutlinedButton(
+                        onClick = {
+                            if (isConnected) {
+                                homeViewModel.cancelAppointment(appointment) {
+                                    onDismiss()
+                                    homeViewModel.fetchAppointments()
+                                }
+                            }
+                        },
+                        shape = RoundedCornerShape(4.dp),
+                        border = BorderStroke(1.dp, Color.Red)
+                    ) {
+                        Text("Cancel Booking", color = Color.Red)
+                    }
+
+                    Image(
+                        painter = painterResource(id = R.drawable.eraser_x),
+                        contentDescription = "Cancel Icon",
+                        modifier = Modifier.size(55.dp)
+                    )
+                }
             }
         }
     )
 }
 
-
-@Composable
+    @Composable
 fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
     val otherUserType = if (userType == "Tutor") "Student" else "Tutor"
 
@@ -679,6 +875,13 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                             horizontalArrangement = Arrangement.Center,
                         ) {
                             //Photo
+                            Image(
+                                painter = painterResource(id = R.drawable.t1),
+                                contentDescription = "Cancel Icon",
+                                modifier = Modifier.size(60.dp)
+                            )
+
+                            Spacer(modifier = Modifier.width(8.dp))
 
                             Column (
                                 horizontalAlignment = Alignment.Start,
@@ -691,33 +894,27 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
 
-                        Row (
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
+                        Column (
+                            horizontalAlignment = Alignment.Start,
+                            verticalArrangement = Arrangement.Top,
                         ) {
-                            //Photo
-
-                            Column (
-                                horizontalAlignment = Alignment.Start,
-                                verticalArrangement = Arrangement.Center,
-                            ) {
-                                Text("This is your Home Page",
-                                    fontSize = 15.sp)
-                                Text("Find your upcoming appointment dates, times, and details",
-                                    fontSize = 15.sp,)
-                            }
+                            Text("This is your Home Page",
+                                fontSize = 15.sp)
+                            Text("Find your upcoming appointment dates, times, and details",
+                                fontSize = 15.sp,)
                         }
-
+                        //Photo
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        Row (
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
-                            //Photo
-                            //IFELSE
+                        Image(
+                            painter = painterResource(id = R.drawable.t2),
+                            contentDescription = "Cancel Icon",
+                            modifier = Modifier.size(400.dp)
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
 
                             Column (
                                 horizontalAlignment = Alignment.Start,
@@ -726,9 +923,14 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                 Text("Tap on an upcoming appointment to find more details and view your $otherUserType's profile",
                                     fontSize = 15.sp,)
                             }
-                        }
+                        //Photo
+                        Image(
+                            painter = painterResource(id = R.drawable.t3),
+                            contentDescription = "Cancel Icon",
+                            modifier = Modifier.size(300.dp)
+                        )
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        //Spacer(modifier = Modifier.height(16.dp))
 
                         Column(
                             horizontalAlignment = Alignment.Start,
@@ -744,16 +946,24 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
 
                             // Photo
                             //IFELSE
+                            if (userType == "Tutor") {
+                                Image(
+                                    painter = painterResource(id = R.drawable.t4),
+                                    contentDescription = "Cancel Icon",
+                                    modifier = Modifier.size(300.dp)
+                                )
+                            } else {
+                                Image(
+                                    painter = painterResource(id = R.drawable.t11),
+                                    contentDescription = "Cancel Icon",
+                                    modifier = Modifier.size(300.dp)
+                                )
+                            }
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        //Spacer(modifier = Modifier.height(16.dp))
 
                         if (userType == "Tutor") {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center,
-                            ) {
-                                //Photo
 
                                 Column(
                                     horizontalAlignment = Alignment.Start,
@@ -766,14 +976,22 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                     Text("You'll be notified in the last week of the current month to remember to enter availability for the upcoming month",
                                         fontSize = 15.sp,)
                                 }
-                            }
                             Spacer(modifier = Modifier.height(16.dp))
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center,
-                            ) {
-                                //Photo
+                            //Photo
+                            Image(
+                                painter = painterResource(id = R.drawable.t5),
+                                contentDescription = "Cancel Icon",
+                                modifier = Modifier.size(400.dp)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
 
+                                //Photo
+                                Image(
+                                    painter = painterResource(id = R.drawable.t6),
+                                    contentDescription = "Cancel Icon",
+                                    modifier = Modifier.size(400.dp)
+                                )
+                            Spacer(modifier = Modifier.height(16.dp))
                                 Column(
                                     horizontalAlignment = Alignment.Start,
                                     verticalArrangement = Arrangement.Center,
@@ -781,14 +999,14 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                     Text("Enter any availability you have for online appointments, in person appointments, or both!",
                                         fontSize = 15.sp,)
                                 }
-                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            //Photo
+                            Image(
+                                painter = painterResource(id = R.drawable.t6),
+                                contentDescription = "Cancel Icon",
+                                modifier = Modifier.size(400.dp)
+                            )
                         } else {
-                            Row (
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center,
-                            ) {
-                                //Photo
-
                                 Column (
                                     horizontalAlignment = Alignment.Start,
                                     verticalArrangement = Arrangement.Center,
@@ -800,16 +1018,16 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                     Text("Pick a subject, price range, date, and time, and be automatically matched with a qualified tutor!",
                                         fontSize = 15.sp,)
                                 }
-                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            //Photo
+                            Image(
+                                painter = painterResource(id = R.drawable.t12),
+                                contentDescription = "Cancel Icon",
+                                modifier = Modifier.size(400.dp)
+                            )
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
-
-                        Row (
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
-                            //Photo
 
                             Column (
                                 horizontalAlignment = Alignment.Start,
@@ -820,16 +1038,15 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                 Text("Find all your new and old messages here!",
                                     fontSize = 15.sp,)
                             }
-                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        //Photo
+                        Image(
+                            painter = painterResource(id = R.drawable.t7),
+                            contentDescription = "Cancel Icon",
+                            modifier = Modifier.size(400.dp)
+                        )
 
                         Spacer(modifier = Modifier.height(16.dp))
-
-                        Row (
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
-                            //Photo
-                            //IFELSE
 
                             Column (
                                 horizontalAlignment = Alignment.Start,
@@ -838,16 +1055,17 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                 Text("Search for a $otherUserType to start a new chat with them!",
                                     fontSize = 15.sp,)
                             }
-                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        //Photo
+                        Image(
+                            painter = painterResource(id = R.drawable.t8),
+                            contentDescription = "Cancel Icon",
+                            modifier = Modifier.size(400.dp)
+                        )
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        Row (
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
                             //Photo
-                            //IFELSE
 
                             Column (
                                 horizontalAlignment = Alignment.Start,
@@ -858,16 +1076,16 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                 Text("Edit your profile here!",
                                     fontSize = 15.sp,)
                             }
-                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Image(
+                            painter = painterResource(id = R.drawable.t9),
+                            contentDescription = "Cancel Icon",
+                            modifier = Modifier.size(400.dp)
+                        )
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        Row (
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
                             //Photo
-                            //IFELSE
 
                             Column (
                                 horizontalAlignment = Alignment.Start,
@@ -878,47 +1096,34 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                 Text("Customize it to your liking!",
                                     fontSize = 15.sp,)
                             }
-                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Image(
+                            painter = painterResource(id = R.drawable.t10),
+                            contentDescription = "Cancel Icon",
+                            modifier = Modifier.size(400.dp)
+                        )
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        Row (
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
                             //Photo
 
                             Column (
                                 horizontalAlignment = Alignment.Start,
                                 verticalArrangement = Arrangement.Center,
                             ) {
-                                Text("Enter your settings from the home page here",
+                                Text("Logout or Delete your account through settings",
                                     fontSize = 15.sp,)
                             }
-                        }
+
 
                         Spacer(modifier = Modifier.height(16.dp))
-
-                        Row (
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
-                            //Photo
-
-                            Column (
-                                horizontalAlignment = Alignment.Start,
-                                verticalArrangement = Arrangement.Center,
-                            ) {
-                                Text("Logout or delete your account here ... tbd are we adding more here??",
-                                    fontSize = 15.sp,)
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
+                        Image(
+                            painter = painterResource(id = R.drawable.t13),
+                            contentDescription = "Cancel Icon",
+                            modifier = Modifier.size(200.dp)
+                        )
                     }
                 }
-
                 // Fixed Close Button at the bottom
                 Button(
                     onClick = onDismiss,

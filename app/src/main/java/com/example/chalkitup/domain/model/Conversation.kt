@@ -7,5 +7,7 @@ data class Conversation(
     val studentName: String = "",
     val tutorName: String = "",
     val lastMessage: String = "",
-    val timestamp: Long = 0
+    val timestamp: Long = 0,
+    val lastMessageReadByStudent: Boolean = true,
+    val lastMessageReadByTutor: Boolean = true
 )

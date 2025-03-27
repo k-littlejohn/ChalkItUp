@@ -10,21 +10,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import coil.compose.AsyncImage
 import com.example.chalkitup.R
 
 
 @Composable
 fun ProfilePictureIcon(
-    profilePictureUrl: String?
+    profilePictureUrl: String?,
+    modifier: Modifier = Modifier,
+    size: Dp = 40.dp
 ) {
     if (profilePictureUrl.isNullOrEmpty()) {
         // Display default avatar
         Image (
             painter = painterResource(id = R.drawable.chalkitup),
             contentDescription = "Default Profile Picture",
-            modifier = Modifier
-                .size(40.dp)
+            modifier = modifier
+                .size(size)
                 .border(1.dp, Color.Gray, CircleShape)
                 .clip(CircleShape)
         )
@@ -33,8 +36,9 @@ fun ProfilePictureIcon(
         AsyncImage(
             model = profilePictureUrl,
             contentDescription = "Profile Picture",
-            modifier = Modifier
-                .size(40.dp)
+            modifier = modifier
+//                .size(40.dp)
+                .size(size)
                 .border(1.dp, Color.Gray, CircleShape)
                 .clip(CircleShape)
         )

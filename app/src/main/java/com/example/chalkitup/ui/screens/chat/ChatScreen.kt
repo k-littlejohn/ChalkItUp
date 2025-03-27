@@ -1,16 +1,17 @@
 package com.example.chalkitup.ui.screens.chat
 
 import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -18,13 +19,16 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.chalkitup.ui.viewmodel.chat.ChatViewModel
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.lifecycle.viewModelScope
 import com.example.chalkitup.domain.model.User
 import com.example.chalkitup.ui.components.ProfilePictureIcon
@@ -66,6 +71,14 @@ fun ChatScreen(
     val coroutineScope = rememberCoroutineScope()
     var selectedUser by remember { mutableStateOf<User?>(null) }
 
+    // Gradient brush for the screen's background.
+    val gradientBrush = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF54A4FF), // 5% Blue
+            androidx.compose.material3.MaterialTheme.colorScheme.surface, androidx.compose.material3.MaterialTheme.colorScheme.surface,
+            androidx.compose.material3.MaterialTheme.colorScheme.surface, androidx.compose.material3.MaterialTheme.colorScheme.surface //95% white
+        )
+    )
 
     // Fetch the selected user's data when screen loads
     LaunchedEffect(selectedUserId) {
@@ -101,123 +114,127 @@ fun ChatScreen(
     }
 
 
-    Scaffold(
-        topBar = {
-            if (selectedUser != null) {
-                ChatAppBar(
-                    user = selectedUser!!,
-                    navController = navController
-                )
-            } else {
-                // Show a placeholder the user data hasn't been fetched yet
-                TopAppBar(
-                    title = { Text("") },
-                    navigationIcon = {
-                        IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(gradientBrush)
+    ) {
+        Scaffold(
+            backgroundColor = Color.Transparent,
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            topBar = {
+                if (selectedUser != null) {
+                    ChatAppBar(
+                        user = selectedUser!!,
+                        navController = navController,
+                    )
+                } else {
+                    // Show a placeholder the user data hasn't been fetched yet
+                    TopAppBar(
+                        backgroundColor = Color.Transparent, // Make background transparent
+                        elevation = 0.dp, // Remove shadow
+                        contentColor = MaterialTheme.colors.onSurface, // Maintain text/icons visibility
+                        title = { Text("") },
+                        navigationIcon = {
+                            IconButton(onClick = { navController.popBackStack() }) {
+                                Icon(
+                                    Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Back",
+                                    tint = MaterialTheme.colors.onSurface // Ensure icon is visible
+                                )
+                            }
                         }
-                    }
-                )
-            }
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
-        ) {
-            // Display chat messages
-            LazyColumn(
-                state = scrollState,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            ) {
-                // Display messages and date stamp
-                groupedMessages.forEach { (_, messagesForDay) ->
-                    val firstTimestamp =
-                        messagesForDay.minByOrNull { it.timestamp }?.timestamp ?: 0L
-                    item {
-                        // Date header
-                        Text(
-                            text = formatDateHeader(firstTimestamp),
-                            style = MaterialTheme.typography.caption,
-                            color = Color.Gray,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentSize(Alignment.Center)
-                                .padding(vertical = 8.dp)
-                        )
-                    }
-
-                    items(messagesForDay) { message ->
-                        ChatBubble(
-                            message = message.text,
-                            isCurrentUser = message.senderId == chatViewModel.currentUserId
-                        )
-                    }
+                    )
                 }
             }
-
-            // Chat input bar
-            Row(
+        ) { innerPadding  ->
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .fillMaxSize()
+                    .padding(innerPadding )
+                    .padding(16.dp)
             ) {
-                TextField(
-                    value = text,
-                    onValueChange = { text = it },
+                // Display chat messages
+                LazyColumn(
+                    state = scrollState,
                     modifier = Modifier
                         .weight(1f)
-                        .padding(end = 6.dp),
-                    placeholder = { Text("Message...") }
-                )
+                        .fillMaxWidth()
+                ) {
+                    // Display messages and date stamp
+                    groupedMessages.forEach { (_, messagesForDay) ->
+                        val firstTimestamp =
+                            messagesForDay.minByOrNull { it.timestamp }?.timestamp ?: 0L
+                        item {
+                            // Date header
+                            Text(
+                                text = formatDateHeader(firstTimestamp),
+                                style = MaterialTheme.typography.caption,
+                                color = Color.Gray,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentSize(Alignment.Center)
+                                    .padding(vertical = 8.dp)
+                            )
+                        }
 
-                // Send messages
-                Button(onClick = {
-                    if (text.isNotBlank()) {
-//                        chatViewModel.viewModelScope.launch {
-                        coroutineScope.launch {
+                        items(messagesForDay) { message ->
+                            ChatBubble(
+                                message = message.text,
+                                isCurrentUser = message.senderId == chatViewModel.currentUserId
+                            )
+                        }
+                    }
+                }
 
-                            if (conversationId.isNullOrEmpty()) {
-                                // Fetch user details
-                                val currentUser = chatViewModel.fetchUser(chatViewModel.currentUserId)
-                                val selectedUser = chatViewModel.fetchUser(selectedUserId)
+                // Chat input bar
+                ChatInputBar(
+                    text = text,
+                    onTextChange = { text = it },
+                    onSend = {
+                        if (text.isNotBlank()) {
 
-                                // Create a new conversation
-                                val newConversationId = chatViewModel.createConversation(currentUser, selectedUser)
+                            val messageToSend = text
+                            text = ""
 
-                                // If the conversation was successfully created, send the message
-                                if (!newConversationId.isNullOrEmpty()) {
-                                    chatViewModel.setConversationId(newConversationId)
-                                    chatViewModel.sendMessage(newConversationId, text)
-                                    text = ""
+                            coroutineScope.launch {
+
+                                if (conversationId.isNullOrEmpty()) {
+                                    // Fetch user details
+                                    val currentUser =
+                                        chatViewModel.fetchUser(chatViewModel.currentUserId)
+                                    val selectedUser = chatViewModel.fetchUser(selectedUserId)
+
+                                    // Create a new conversation
+                                    val newConversationId =
+                                        chatViewModel.createConversation(currentUser, selectedUser)
+
+                                    // If the conversation was successfully created, send the message
+                                    if (!newConversationId.isNullOrEmpty()) {
+                                        chatViewModel.setConversationId(newConversationId)
+                                        chatViewModel.sendMessage(newConversationId, messageToSend)
+                                        text = ""
+                                    } else {
+                                        Log.e("Chat", "Failed to create a new conversation.")
+                                    }
                                 } else {
-                                    Log.e("Chat", "Failed to create a new conversation.")
-                                }
-                            } else {
-                                chatViewModel.sendMessage(conversationId, text)
-                                text = ""
+                                    chatViewModel.sendMessage(conversationId, messageToSend)
+                                    text = ""
 
-                                // Scroll after message is sent
-                                withContext(Dispatchers.Main.immediate) {
-                                    if (messages.size > 0) {
-                                        scrollState.animateScrollToItem(messages.size - 1)
+                                    // Scroll to latest message after message is sent
+                                    withContext(Dispatchers.Main.immediate) {
+                                        if (messages.size > 0) {
+                                            scrollState.animateScrollToItem(messages.size - 1)
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }) {
-                    Text("Send")
-                }
+                )
             }
         }
     }
-
 }
 
 
@@ -236,22 +253,24 @@ fun ChatBubble(
         Surface(
             modifier = Modifier
                 .widthIn(max = 300.dp),
-            color = if (isCurrentUser) Color.Blue else Color.LightGray,
+            color = if (isCurrentUser) Color(0xFF2196F3) else Color(0xFF06C59C),
             shape = RoundedCornerShape(8.dp)
         ) {
+            // Text inside the bubble
             Text(
                 text = message,
                 modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                color = if (isCurrentUser) Color.White else Color.Black
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                color = if (isCurrentUser) Color.White else Color.White,
+                style = MaterialTheme.typography.body1
+
             )
         }
     }
 }
 
 private fun formatTime(timestamp: Long): String {
-    // "9:11 AM" format
-    return SimpleDateFormat("h:mm a", Locale.getDefault())
+    return SimpleDateFormat("h:mm a", Locale.getDefault())  // "9:11 AM" format
         .format(Date(timestamp))
 }
 
@@ -281,25 +300,91 @@ private fun formatDateHeader(timestamp: Long): String {
 }
 
 @Composable
+fun ChatInputBar(
+    text: String,
+    onTextChange: (String) -> Unit,
+    onSend: () -> Unit
+) {
+    OutlinedTextField(
+        value = text,
+        onValueChange = onTextChange,
+        placeholder = {
+            Text(
+                text = "Message...",
+                style = MaterialTheme.typography.body1
+            )
+        },
+        textStyle = MaterialTheme.typography.body1,
+        shape = RoundedCornerShape(24.dp), // Rounded corners
+        trailingIcon = {
+            IconButton(onClick = onSend) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Send,
+                    contentDescription = "Send"
+                )
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp)
+    )
+}
+
+@Composable
 fun ChatAppBar(
     user: User,
-    navController: NavController
+    navController: NavController,
 ) {
     val userPictureUrl = user.userProfilePictureUrl
 
-    TopAppBar(
-        navigationIcon = {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-            }
-        },
-        title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                ProfilePictureIcon(profilePictureUrl = userPictureUrl)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "${user.firstName} ${user.lastName}")
-            }
-        }
+    Box {
+        TopAppBar(
+            backgroundColor = Color.Transparent, // Make background transparent
+            elevation = 0.dp, // Remove shadow
+            contentColor = MaterialTheme.colors.onSurface, // Maintain text/icons visibility
+            navigationIcon = {
+                IconButton(
+                    onClick = { navController.popBackStack() },
+                    modifier = Modifier.padding(end = (0).dp)
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+//                        modifier = Modifier.size(24.dp), // Standard icon size
+                        tint = MaterialTheme.colors.onSurface // Ensure icon is visible
+                    )
+                }
+            },
+            title = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(start = 0.dp)
+                ) {
+                    ProfilePictureIcon(profilePictureUrl = userPictureUrl,
+                        modifier = Modifier.clickable(onClick = {
+                            navController.navigate("profile/${user.id}")
+                            }
+                        )
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "${user.firstName} ${user.lastName}",
+                        color = MaterialTheme.colors.onSurface
+                    )
+                }
+            },
+            modifier = Modifier.padding(horizontal = 0.dp) // Remove app bar's default padding
+        )
 
-    )
+        // Add divider at the bottom
+        Divider(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth(),
+            color = Color.LightGray.copy(alpha = 0.5f),
+            thickness = 0.5.dp
+        )
+
+    }
+
 }

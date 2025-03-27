@@ -1,6 +1,6 @@
 package com.example.chalkitup.ui.screens.chat
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,6 +12,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
@@ -36,74 +39,89 @@ fun NewMessageScreen(
 
     val filteredUsers = messageListViewModel.getFilteredUsers()
 
+    // Gradient brush for the screen's background.
+    val gradientBrush = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF54A4FF), // 5% Blue
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface,
+        )
+    )
 
-    // Load users' profile pictures
+
+    // Trigger to reload user's conversations when screen is launched
     LaunchedEffect(Unit) {
         messageListViewModel.fetchUsers()
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        // Search Bar and Back Button in the same row
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-            }
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { messageListViewModel.updateSearchQuery(it) },
-                placeholder = { Text("Search") },
-                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Search Icon") },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                modifier = Modifier.weight(1f)
-            )
-        }
-        if (error != null) {
-            Text(
-                text = error!!,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(16.dp)
-            )
-        }
-
-        if (isUsersLoading) {
-            Box(
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(gradientBrush)
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Search Bar and Back Button in the same row
+            Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .wrapContentSize(Alignment.Center)
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                CircularProgressIndicator()
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                }
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { messageListViewModel.updateSearchQuery(it) },
+                    placeholder = { Text("Search") },
+                    leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Search Icon") },
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    modifier = Modifier.weight(1f)
+                )
             }
-        } else if (filteredUsers.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .wrapContentSize(Alignment.Center)
-            ) {
-                Text("No users found")
+            if (error != null) {
+                Text(
+                    text = error!!,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(16.dp)
+                )
             }
-        } else {
-            LazyColumn(modifier = Modifier.weight(1f)) {
-                items(filteredUsers) { user ->
-                    UserItem(
-                        user = user,
-                        onClick = {
-                            // Fetch existing conversation before navigating
-                            chatViewModel.viewModelScope.launch {
-                                val existingConversationId = chatViewModel.getConversation(user.id)
 
-                                // If no conversation exists, pass "null" as the conversationId
-                                val conversationId = existingConversationId ?: "null"
+            if (isUsersLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentSize(Alignment.Center)
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else if (filteredUsers.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentSize(Alignment.Center)
+                ) {
+                    Text("No users found")
+                }
+            } else {
+                LazyColumn(modifier = Modifier.weight(1f)) {
+                    items(filteredUsers) { user ->
+                        UserItem(
+                            user = user,
+                            onClick = {
+                                // Fetch existing conversation before navigating
+                                chatViewModel.viewModelScope.launch {
+                                    val existingConversationId =
+                                        chatViewModel.getConversation(user.id)
 
-                                navController.navigate("chat/$conversationId/${user.id}")
+                                    // If no conversation exists, pass "null" as the conversationId
+                                    val conversationId = existingConversationId ?: "null"
+
+                                    navController.navigate("chat/$conversationId/${user.id}")
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
@@ -120,24 +138,31 @@ fun UserItem(
     val userProfilePictureUrl = user.userProfilePictureUrl
 
     Card(
+        onClick = onClick,
+        shape = RectangleShape,
+        colors = CardDefaults.cardColors(Color.Transparent),
+        elevation = CardDefaults.cardElevation(0.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
-            .clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            .fillMaxHeight()
+//            .padding(8.dp),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+//                .padding(16.dp),
+                .padding(start = 12.dp, top = 7.dp, end = 14.dp, bottom = 7.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Display profile picture
-            ProfilePictureIcon(profilePictureUrl = userProfilePictureUrl)
+            ProfilePictureIcon(
+                profilePictureUrl = userProfilePictureUrl,
+                size = 60.dp
+            )
             Spacer(modifier = Modifier.width(16.dp))
             Text(
                 text = "${user.firstName} ${user.lastName}",
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.titleMedium
             )
         }
     }
