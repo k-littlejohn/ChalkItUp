@@ -427,7 +427,7 @@ fun ProfileScreen(
                                             .align(Alignment.BottomCenter)
                                     ) {
                                         Text(
-                                            text = subject.subject,
+                                            text = subject.subject + " " + subject.grade + " " + subject.specialization,
                                             color = Color.White,
                                             fontSize = 14.sp,
                                             modifier = Modifier.padding(4.dp)
@@ -441,7 +441,7 @@ fun ProfileScreen(
                         Spacer(modifier = Modifier.height(42.dp))
 
 
-                        Text("Certifications & Qualifications:")
+                        Text("Certifications & Qualifications", fontWeight = FontWeight.Bold, fontSize = 18.sp)
 
                         // If no certifications found, display a message.
                         if (certifications.isEmpty()) {
@@ -503,13 +503,13 @@ fun ProfileScreen(
                             cardColor = Color(0xFF42A5F5)
                         )
 
-                        QualificationCard(
-                            icon = Icons.Default.Star,
-                            title = "Overall Rating",
-                            value = "4.4/5",
-                            valueColor = Color(0xFF06C59C),
-                            cardColor = Color(0xFF42A5F5)
-                        )
+//                        QualificationCard(
+//                            icon = Icons.Default.Star,
+//                            title = "Overall Rating",
+//                            value = "4.4/5",
+//                            valueColor = Color(0xFF06C59C),
+//                            cardColor = Color(0xFF42A5F5)
+//                        )
 
                         Spacer(modifier = Modifier.height(16.dp))
 
@@ -693,6 +693,7 @@ fun ProfileScreen(
                 }
             }
         }
+        Spacer(modifier = Modifier.height(50.dp))
     }
 }
 
@@ -799,7 +800,7 @@ fun CertificationGrid(
     certifications: List<Certification>,
     onItemClick: (String) -> Unit
 ) {
-    Box(modifier = Modifier.height(100.dp)) {
+    Box(modifier = Modifier.heightIn(max = 400.dp)) {
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
             horizontalArrangement = Arrangement.Center,
@@ -869,7 +870,7 @@ fun CertificationItem(
             .clickable {
                 onItemClick(fileName) // Handle item click
             }
-            .size(100.dp)
+            .size(120.dp)
             .padding(4.dp)
             .background(Color(0xFF42A5F5), shape = RoundedCornerShape(8.dp)),
         contentAlignment = Alignment.Center,
