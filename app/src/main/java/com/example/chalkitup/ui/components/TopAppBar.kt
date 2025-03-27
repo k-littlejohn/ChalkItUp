@@ -207,12 +207,14 @@ fun MyTopBar(
                         var expanded by remember { mutableStateOf(false) }
 
                         Box {
-                            IconButton(onClick = { expanded = true }) {
+                            IconButton(onClick = { expanded = true },
+                                modifier = Modifier.size(65.dp)
+                            ) {
                                 AsyncImage(
                                     model = profilePictureUrl ?: R.drawable.chalkitup,
                                     contentDescription = "Profile",
                                     modifier = Modifier
-                                        .size(120.dp)
+                                        .size(55.dp)
                                         .clip(CircleShape)
                                         .border(4.dp, MaterialTheme.colorScheme.primary, CircleShape)
                                 )
