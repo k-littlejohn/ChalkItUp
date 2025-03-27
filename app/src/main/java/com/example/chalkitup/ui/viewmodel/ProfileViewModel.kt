@@ -177,12 +177,8 @@ class ProfileViewModel : ViewModel() {
                     // Check if the user is a tutor or a student
                     _isTutor.value = user.userType == "Tutor"
                 }
-                //if (user.userType == "Tutor") {
-                    // Placeholder for loading tutor specific information
-                    // Currently none saved yet
-                    // Certification loading is handled by the CertificationViewModel
-                }
-        }
+            }
+    }
 
     // Function to load the profile picture from storage
     private fun loadProfilePicture(userId: String) {

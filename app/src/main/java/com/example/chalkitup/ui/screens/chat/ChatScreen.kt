@@ -2,6 +2,7 @@ package com.example.chalkitup.ui.screens.chat
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -75,6 +76,7 @@ fun ChatScreen(
         colors = listOf(
             Color(0xFF54A4FF), // 5% Blue
             androidx.compose.material3.MaterialTheme.colorScheme.surface, androidx.compose.material3.MaterialTheme.colorScheme.surface,
+            androidx.compose.material3.MaterialTheme.colorScheme.surface, androidx.compose.material3.MaterialTheme.colorScheme.surface //95% white
         )
     )
 
@@ -118,6 +120,7 @@ fun ChatScreen(
             .background(gradientBrush)
     ) {
         Scaffold(
+            backgroundColor = Color.Transparent,
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
             topBar = {
                 if (selectedUser != null) {
@@ -250,7 +253,7 @@ fun ChatBubble(
         Surface(
             modifier = Modifier
                 .widthIn(max = 300.dp),
-            color = if (isCurrentUser) Color.Blue else Color.LightGray,
+            color = if (isCurrentUser) Color(0xFF2196F3) else Color(0xFF06C59C),
             shape = RoundedCornerShape(8.dp)
         ) {
             // Text inside the bubble
@@ -258,7 +261,9 @@ fun ChatBubble(
                 text = message,
                 modifier = Modifier
                     .padding(horizontal = 8.dp, vertical = 6.dp),
-                color = if (isCurrentUser) Color.White else Color.Black
+                color = if (isCurrentUser) Color.White else Color.White,
+                style = MaterialTheme.typography.body1
+
             )
         }
     }
@@ -355,7 +360,12 @@ fun ChatAppBar(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(start = 0.dp)
                 ) {
-                    ProfilePictureIcon(profilePictureUrl = userPictureUrl)
+                    ProfilePictureIcon(profilePictureUrl = userPictureUrl,
+                        modifier = Modifier.clickable(onClick = {
+                            navController.navigate("profile/${user.id}")
+                            }
+                        )
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "${user.firstName} ${user.lastName}",
