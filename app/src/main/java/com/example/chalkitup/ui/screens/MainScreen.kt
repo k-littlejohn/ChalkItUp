@@ -19,6 +19,8 @@ import com.example.chalkitup.ui.components.MyTopBar
 import com.example.chalkitup.ui.components.NavigationDrawer
 import com.example.chalkitup.ui.nav.NavGraph
 import com.example.chalkitup.ui.viewmodel.AuthViewModel
+import com.example.chalkitup.ui.viewmodel.ProfileViewModel
+import com.example.chalkitup.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.launch
 
 // Main Screen acts as a base for other screens to be loaded into
@@ -48,6 +50,12 @@ fun MainScreen() {
 
     // ViewModel for managing authentication-related data.
     val authViewModel: AuthViewModel = viewModel()
+
+    // ViewModel for managing profile photo
+    val profileViewModel: ProfileViewModel = viewModel() // Get ViewModel instance
+    val profilePictureUrl by profileViewModel.profilePictureUrl.observeAsState()
+
+    val settingsViewModel: SettingsViewModel = viewModel()
 
     // State for tracking the current route to conditionally hide/show bars.
     var currentRoute by remember { mutableStateOf<String?>(null) }
@@ -141,7 +149,10 @@ fun MainScreen() {
                         onMenuClick = {
                             // Open the drawer when the menu button is clicked
                             coroutineScope.launch { drawerState.open() }
-                        }
+                        },
+                        profilePictureUrl = profilePictureUrl, // Observed LiveData
+                        authViewModel = authViewModel, // Required for Logout
+                        settingsViewModel = settingsViewModel // Required for Delete Account
                     )
                 }
             },
