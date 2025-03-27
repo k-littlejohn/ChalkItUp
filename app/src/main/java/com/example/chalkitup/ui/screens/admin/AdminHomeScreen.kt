@@ -1,6 +1,5 @@
 package com.example.chalkitup.ui.screens.admin
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -165,8 +164,12 @@ fun AdminHome(
                             "${unapprovedTutors.size} Tutors need to be approved",
                             fontSize = 18.sp
                         )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
                         Column(
                             modifier = Modifier.heightIn(max = 700.dp)
+                                .border(1.dp, Color(0xFF54A4FF), shape = RoundedCornerShape(8.dp))
                         ) {
                             Column(
                                 modifier = Modifier
@@ -178,19 +181,15 @@ fun AdminHome(
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(top = 16.dp),
+                                            .padding(6.dp),
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Card(
                                             modifier = Modifier.fillMaxWidth(),
-                                            border = BorderStroke(
-                                                2.dp,
-                                                MaterialTheme.colorScheme.surface
-                                            ),
                                             colors = CardColors(
-                                                containerColor = Color(0xFFd2e5fa),
-                                                contentColor = Color.Black,
+                                                containerColor = Color.Transparent,
+                                                contentColor = MaterialTheme.colorScheme.onSurface,
                                                 disabledContainerColor = Color.LightGray,
                                                 disabledContentColor = Color.DarkGray
                                             ),
@@ -209,7 +208,7 @@ fun AdminHome(
                                                     vertical = 22.dp,
                                                     horizontal = 20.dp
                                                 ),
-                                                fontWeight = FontWeight.Bold, fontSize = 18.sp
+                                                fontSize = 18.sp
                                             )
                                         }
                                     }
@@ -217,19 +216,15 @@ fun AdminHome(
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(bottom = 8.dp),
+                                                .padding(6.dp),
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Card(
                                                 modifier = Modifier.fillMaxWidth(),
-                                                border = BorderStroke(
-                                                    2.dp,
-                                                    MaterialTheme.colorScheme.surface
-                                                ),
                                                 colors = CardColors(
-                                                    containerColor = Color(0xFFd2e5fa),
-                                                    contentColor = Color.Black,
+                                                    containerColor = Color.Transparent,
+                                                    contentColor = MaterialTheme.colorScheme.onSurface,
                                                     disabledContainerColor = Color.LightGray,
                                                     disabledContentColor = Color.DarkGray
                                                 ),
@@ -335,8 +330,11 @@ fun AdminHome(
                             fontSize = 18.sp
                         )
 
+                        Spacer(modifier = Modifier.height(8.dp))
+
                         Column(
                             modifier = Modifier.heightIn(max = 700.dp)
+                                .border(1.dp, Color(0xFF54A4FF), shape = RoundedCornerShape(8.dp))
                         ) {
                             Column(
                                 modifier = Modifier
@@ -348,19 +346,15 @@ fun AdminHome(
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(top = 16.dp),
+                                            .padding(6.dp),
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Card(
                                             modifier = Modifier.fillMaxWidth(),
-                                            border = BorderStroke(
-                                                2.dp,
-                                                MaterialTheme.colorScheme.surface
-                                            ),
                                             colors = CardColors(
-                                                containerColor = Color(0xFFd2e5fa),
-                                                contentColor = Color.Black,
+                                                containerColor = Color.Transparent,
+                                                contentColor = MaterialTheme.colorScheme.onSurface,
                                                 disabledContainerColor = Color.LightGray,
                                                 disabledContentColor = Color.DarkGray
                                             ),
@@ -402,7 +396,6 @@ fun AdminHome(
                                                         vertical = 22.dp,
                                                         horizontal = 20.dp
                                                     ),
-                                                    fontWeight = FontWeight.Bold,
                                                     fontSize = 18.sp,
                                                 )
                                                 if (tutorReports.isNotEmpty()) {
@@ -444,13 +437,9 @@ fun AdminHome(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .heightIn(max = 200.dp),
-                                                border = BorderStroke(
-                                                    2.dp,
-                                                    MaterialTheme.colorScheme.surface
-                                                ),
                                                 colors = CardColors(
-                                                    containerColor = Color(0xFFd2e5fa),
-                                                    contentColor = Color.Black,
+                                                    containerColor = Color.Transparent,
+                                                    contentColor = MaterialTheme.colorScheme.onSurface,
                                                     disabledContainerColor = Color.LightGray,
                                                     disabledContentColor = Color.DarkGray
                                                 ),
@@ -458,16 +447,21 @@ fun AdminHome(
                                                 Column(
                                                     modifier = Modifier
                                                         .padding(16.dp)
-                                                        .verticalScroll(rememberScrollState()),
                                                 ) {
                                                     Text(
                                                         "${tutorReports.size} Reports",
                                                         fontWeight = FontWeight.Bold,
                                                         fontSize = 18.sp
                                                     )
-
-                                                    tutorReports.forEach { report ->
-                                                        ReportItem(report, viewModel = viewModel)
+                                                    Column(
+                                                        modifier = Modifier.verticalScroll(rememberScrollState()),
+                                                    ) {
+                                                        tutorReports.forEach { report ->
+                                                            ReportItem(
+                                                                report,
+                                                                viewModel = viewModel
+                                                            )
+                                                        }
                                                     }
                                                 }
                                             }
@@ -477,19 +471,15 @@ fun AdminHome(
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(bottom = 8.dp),
+                                                .padding(6.dp),
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Card(
                                                 modifier = Modifier.fillMaxWidth(),
-                                                border = BorderStroke(
-                                                    2.dp,
-                                                    MaterialTheme.colorScheme.surface
-                                                ),
                                                 colors = CardColors(
-                                                    containerColor = Color(0xFFd2e5fa),
-                                                    contentColor = Color.Black,
+                                                    containerColor = Color.Transparent,
+                                                    contentColor = MaterialTheme.colorScheme.onSurface,
                                                     disabledContainerColor = Color.LightGray,
                                                     disabledContentColor = Color.DarkGray
                                                 ),
@@ -573,8 +563,11 @@ fun AdminHome(
                             fontSize = 18.sp
                         )
 
+                        Spacer(modifier = Modifier.height(8.dp))
+
                         Column(
                             modifier = Modifier.heightIn(max = 700.dp)
+                                .border(1.dp, Color(0xFF54A4FF), shape = RoundedCornerShape(8.dp))
                         ) {
                             Column(
                                 modifier = Modifier
@@ -587,19 +580,15 @@ fun AdminHome(
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(top = 16.dp),
+                                            .padding(6.dp),
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Card(
                                             modifier = Modifier.fillMaxWidth(),
-                                            border = BorderStroke(
-                                                2.dp,
-                                                MaterialTheme.colorScheme.surface
-                                            ),
                                             colors = CardColors(
-                                                containerColor = Color(0xFFd2e5fa),
-                                                contentColor = Color.Black,
+                                                containerColor = Color.Transparent,
+                                                contentColor = MaterialTheme.colorScheme.onSurface,
                                                 disabledContainerColor = Color.LightGray,
                                                 disabledContentColor = Color.DarkGray
                                             ),
@@ -633,7 +622,6 @@ fun AdminHome(
                                                         vertical = 22.dp,
                                                         horizontal = 20.dp
                                                     ),
-                                                    fontWeight = FontWeight.Bold,
                                                     fontSize = 18.sp,
                                                 )
 
@@ -673,31 +661,33 @@ fun AdminHome(
                                             Card(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .heightIn(max = 200.dp),
-                                                border = BorderStroke(
-                                                    2.dp,
-                                                    MaterialTheme.colorScheme.surface
-                                                ),
+                                                    .heightIn(max = 200.dp)
+                                                ,
                                                 colors = CardColors(
-                                                    containerColor = Color(0xFFd2e5fa),
-                                                    contentColor = Color.Black,
+                                                    containerColor = Color.Transparent,
+                                                    contentColor = MaterialTheme.colorScheme.onSurface,
                                                     disabledContainerColor = Color.LightGray,
                                                     disabledContentColor = Color.DarkGray
                                                 ),
                                             ) {
                                                 Column(
-                                                    modifier = Modifier
-                                                        .padding(16.dp)
-                                                        .verticalScroll(rememberScrollState()),
+                                                    modifier = Modifier.padding(16.dp)
                                                 ) {
                                                     Text(
                                                         "${usersReports.size} Reports",
                                                         fontWeight = FontWeight.Bold,
                                                         fontSize = 18.sp
                                                     )
-
-                                                    usersReports.forEach { report ->
-                                                        ReportItem(report, viewModel = viewModel)
+                                                    Column(
+                                                        modifier = Modifier.verticalScroll(rememberScrollState())
+                                                            .background(shape = RoundedCornerShape(8.dp), color = Color.Transparent)
+                                                    ) {
+                                                        usersReports.forEach { report ->
+                                                            ReportItem(
+                                                                report,
+                                                                viewModel = viewModel
+                                                            )
+                                                        }
                                                     }
                                                 }
                                             }
@@ -707,19 +697,16 @@ fun AdminHome(
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(bottom = 8.dp),
+                                                .padding(6.dp)
+                                            ,
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Card(
                                                 modifier = Modifier.fillMaxWidth(),
-                                                border = BorderStroke(
-                                                    2.dp,
-                                                    MaterialTheme.colorScheme.surface
-                                                ),
                                                 colors = CardColors(
-                                                    containerColor = Color(0xFFd2e5fa),
-                                                    contentColor = Color.Black,
+                                                    containerColor = Color.Transparent,
+                                                    contentColor = MaterialTheme.colorScheme.onSurface,
                                                     disabledContainerColor = Color.LightGray,
                                                     disabledContentColor = Color.DarkGray
                                                 ),
@@ -1127,7 +1114,7 @@ fun ReportItem(report: Report, viewModel: AdminHomeViewModel) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
-            .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(4.dp))
+            .background(Color(0xFFd2e5fa), shape = RoundedCornerShape(4.dp))
             .padding(10.dp)
             .clickable {
                 // Handle report item click
@@ -1143,10 +1130,10 @@ fun ReportItem(report: Report, viewModel: AdminHomeViewModel) {
         Text(
             text = formattedDate,
             fontSize = 12.sp,
-            color = MaterialTheme.colorScheme.onSurface
+            color = Color.Black
         )
 
         Text(text = report.reportMessage, fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.onSurface)
+            color = Color.Black)
     }
 }
