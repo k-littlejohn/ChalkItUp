@@ -134,6 +134,21 @@ fun ProfileScreen(
         profileViewModel.loadUserProfile(targetedUser) // Fetches the user profile when entering the profile screen
     }
 
+    LaunchedEffect(isTutor) {
+        if (isTutor == true) {
+            if(targetedUser.isNotEmpty()) {
+                profileViewModel.startListeningForPastSessions(targetedUser)
+            } else {
+                profileViewModel.startListeningForPastSessions()
+            }
+        }
+    }
+
+    val totalSessions by profileViewModel.totalSessions.collectAsState()
+    val totalHours by profileViewModel.totalHours.collectAsState()
+    val formattedHours = formatTotalHours(totalHours * 60) // Convert minutes to decimal hours
+
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -474,8 +489,8 @@ fun ProfileScreen(
 
                         QualificationCard(
                             icon = Icons.Default.CheckCircle,
-                            title = "Average Grade",
-                            value = "A",
+                            title = "Total Sessions",
+                            value = "$totalSessions",
                             valueColor = Color(0xFF06C59C),
                             cardColor = Color(0xFF42A5F5)
                         )
@@ -483,7 +498,7 @@ fun ProfileScreen(
                         QualificationCard(
                             icon = Icons.Default.Timer,
                             title = "Total Tutor Hours",
-                            value = "168",
+                            value = formattedHours,
                             valueColor = Color(0xFF06C59C),
                             cardColor = Color(0xFF42A5F5)
                         )
@@ -891,4 +906,9 @@ fun CertificationItem(
             }
         }
     }
+}
+
+fun formatTotalHours(totalMinutes: Double): String {
+    val hours = (totalMinutes / 60).toInt()
+    return "$hours hours"
 }
