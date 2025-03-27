@@ -119,7 +119,7 @@ fun MyTopBar(
                         text = when (currentRoute) {
                             "profile" -> ""
                             "settings" -> ""
-                            "messages" -> ""
+                            "messages" -> "Messages"
                             "notifications" -> "Notifications"
                             "newMessage" -> "New Chat"
                             "start", "login", "signup", "forgotPassword", "checkEmail", "tutorAvailability", "termsAndCond", "adminHome", "awaitingApproval",
