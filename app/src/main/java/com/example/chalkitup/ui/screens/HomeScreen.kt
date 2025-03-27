@@ -1112,12 +1112,16 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                 verticalArrangement = Arrangement.Center,
                             ) {
                                 Text("Logout or Delete your account through settings",
-                                    fontSize = 15.sp,) //TODO
+                                    fontSize = 15.sp,)
                             }
 
 
                         Spacer(modifier = Modifier.height(16.dp))
-
+                        Image(
+                            painter = painterResource(id = R.drawable.t13),
+                            contentDescription = "Cancel Icon",
+                            modifier = Modifier.size(200.dp)
+                        )
                     }
                 }
                 // Fixed Close Button at the bottom
