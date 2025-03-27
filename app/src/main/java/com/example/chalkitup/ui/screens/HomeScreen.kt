@@ -32,13 +32,16 @@ import androidx.compose.foundation.clickable
 import java.time.LocalDate
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.Brush
 import java.util.Locale
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.example.chalkitup.Connection
 import com.example.chalkitup.ui.viewmodel.Appointment
 import com.example.chalkitup.ui.viewmodel.BookingManager
@@ -52,9 +55,16 @@ fun HomeScreen(
     homeViewModel: HomeViewModel = viewModel(),
     weatherViewModel: WeatherViewModel = viewModel()
 ) {
+
     val userType by homeViewModel.userType.collectAsState()
 
     var showTutorial by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        homeViewModel.checkFirstTimeLogin(
+            onSuccess = { showTutorial = true }
+        )
+        println("showtutorial value is $showTutorial")
+    }
 
     var selectedAppointment by remember { mutableStateOf<Appointment?>(null) }
     val userName by homeViewModel.userName.collectAsState()
@@ -107,13 +117,13 @@ fun HomeScreen(
                     )
                 }
                 // Image to the right of the Info icon
-                Image(
-                    painter = painterResource(id = R.drawable.chalk_confused),
-                    contentDescription = "Confused Chalk",
-                    modifier = Modifier
-                        .size(80.dp)
-                        .offset(x = (-28).dp)
-                )
+//                Image(
+//                    painter = painterResource(id = R.drawable.chalk_confused),
+//                    contentDescription = "Confused Chalk",
+//                    modifier = Modifier
+//                        .size(80.dp)
+//                        .offset(x = (-28).dp)
+//                )
             }
 
 
@@ -617,6 +627,16 @@ fun AppointmentPopup(
     // Track error message for network issues
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
+    LaunchedEffect(Unit) {
+        if (userType != "Tutor") {
+            homeViewModel.loadProfilePicture(appointment.tutorID)
+        } else {
+            homeViewModel.loadProfilePicture(appointment.studentID)
+        }
+    }
+
+    val profilePictureUrl by homeViewModel.profilePictureUrl.observeAsState()
+
     AlertDialog(
         onDismissRequest = {
             errorMessage = null
@@ -633,18 +653,93 @@ fun AppointmentPopup(
         text = {
             Column(modifier = Modifier.padding(16.dp)) {
                 if (userType == "Tutor") {
-                    Text(text = "Student:       ${appointment.studentName}")
+                    Text(text = "Student:              ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold)
                 } else {
-                    Text(text = "Tutor:             ${appointment.tutorName}")
+                    Text(text = "Tutor:              ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold)
                 }
-                Text(text = "Date:              ${appointment.date}")
-                Text(text = "Time:             ${appointment.time}")
-                Text(text = "Subject:         ${appointment.subject}")
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
 
-                Text(text = "Mode:       ${appointment.mode}")
+                    // Profile Picture
+                    AsyncImage(
+                        model = profilePictureUrl ?: R.drawable.chalkitup,
+                        contentDescription = "Profile Picture",
+                        modifier = Modifier
+                            .size(90.dp)
+                            .clip(CircleShape)
+                            .border(2.dp, Color.Gray, CircleShape)
+                            .clickable {
+                                if (userType == "Tutor") {
+                                    navController.navigate("profile/${appointment.studentID}")
+                                } else {
+                                    navController.navigate("profile/${appointment.tutorID}")
+                                }
+                            }
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    if (userType == "Tutor") {
+                        Text(
+                            text = appointment.studentName,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    } else {
+                        Text(
+                            text = appointment.tutorName,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Row {
+                    Text(text = "Date:           ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold)
+                    Text(text = appointment.date)
+                }
+                Row {
+                    Text(text = "Time:          ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold)
+                    Text(text = appointment.time)
+                }
+                Row {
+                    Text(text = "Subject:      ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold)
+                    Text(text = appointment.subject)
+                }
+                Row {
+                    Text(text = "Price:          ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold)
+                    Text(text = appointment.subjectObject["price"] as? String ?: "N/A")
+                }
+                Row {
+                    Text(text = "Mode:         ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold)
+                    Text(text = appointment.mode)
+                }
                 Spacer(modifier = Modifier.height(20.dp))
-                Text(text = "Comments: \n${appointment.comments}")
-
+                if (appointment.comments.isNotEmpty()) {
+                    Text(
+                        text = "Comments:              ",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(text = appointment.comments)
+                }
                 errorMessage?.let {
                     Text(text = it, color = Color.Red)
                 }
@@ -1019,7 +1114,6 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
 
                     }
                 }
-
                 // Fixed Close Button at the bottom
                 Button(
                     onClick = onDismiss,
