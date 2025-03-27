@@ -1,13 +1,14 @@
 package com.example.chalkitup.ui.screens.chat
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -33,6 +34,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -60,89 +64,104 @@ fun MessageListScreen(
 
     val filteredConversations = messageListViewModel.getFilteredConversations()
 
+    // Gradient brush for the screen's background.
+    val gradientBrush = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF54A4FF), // 5% Blue
+            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface,
+        )
+    )
 
+    // Trigger to reload user's conversations when screen is launched
     LaunchedEffect(Unit) {
         messageListViewModel.fetchConversations()
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        // Search Bar and + Button in the same row
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { messageListViewModel.updateSearchQuery(it) },
-                placeholder = { Text("Search") },
-                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Search Icon") },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                modifier = Modifier.weight(1f)
-            )
-
-            Spacer(modifier = Modifier.width(6.dp))
-
-            IconButton(
-                onClick = { navController.navigate("newMessage") },
-                modifier = Modifier.size(50.dp)
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = "New Message")
-            }
-        }
-
-        // Display error message
-        if (error != null) {
-            Text(
-                text = error!!,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(16.dp)
-            )
-        }
-
-        if (isConversationsLoading) {
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .wrapContentSize(Alignment.Center)
-            ) {
-                CircularProgressIndicator()
-            }
-
-        } else if (filteredConversations.isEmpty()) {
-            Box(
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(gradientBrush)
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Search Bar and + Button in the same row
+            Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .wrapContentSize(Alignment.Center)
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("No conversations")
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { messageListViewModel.updateSearchQuery(it) },
+                    placeholder = { Text("Search") },
+                    leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Search Icon") },
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    modifier = Modifier.weight(1f)
+                )
+
+                Spacer(modifier = Modifier.width(6.dp))
+
+                IconButton(
+                    onClick = { navController.navigate("newMessage") },
+                    modifier = Modifier.size(50.dp)
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = "New Message")
+                }
             }
-        } else {
-            LazyColumn(
-                state = scrollState,
-                modifier = Modifier.weight(1f)
-            ) {
-                items(filteredConversations) { conversation ->
-                    // Determine the other user's id
-                    val otherUserId = if (conversation.studentId == currentUserId)
-                        conversation.tutorId else conversation.studentId
 
-                    // Find the corresponding User object from the users list
-                    val otherUser = users.find { it.id == otherUserId }
+            // Display error message
+            if (error != null) {
+                Text(
+                    text = error!!,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
 
-                    ConversationItem(
-                        conversation = conversation,
-                        user = otherUser,
-                        onClick = {
-                            navController.navigate(
-                                "chat/${conversation.id}/${
-                                    if (conversation.studentId == currentUserId)
-                                        conversation.tutorId
-                                    else conversation.studentId
-                                }"
-                            )
-                        }
-                    )
+            if (isConversationsLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentSize(Alignment.Center)
+                ) {
+                    CircularProgressIndicator()
+                }
+
+            } else if (filteredConversations.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentSize(Alignment.Center)
+                ) {
+                    Text("No conversations")
+                }
+            } else {
+                LazyColumn(
+                    state = scrollState,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    items(filteredConversations) { conversation ->
+                        // Determine the other user's id
+                        val otherUserId = if (conversation.studentId == currentUserId)
+                            conversation.tutorId else conversation.studentId
+
+                        // Find the corresponding User object from the users list
+                        val otherUser = users.find { it.id == otherUserId }
+
+                        ConversationItem(
+                            conversation = conversation,
+                            user = otherUser,
+                            onClick = {
+                                navController.navigate(
+                                    "chat/${conversation.id}/${
+                                        if (conversation.studentId == currentUserId)
+                                            conversation.tutorId
+                                        else conversation.studentId
+                                    }"
+                                )
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -160,41 +179,52 @@ fun ConversationItem(
 
     Card(
         onClick = onClick,
+        colors = CardDefaults.cardColors(Color(0xFFF3F0FA)),
+        shape = RectangleShape,
+        elevation = CardDefaults.cardElevation(0.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
-            .height(80.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+//            .padding(vertical = 0.dp)
+//            .height(80.dp)
+            .fillMaxHeight()
     ) {
         Row(
             modifier = Modifier
-//                .fillMaxWidth()
-                .fillMaxSize()
-                .padding(16.dp),
+                .fillMaxWidth()
+//                .fillMaxSize(),
+                .padding(start = 12.dp, top = 7.dp, end = 14.dp, bottom = 7.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            ProfilePictureIcon(profilePictureUrl = userProfilePictureUrl)
+            ProfilePictureIcon(
+                profilePictureUrl = userProfilePictureUrl,
+                size = 60.dp
+            )
             Spacer(modifier = Modifier.width(16.dp))
+
             Column(modifier = Modifier.weight(1f)) {
                 // Display the other user's name
                 if (user != null) {
                     Text(
                         text = "${user.firstName} ${user.lastName}",
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
-                // Display the last message & timestamp
                 Row (
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
+                    // Display the last message
                     Text(
                         text = conversation.lastMessage,
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
                     )
 
+                    // Display the timestamp
                     Text(
                         text = formatTimestamp(conversation.timestamp),
                         style = MaterialTheme.typography.bodySmall

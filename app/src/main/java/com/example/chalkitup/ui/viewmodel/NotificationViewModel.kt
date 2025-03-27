@@ -73,6 +73,7 @@ class NotificationViewModel: ViewModel() {
                             LocalDate.parse(notification.notifDate,
                                 DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US))
                         }
+                    println("Notifications: $userNotifications")
 
                 } catch (e: Exception) {
                     println("Error fetching notifications: ${e.message}")

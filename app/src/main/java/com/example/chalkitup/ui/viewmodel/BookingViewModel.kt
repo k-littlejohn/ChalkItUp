@@ -99,11 +99,26 @@ class BookingViewModel : ViewModel() {
         }
     }
 
-    // NOT FINISHED
-    // Need to grab emails for both the student and tutor
-    private fun sendEmail(onSuccess: () -> Unit) {
+    // Sends an email to the student and the tutor for the session.
+    private fun sendEmail(
+        tutorID: String,
+        onSuccess: () -> Unit) {
 
         Log.d("MessagesScreen", "fName: ${fName.value}, email: ${userEmail.value}")
+
+        var tutorEmail = ""
+
+        viewModelScope.launch {
+            try {
+                val tempRef = db.collection("users").document(tutorID)
+                    .get()
+                    .await()
+                tutorEmail = tempRef.getString("email") ?: "Unknown"
+
+            } catch (e: java.lang.Exception) {
+                println("Error fetching user email: ${e.message}")
+            }
+        }
 
         val formattedSubject =
             "${userSubject.value!!.subject} ${userSubject.value!!.grade} ${userSubject.value!!.specialization}"
@@ -117,12 +132,36 @@ class BookingViewModel : ViewModel() {
                     "<p> Have a good day! </p>" +
                     "<p> -ChalkItUp Tutors </p>"
 
-        val email = Email(
+        val tutorEmailHTML =
+            "<p> Hi ${tutorName.value},<br><br> Your appointment for <b>$formattedSubject</b>" +
+                    " with ${fName.value} has been booked at ${date.value}: ${timeSlot.value}. </p>" +
+                    "<p> The rate of the appointment is: ${price.value} <p>" +
+                    "<p> The appointment has been added to your calendar. </p>" +
+                    "<p> Have a good day! </p>" +
+                    "<p> -ChalkItUp Tutors </p>"
+
+
+        // Sends an email to student and the tutor
+        val studEmail = Email(
             to = userEmail.value!!,
             message = EmailMessage(emailSubj, emailHTML)
         )
 
-        db.collection("mail").add(email)
+        db.collection("mail").add(studEmail)
+            .addOnSuccessListener {
+                println("Appointment booked successfully!")
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                println("Error booking appointment: ${e.message}")
+            }
+
+        val tutEmail = Email(
+            to = tutorEmail,
+            message = EmailMessage(emailSubj, tutorEmailHTML)
+        )
+
+        db.collection("mail").add(tutEmail)
             .addOnSuccessListener {
                 println("Appointment booked successfully!")
                 onSuccess()
@@ -163,6 +202,32 @@ class BookingViewModel : ViewModel() {
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> get() = _error
+
+    // Function to get the 'active' field for the current user
+    fun getCurrentUserActiveStatus(onComplete: (Boolean) -> Unit) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId == null) {
+            // If no user is signed in, return false (or handle it however you'd like)
+            onComplete(false)
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                // Fetch the current user's document by their userId
+                val userDoc = db.collection("users").document(userId).get().await()
+
+                // Get the 'active' field (defaults to false if not found)
+                val activeStatus = userDoc.getBoolean("active") ?: false
+
+                // Call the onComplete lambda with the active status
+                onComplete(activeStatus)
+            } catch (e: Exception) {
+                Log.e("AdminViewModel", "Error fetching user active status: ${e.message}")
+                onComplete(false) // Return false if there's an error
+            }
+        }
+    }
 
     fun toggleIsCurrentMonth() {
         _isCurrentMonth.value = !_isCurrentMonth.value
@@ -220,6 +285,7 @@ class BookingViewModel : ViewModel() {
             try {
                 db.collection("users")
                     .whereEqualTo("userType", "Tutor") // Filter for tutors only
+                    .whereEqualTo("active", true) // Filter for active tutors only
                     .get()
                     .addOnSuccessListener { querySnapshot ->
                         val matchedTutorIds = mutableListOf<String>()
@@ -555,6 +621,7 @@ class BookingViewModel : ViewModel() {
             )
 
             sendEmail(
+                tutorID = tutorId,
                 onSuccess = {
                     onSuccess()
                 }

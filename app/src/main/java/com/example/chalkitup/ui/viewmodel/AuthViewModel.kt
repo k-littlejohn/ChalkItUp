@@ -225,7 +225,8 @@ class AuthViewModel : ViewModel() {
                                     "email" to email,
                                     "subjects" to subjects,
                                     "agreeToTerms" to false,
-                                    "adminApproved" to false
+                                    "adminApproved" to false,
+                                    "active" to true
                                 )
 
                                 // Save the user data in Firestore under their UID
@@ -408,9 +409,6 @@ class AuthViewModel : ViewModel() {
 
 
 }
-
-
-
 
 
 object OfflineDataManager {
