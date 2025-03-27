@@ -1114,7 +1114,6 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
 
                     }
                 }
-
                 // Fixed Close Button at the bottom
                 Button(
                     onClick = onDismiss,
