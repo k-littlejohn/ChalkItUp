@@ -117,13 +117,13 @@ fun HomeScreen(
                     )
                 }
                 // Image to the right of the Info icon
-//                Image(
-//                    painter = painterResource(id = R.drawable.chalk_confused),
-//                    contentDescription = "Confused Chalk",
-//                    modifier = Modifier
-//                        .size(80.dp)
-//                        .offset(x = (-28).dp)
-//                )
+                Image(
+                    painter = painterResource(id = R.drawable.chalk_confused),
+                    contentDescription = "Confused Chalk",
+                    modifier = Modifier
+                        .size(80.dp)
+                        .offset(x = (-28).dp)
+                )
             }
 
 
@@ -875,6 +875,13 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                             horizontalArrangement = Arrangement.Center,
                         ) {
                             //Photo
+                            Image(
+                                painter = painterResource(id = R.drawable.t1),
+                                contentDescription = "Cancel Icon",
+                                modifier = Modifier.size(60.dp)
+                            )
+
+                            Spacer(modifier = Modifier.width(8.dp))
 
                             Column (
                                 horizontalAlignment = Alignment.Start,
@@ -887,33 +894,27 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
 
-                        Row (
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
+                        Column (
+                            horizontalAlignment = Alignment.Start,
+                            verticalArrangement = Arrangement.Top,
                         ) {
-                            //Photo
-
-                            Column (
-                                horizontalAlignment = Alignment.Start,
-                                verticalArrangement = Arrangement.Center,
-                            ) {
-                                Text("This is your Home Page",
-                                    fontSize = 15.sp)
-                                Text("Find your upcoming appointment dates, times, and details",
-                                    fontSize = 15.sp,)
-                            }
+                            Text("This is your Home Page",
+                                fontSize = 15.sp)
+                            Text("Find your upcoming appointment dates, times, and details",
+                                fontSize = 15.sp,)
                         }
-
+                        //Photo
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        Row (
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
-                            //Photo
-                            //IFELSE
+                        Image(
+                            painter = painterResource(id = R.drawable.t2),
+                            contentDescription = "Cancel Icon",
+                            modifier = Modifier.size(400.dp)
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
 
                             Column (
                                 horizontalAlignment = Alignment.Start,
@@ -922,9 +923,14 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                 Text("Tap on an upcoming appointment to find more details and view your $otherUserType's profile",
                                     fontSize = 15.sp,)
                             }
-                        }
+                        //Photo
+                        Image(
+                            painter = painterResource(id = R.drawable.t3),
+                            contentDescription = "Cancel Icon",
+                            modifier = Modifier.size(300.dp)
+                        )
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        //Spacer(modifier = Modifier.height(16.dp))
 
                         Column(
                             horizontalAlignment = Alignment.Start,
@@ -940,16 +946,24 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
 
                             // Photo
                             //IFELSE
+                            if (userType == "Tutor") {
+                                Image(
+                                    painter = painterResource(id = R.drawable.t4),
+                                    contentDescription = "Cancel Icon",
+                                    modifier = Modifier.size(300.dp)
+                                )
+                            } else {
+                                Image(
+                                    painter = painterResource(id = R.drawable.t11),
+                                    contentDescription = "Cancel Icon",
+                                    modifier = Modifier.size(300.dp)
+                                )
+                            }
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        //Spacer(modifier = Modifier.height(16.dp))
 
                         if (userType == "Tutor") {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center,
-                            ) {
-                                //Photo
 
                                 Column(
                                     horizontalAlignment = Alignment.Start,
@@ -962,14 +976,22 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                     Text("You'll be notified in the last week of the current month to remember to enter availability for the upcoming month",
                                         fontSize = 15.sp,)
                                 }
-                            }
                             Spacer(modifier = Modifier.height(16.dp))
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center,
-                            ) {
-                                //Photo
+                            //Photo
+                            Image(
+                                painter = painterResource(id = R.drawable.t5),
+                                contentDescription = "Cancel Icon",
+                                modifier = Modifier.size(400.dp)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
 
+                                //Photo
+                                Image(
+                                    painter = painterResource(id = R.drawable.t6),
+                                    contentDescription = "Cancel Icon",
+                                    modifier = Modifier.size(400.dp)
+                                )
+                            Spacer(modifier = Modifier.height(16.dp))
                                 Column(
                                     horizontalAlignment = Alignment.Start,
                                     verticalArrangement = Arrangement.Center,
@@ -977,14 +999,14 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                     Text("Enter any availability you have for online appointments, in person appointments, or both!",
                                         fontSize = 15.sp,)
                                 }
-                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            //Photo
+                            Image(
+                                painter = painterResource(id = R.drawable.t6),
+                                contentDescription = "Cancel Icon",
+                                modifier = Modifier.size(400.dp)
+                            )
                         } else {
-                            Row (
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center,
-                            ) {
-                                //Photo
-
                                 Column (
                                     horizontalAlignment = Alignment.Start,
                                     verticalArrangement = Arrangement.Center,
@@ -996,16 +1018,16 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                     Text("Pick a subject, price range, date, and time, and be automatically matched with a qualified tutor!",
                                         fontSize = 15.sp,)
                                 }
-                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            //Photo
+                            Image(
+                                painter = painterResource(id = R.drawable.t12),
+                                contentDescription = "Cancel Icon",
+                                modifier = Modifier.size(400.dp)
+                            )
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
-
-                        Row (
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
-                            //Photo
 
                             Column (
                                 horizontalAlignment = Alignment.Start,
@@ -1016,16 +1038,15 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                 Text("Find all your new and old messages here!",
                                     fontSize = 15.sp,)
                             }
-                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        //Photo
+                        Image(
+                            painter = painterResource(id = R.drawable.t7),
+                            contentDescription = "Cancel Icon",
+                            modifier = Modifier.size(400.dp)
+                        )
 
                         Spacer(modifier = Modifier.height(16.dp))
-
-                        Row (
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
-                            //Photo
-                            //IFELSE
 
                             Column (
                                 horizontalAlignment = Alignment.Start,
@@ -1034,16 +1055,17 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                 Text("Search for a $otherUserType to start a new chat with them!",
                                     fontSize = 15.sp,)
                             }
-                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        //Photo
+                        Image(
+                            painter = painterResource(id = R.drawable.t8),
+                            contentDescription = "Cancel Icon",
+                            modifier = Modifier.size(400.dp)
+                        )
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        Row (
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
                             //Photo
-                            //IFELSE
 
                             Column (
                                 horizontalAlignment = Alignment.Start,
@@ -1054,16 +1076,16 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                 Text("Edit your profile here!",
                                     fontSize = 15.sp,)
                             }
-                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Image(
+                            painter = painterResource(id = R.drawable.t9),
+                            contentDescription = "Cancel Icon",
+                            modifier = Modifier.size(400.dp)
+                        )
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        Row (
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
                             //Photo
-                            //IFELSE
 
                             Column (
                                 horizontalAlignment = Alignment.Start,
@@ -1074,44 +1096,32 @@ fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
                                 Text("Customize it to your liking!",
                                     fontSize = 15.sp,)
                             }
-                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Image(
+                            painter = painterResource(id = R.drawable.t10),
+                            contentDescription = "Cancel Icon",
+                            modifier = Modifier.size(400.dp)
+                        )
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        Row (
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
                             //Photo
 
                             Column (
                                 horizontalAlignment = Alignment.Start,
                                 verticalArrangement = Arrangement.Center,
                             ) {
-                                Text("Enter your settings from the home page here",
+                                Text("Logout or Delete your account through settings",
                                     fontSize = 15.sp,)
                             }
-                        }
+
 
                         Spacer(modifier = Modifier.height(16.dp))
-
-                        Row (
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
-                            //Photo
-
-                            Column (
-                                horizontalAlignment = Alignment.Start,
-                                verticalArrangement = Arrangement.Center,
-                            ) {
-                                Text("Logout or delete your account here ... tbd are we adding more here??",
-                                    fontSize = 15.sp,)
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
+                        Image(
+                            painter = painterResource(id = R.drawable.t13),
+                            contentDescription = "Cancel Icon",
+                            modifier = Modifier.size(200.dp)
+                        )
                     }
                 }
                 // Fixed Close Button at the bottom
