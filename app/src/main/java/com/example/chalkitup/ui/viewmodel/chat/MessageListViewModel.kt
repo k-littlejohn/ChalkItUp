@@ -4,11 +4,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.chalkitup.domain.model.Conversation
-import com.example.chalkitup.domain.model.Message
 import com.example.chalkitup.domain.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,6 +32,7 @@ class MessageListViewModel : ViewModel() {
 
     // Holds the current user's type (e.g., "Student" or "Tutor")
     private val _currentUserType = MutableStateFlow<String?>(null)
+    val currentUserType: StateFlow<String?> = _currentUserType.asStateFlow()
 
     // Holds a list of users with opposite user type as current user
     private val _users = MutableStateFlow<List<User>>(emptyList())
@@ -51,10 +50,6 @@ class MessageListViewModel : ViewModel() {
     // For NewMessageScreen
     private val _isUsersLoading = MutableStateFlow(true)
     val isUsersLoading: StateFlow<Boolean> = _isUsersLoading.asStateFlow()
-
-//    // Flags to track whether data has been loaded
-//    private var isConversationsLoaded = false
-//    private var isUsersLoaded = false
 
     // Error state (shared between screens)
     private val _error = MutableStateFlow<String?>(null)
@@ -136,7 +131,6 @@ class MessageListViewModel : ViewModel() {
     }
 
 
-    // Listen to conversations using a snapshot listener wrapped in a Flow
     fun fetchConversations() {
         viewModelScope.launch {
 
@@ -159,6 +153,9 @@ class MessageListViewModel : ViewModel() {
                 }
 
                 val convos = snapshot.documents.mapNotNull { document ->
+                    val lastMessageReadByStudent = document.getBoolean("lastMessageReadByStudent") ?: true
+                    val lastMessageReadByTutor = document.getBoolean("lastMessageReadByTutor") ?: true
+
                     Conversation(
                         id = document.id,
                         studentId = document.getString("studentId") ?: "",
@@ -166,7 +163,9 @@ class MessageListViewModel : ViewModel() {
                         studentName = document.getString("studentName") ?: "",
                         tutorName = document.getString("tutorName") ?: "",
                         lastMessage = document.getString("lastMessage") ?: "",
-                        timestamp = document.getLong("timestamp") ?: 0L
+                        timestamp = document.getLong("timestamp") ?: 0L,
+                        lastMessageReadByStudent = lastMessageReadByStudent,
+                        lastMessageReadByTutor = lastMessageReadByTutor
                     )
                 }
 
@@ -243,6 +242,34 @@ class MessageListViewModel : ViewModel() {
             user.copy(userProfilePictureUrl = results[user.id] ?: "")
         }
     }
+
+
+    // Updates message states
+    fun markAsRead(conversationId: String) {
+        viewModelScope.launch {
+            try {
+                val userType = currentUserType.value
+                val conversationRef = db.collection("conversations").document(conversationId)
+
+                val updateStatus =  when (userType) {
+                    "Student" -> "lastMessageReadByStudent"
+                    "Tutor" -> "lastMessageReadByTutor"
+                    else -> null
+                }
+
+                // Update if the current user has read the last message
+                if (updateStatus != null) {
+                    conversationRef.update(updateStatus, true).await()
+                    fetchConversations()
+                }
+
+
+            } catch (e: Exception) {
+                Log.e("MessageListViewModel", "Error marking as read", e)
+            }
+        }
+    }
+
 
 }
 
