@@ -394,12 +394,14 @@ fun ProfileScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            items(profile.subjects) { subject ->
+                            items(profile.subjects.distinctBy { it.subject }) { subject ->
+                                var showAllSubjectInfo by remember { mutableStateOf(false) }
                                 Box(
                                     modifier = Modifier
                                         .size(160.dp)
                                         .clip(RoundedCornerShape(8.dp))
                                         .background(Color.LightGray)
+                                        .clickable(onClick = { showAllSubjectInfo = !showAllSubjectInfo })
                                 ) {
                                     // Temporary icons for subjects
                                     val subjectIcon = when (subject.subject) {
@@ -419,19 +421,32 @@ fun ProfileScreen(
                                         contentScale = ContentScale.Crop,
                                         modifier = Modifier.fillMaxSize()
                                     )
-
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .background(Color.Black.copy(alpha = 0.7f))
                                             .align(Alignment.BottomCenter)
                                     ) {
-                                        Text(
-                                            text = subject.subject + " " + subject.grade + " " + subject.specialization,
-                                            color = Color.White,
-                                            fontSize = 14.sp,
-                                            modifier = Modifier.padding(4.dp)
-                                        )
+                                        Column {
+                                            Text(
+                                                text = subject.subject,// + " " + subject.grade + " " + subject.specialization,
+                                                color = Color.White,
+                                                fontSize = 14.sp,
+                                                modifier = Modifier.padding(4.dp)
+                                            )
+                                            if (showAllSubjectInfo) {
+                                                for (item in profile.subjects) {
+                                                    if (item.subject == subject.subject) {
+                                                        Text(
+                                                            text = subject.subject + " " +item.grade + " " + item.specialization,
+                                                            color = Color.White,
+                                                            fontSize = 14.sp,
+                                                            modifier = Modifier.padding(4.dp)
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
