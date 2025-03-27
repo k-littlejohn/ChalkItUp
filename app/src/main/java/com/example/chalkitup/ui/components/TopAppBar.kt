@@ -85,7 +85,7 @@ fun MyTopBar(
     CenterAlignedTopAppBar(
         modifier = Modifier.height(110.dp), // Increased height for icon, felt 80.dp looked the best
         title = {
-            if (currentRoute == "home" || currentRoute == "editProfile") {
+            if (currentRoute == "home" || currentRoute == "editProfile" || currentRoute == "profile") {
                 Image(
                     painter = painterResource(id = R.drawable.logo1),
                     contentDescription = "Chalk & Eraser",
@@ -130,7 +130,7 @@ fun MyTopBar(
                 ) {
                     Text(
                         text = when (currentRoute) {
-                            "profile" -> ""
+                           // "profile" -> ""
                             "settings" -> ""
                             "messages" -> "Messages"
                             "notifications" -> "Notifications"
@@ -207,12 +207,14 @@ fun MyTopBar(
                         var expanded by remember { mutableStateOf(false) }
 
                         Box {
-                            IconButton(onClick = { expanded = true }) {
+                            IconButton(onClick = { expanded = true },
+                                modifier = Modifier.size(65.dp)
+                            ) {
                                 AsyncImage(
                                     model = profilePictureUrl ?: R.drawable.chalkitup,
                                     contentDescription = "Profile",
                                     modifier = Modifier
-                                        .size(120.dp)
+                                        .size(55.dp)
                                         .clip(CircleShape)
                                         .border(4.dp, MaterialTheme.colorScheme.primary, CircleShape)
                                 )
