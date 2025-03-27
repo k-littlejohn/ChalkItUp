@@ -44,6 +44,7 @@ import com.example.chalkitup.ui.viewmodel.Appointment
 import com.example.chalkitup.ui.viewmodel.BookingManager
 import com.example.chalkitup.ui.viewmodel.HomeViewModel
 import com.example.chalkitup.ui.viewmodel.WeatherViewModel
+import androidx.compose.foundation.BorderStroke
 
 @Composable
 fun HomeScreen(
@@ -91,16 +92,30 @@ fun HomeScreen(
                 .verticalScroll(rememberScrollState())
         ) {
 
-            // Information Icon Button
-            IconButton(
-                onClick = { showTutorial = true },
+            // Row to hold both icons
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.Info,
-                    contentDescription = "Tutorial",
-                    tint = Color.White
+                // Information Icon Button
+                IconButton(
+                    onClick = { showTutorial = true },
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = "Tutorial",
+                        tint = Color.White
+                    )
+                }
+                // Image to the right of the Info icon
+                Image(
+                    painter = painterResource(id = R.drawable.chalk_confused),
+                    contentDescription = "Confused Chalk",
+                    modifier = Modifier
+                        .size(80.dp)
+                        .offset(x = (-28).dp)
                 )
             }
+
 
             Row(
                 modifier = Modifier
@@ -228,12 +243,17 @@ fun CalendarScreen(
 ) {
     val bookedDates by homeViewModel.bookedDates.collectAsState()
 
+    val currentMonth = remember { mutableStateOf(YearMonth.now()) }
+
     // Current Visibility Set Up Is 3 Months Prior and 3 Months Forward
     val calendarState = rememberCalendarState(
         startMonth = YearMonth.now().minusMonths(3),
         endMonth = YearMonth.now().plusMonths(3),
         firstVisibleMonth = YearMonth.now(),
     )
+    LaunchedEffect(currentMonth.value) {
+        calendarState.animateScrollToMonth(currentMonth.value)
+    }
 
     Column(
         modifier = Modifier
@@ -262,12 +282,40 @@ fun CalendarScreen(
 
                 Spacer(modifier = Modifier.height(6.dp))
 
-                // Month Title Inside of Calendar
-                Text(
-                    text = calendarState.firstVisibleMonth.yearMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = Color.Black
-                )
+                // Month Navigation with Back and Forward Arrows
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Back Button (Previous Month)
+                    IconButton(onClick = {
+                        currentMonth.value = currentMonth.value.minusMonths(1)
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_arrow_back),
+                            contentDescription = "Previous Month",
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
+
+                    // Month Title Inside of Calendar
+                    Text(
+                        text = calendarState.firstVisibleMonth.yearMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = Color.Black
+                    )
+
+                    // Forward Button (Next Month)
+                    IconButton(onClick = {
+                        currentMonth.value = currentMonth.value.plusMonths(1)
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_arrow_forward),
+                            contentDescription = "Next Month",
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -509,14 +557,33 @@ fun UpcomingAppointmentItem(
                         color = Color.Gray
                     )
                 }
+                // Row to hold the arrow and image
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    // Conditionally load the image based on the mode
+                    val imageRes = when (mode.lowercase()) {
+                        "in person" -> R.drawable.chalk_eraser1
+                        "online" -> R.drawable.chalk3
+                        else -> R.drawable.chalk_cool
+                    }
 
-                // Right Arrow Icon
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                    contentDescription = "More",
-                    tint = Color.Gray,
-                    modifier = Modifier.size(20.dp)
-                )
+                    // Image for mode (either "inperson" or "online")
+                    Image(
+                        painter = painterResource(id = imageRes),
+                        contentDescription = "Mode Image",
+                        modifier = Modifier.size(65.dp)
+                    )
+
+                    // Right Arrow Icon
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                        contentDescription = "More",
+                        tint = Color.Gray,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
 
@@ -553,83 +620,117 @@ fun AppointmentPopup(
     AlertDialog(
         onDismissRequest = {
             errorMessage = null
-
             onDismiss()
         },
-        title = { Text(text = "Appointment Details") },
+        title = {
+            Text(
+                text = "Appointment Details",
+                fontSize = 28.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
         text = {
-            Column {
+            Column(modifier = Modifier.padding(16.dp)) {
                 if (userType == "Tutor") {
-                    Text(text = "Student: ${appointment.studentName}")
+                    Text(text = "Student:       ${appointment.studentName}")
                 } else {
-                    Text(text = "Tutor: ${appointment.tutorName}")
+                    Text(text = "Tutor:             ${appointment.tutorName}")
                 }
-                Text(text = "Date: ${appointment.date}")
-                Text(text = "Time: ${appointment.time}")
-                Text(text = "Subject: ${appointment.subject}")
-                Text(text = "Location: ${appointment.mode}")
-                Text(text = "Comments: ${appointment.comments}")
+                Text(text = "Date:              ${appointment.date}")
+                Text(text = "Time:             ${appointment.time}")
+                Text(text = "Subject:         ${appointment.subject}")
+
+                Text(text = "Mode:       ${appointment.mode}")
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(text = "Comments: \n${appointment.comments}")
 
                 errorMessage?.let {
-                    Text(
-                        text = it,
-                        color = Color.Red,
-                    )
+                    Text(text = it, color = Color.Red)
                 }
             }
         },
         confirmButton = {
-            Button(
-                onClick = {
-                    onDismiss()
-                }
-            ) { Text("Close") }
-        },
-        dismissButton = {
-            Column {
-                Button(
-                    onClick = {
-                        if (isConnected){
-                            homeViewModel.cancelAppointment(appointment) {
-                                onDismiss()
-                                homeViewModel.fetchAppointments()
-                            }
-                        }
-                        else {
-                            errorMessage="Error: Try canceling when you are back online!"
-                        }
-
-                    },
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Rebook & Close in the same row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Cancel Appointment")
-                }
-                if (userType == "Student") {
-                    Button(
-                        onClick = {
-
-                            if(isConnected) {
-                                homeViewModel.cancelAppointment(appointment) {
-                                    onDismiss()
-                                    navController.navigate("booking")
+                    if (userType == "Student") {
+                        OutlinedButton(
+                            onClick = {
+                                if (isConnected) {
+                                    homeViewModel.cancelAppointment(appointment) {
+                                        onDismiss()
+                                        navController.navigate("booking")
+                                    }
+                                } else {
+                                    errorMessage = "Error: Try rebooking when you are back online!"
                                 }
-                            }
-                            else{
-                                errorMessage="Error: Try rebooking when you are back online!"
+                            },
+                            shape = RoundedCornerShape(4.dp),
+                            modifier = Modifier.weight(1f),
+                            border = BorderStroke(2.dp, Color(0xFF54A4FF))
+                        ) {
+                            Text("Rebook", color = Color(0xFF54A4FF))
+                        }
+                    }
 
-                            }
-                        },
+                    OutlinedButton(
+                        onClick = { onDismiss() },
+                        shape = RoundedCornerShape(4.dp),
+                        modifier = Modifier.weight(1f),
+                        border = BorderStroke(2.dp, Color.Gray)
                     ) {
-                        Text("Rebook Appointment")
+                        Text("Close", color = Color.Gray)
                     }
                 }
 
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Cancel button
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Image on the left side of the button
+                    Image(
+                        painter = painterResource(id = R.drawable.eraser_x),
+                        contentDescription = "Cancel Icon",
+                        modifier = Modifier.size(55.dp)
+                    )
+
+                    OutlinedButton(
+                        onClick = {
+                            if (isConnected) {
+                                homeViewModel.cancelAppointment(appointment) {
+                                    onDismiss()
+                                    homeViewModel.fetchAppointments()
+                                }
+                            }
+                        },
+                        shape = RoundedCornerShape(4.dp),
+                        border = BorderStroke(1.dp, Color.Red)
+                    ) {
+                        Text("Cancel Booking", color = Color.Red)
+                    }
+
+                    Image(
+                        painter = painterResource(id = R.drawable.eraser_x),
+                        contentDescription = "Cancel Icon",
+                        modifier = Modifier.size(55.dp)
+                    )
+                }
             }
         }
     )
 }
 
-
-@Composable
+    @Composable
 fun TutorialDialog(onDismiss: () -> Unit, userType: String) {
     val otherUserType = if (userType == "Tutor") "Student" else "Tutor"
 
