@@ -32,13 +32,16 @@ import androidx.compose.foundation.clickable
 import java.time.LocalDate
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.Brush
 import java.util.Locale
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.example.chalkitup.Connection
 import com.example.chalkitup.ui.viewmodel.Appointment
 import com.example.chalkitup.ui.viewmodel.BookingManager
@@ -51,9 +54,23 @@ fun HomeScreen(
     homeViewModel: HomeViewModel = viewModel(),
     weatherViewModel: WeatherViewModel = viewModel()
 ) {
+
     val userType by homeViewModel.userType.collectAsState()
 
     var showTutorial by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        homeViewModel.checkFirstTimeLogin(
+            onSuccess = { showTutorial = true }
+        )
+        println("showtutorial value is $showTutorial")
+    }
+
+//    if (showTutorialOnFirstLogin.value) {
+//        showTutorial = true
+//    }
+//    LaunchedEffect(showTutorialOnFirstLogin.value) {
+//        showTutorial = showTutorialOnFirstLogin.value
+//    }
 
     var selectedAppointment by remember { mutableStateOf<Appointment?>(null) }
     val userName by homeViewModel.userName.collectAsState()
@@ -550,6 +567,16 @@ fun AppointmentPopup(
     // Track error message for network issues
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
+    LaunchedEffect(Unit) {
+        if (userType != "Tutor") {
+            homeViewModel.loadProfilePicture(appointment.tutorID)
+        } else {
+            homeViewModel.loadProfilePicture(appointment.studentID)
+        }
+    }
+
+    val profilePictureUrl by homeViewModel.profilePictureUrl.observeAsState()
+
     AlertDialog(
         onDismissRequest = {
             errorMessage = null
@@ -559,11 +586,33 @@ fun AppointmentPopup(
         title = { Text(text = "Appointment Details") },
         text = {
             Column {
-                if (userType == "Tutor") {
-                    Text(text = "Student: ${appointment.studentName}")
-                } else {
-                    Text(text = "Tutor: ${appointment.tutorName}")
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Profile Picture
+                    AsyncImage(
+                        model = profilePictureUrl ?: R.drawable.chalkitup,
+                        contentDescription = "Profile Picture",
+                        modifier = Modifier
+                            .size(170.dp)
+                            .clip(CircleShape)
+                            .border(2.dp, Color.Gray, CircleShape)
+                    )
+                    if (userType == "Tutor") {
+                        Text(text = "Student: ${appointment.studentName}")
+                    } else {
+                        Text(text = "Tutor: ${appointment.tutorName}")
+                    }
                 }
+
+//                if (userType == "Tutor") {
+//                    Text(text = "Student: ${appointment.studentName}")
+//                } else {
+//                    Text(text = "Tutor: ${appointment.tutorName}")
+//                }
                 Text(text = "Date: ${appointment.date}")
                 Text(text = "Time: ${appointment.time}")
                 Text(text = "Subject: ${appointment.subject}")
