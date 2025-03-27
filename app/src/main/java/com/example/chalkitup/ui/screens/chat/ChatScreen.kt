@@ -2,6 +2,7 @@ package com.example.chalkitup.ui.screens.chat
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -355,7 +356,12 @@ fun ChatAppBar(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(start = 0.dp)
                 ) {
-                    ProfilePictureIcon(profilePictureUrl = userPictureUrl)
+                    ProfilePictureIcon(profilePictureUrl = userPictureUrl,
+                        modifier = Modifier.clickable(onClick = {
+                            navController.navigate("profile/${user.id}")
+                            }
+                        )
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "${user.firstName} ${user.lastName}",
