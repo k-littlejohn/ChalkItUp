@@ -270,6 +270,52 @@ class HomeViewModel : ViewModel() {
                         .document("sessionCount")
                         .update("week$weekNumber", FieldValue.increment(-1))
 
+                    // Add the cancellation session notifications to firebase
+                    addNotification(
+                        notifUserID = appointment.tutorID,
+                        notifUserName = appointment.tutorName,
+                        notifTime = LocalTime.now().toString(),
+                        notifDate = LocalDate.now().toString(),
+                        comments = appointment.comments,
+                        sessDate = appointment.date,
+                        sessTime = appointment.time,
+                        otherID = appointment.studentID,
+                        otherName = appointment.studentName,
+                        subject = appointment.subjectObject["subject"].toString(),
+                        grade = appointment.subjectObject["grade"].toString(),
+                        spec = appointment.subjectObject["specialization"].toString(),
+                        mode = appointment.mode,
+                        price = appointment.subjectObject["price"].toString()
+                    )
+            
+                    addNotification(
+                        notifUserID = appointment.studentID,
+                        notifUserName = appointment.studentName,
+                        notifTime = LocalTime.now().toString(),
+                        notifDate = LocalDate.now().toString(),
+                        comments = appointment.comments,
+                        sessDate = appointment.date,
+                        sessTime = appointment.time,
+                        otherID = appointment.tutorID,
+                        otherName = appointment.tutorName,
+                        subject = appointment.subjectObject["subject"].toString(),
+                        grade = appointment.subjectObject["grade"].toString(),
+                        spec = appointment.subjectObject["specialization"].toString(),
+                        mode = appointment.mode,
+                        price = appointment.subjectObject["price"].toString()
+                    )
+            
+                    // Send two emails about the cancelled sessions
+                    sendEmail(
+                        appointment = appointment,
+                        userID = appointment.tutorID
+                    )
+            
+                    sendEmail(
+                        appointment = appointment,
+                        userID = appointment.studentID
+                    )
+        
                     // Delete the appointment from Firestore
                     db.collection("appointments")
                         .document(appointmentId)
@@ -288,52 +334,6 @@ class HomeViewModel : ViewModel() {
             .addOnFailureListener { e ->
                 Log.e("Appointment", "Error fetching appointment details", e)
             }
-
-        // Add the cancellation session notifications to firebase
-        addNotification(
-            notifUserID = appointment.tutorID,
-            notifUserName = appointment.tutorName,
-            notifTime = LocalTime.now().toString(),
-            notifDate = LocalDate.now().toString(),
-            comments = appointment.comments,
-            sessDate = appointment.date,
-            sessTime = appointment.time,
-            otherID = appointment.studentID,
-            otherName = appointment.studentName,
-            subject = appointment.subjectObject["subject"].toString(),
-            grade = appointment.subjectObject["grade"].toString(),
-            spec = appointment.subjectObject["specialization"].toString(),
-            mode = appointment.mode,
-            price = appointment.subjectObject["price"].toString()
-        )
-
-        addNotification(
-            notifUserID = appointment.studentID,
-            notifUserName = appointment.studentName,
-            notifTime = LocalTime.now().toString(),
-            notifDate = LocalDate.now().toString(),
-            comments = appointment.comments,
-            sessDate = appointment.date,
-            sessTime = appointment.time,
-            otherID = appointment.tutorID,
-            otherName = appointment.tutorName,
-            subject = appointment.subjectObject["subject"].toString(),
-            grade = appointment.subjectObject["grade"].toString(),
-            spec = appointment.subjectObject["specialization"].toString(),
-            mode = appointment.mode,
-            price = appointment.subjectObject["price"].toString()
-        )
-
-        // Send two emails about the cancelled sessions
-        sendEmail(
-            appointment = appointment,
-            userID = appointment.tutorID
-        )
-
-        sendEmail(
-            appointment = appointment,
-            userID = appointment.studentID
-        )
     }
 
     // Firebase order: notifications/actual notification info
