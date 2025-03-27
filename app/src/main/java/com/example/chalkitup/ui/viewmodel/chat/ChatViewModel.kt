@@ -124,7 +124,6 @@ class ChatViewModel: ViewModel() {
 
                 markConversationAsRead(id) // Mark conversations as read when opening
 
-                _messages.value = emptyList()   // Clear previous messages for a new chat
 
                 getMessages(id).collectLatest { newMessages ->
                     _messages.value = newMessages
@@ -178,8 +177,7 @@ class ChatViewModel: ViewModel() {
                     "studentName" to studentName,
                     "tutorName" to tutorName,
                     "lastMessage" to "",
-                    "timestamp" to System.currentTimeMillis(),
-                    "isRead" to false
+                    "timestamp" to System.currentTimeMillis()
                     )
                 ).await()
             conversationRef.id
