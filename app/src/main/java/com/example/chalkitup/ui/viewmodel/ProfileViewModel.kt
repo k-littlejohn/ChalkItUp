@@ -324,6 +324,7 @@ data class UserProfile(
     }
 }
 
+
 data class Interest(val name: String = "", var isSelected: Boolean = false) {
     companion object {
         fun fromMap(map: Map<String, Any>): Interest {

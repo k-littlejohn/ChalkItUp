@@ -180,7 +180,7 @@ fun NavGraph(navController: NavHostController) {
                 navController = navController,
                 settingsViewModel = settingsViewModel,
                 authViewModel = authViewModel,
-                offlineViewModel = OfflineDataManager
+                offlineViewModel = OfflineDataManager,
             )
         }
 

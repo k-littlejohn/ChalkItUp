@@ -17,6 +17,8 @@ buildscript {
         classpath(libs.google.services)
         classpath(libs.gradle)
         classpath(libs.kotlin.gradle.plugin)
+
     }
+
 //    id("com.google.dagger.hilt.android") version "2.51.1" apply false
 }

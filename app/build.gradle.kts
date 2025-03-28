@@ -40,6 +40,12 @@ android {
     buildFeatures {
         compose = true
     }
+    packagingOptions {
+        resources {
+            excludes += "META-INF/INDEX.LIST"
+            excludes += "META-INF/DEPENDENCIES"
+        }
+    }
 }
 
 dependencies {
@@ -76,8 +82,7 @@ dependencies {
     implementation(libs.androidx.foundation.v151) // New
     implementation(libs.compose) // Calendar
     implementation(libs.firebase.firestore.ktx)
-    // Enable Java 8+ API desugaring (only if minSdk < 26)
-    coreLibraryDesugaring(libs.desugar.jdk.libs) // Latest version//
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
     coreLibraryDesugaring(libs.desugar.jdk.libs.v204)
     implementation(libs.google.firebase.firestore.ktx)
     implementation(libs.androidx.material)
@@ -107,10 +112,16 @@ dependencies {
     implementation(libs.androidx.emoji2.bundled)
     implementation(libs.play.services.auth)
     implementation(libs.firebase.auth.v2100)
-    // Google Sign-in
     implementation(libs.play.services.auth)
     implementation(libs.protobuf.javalite)
 
+    // ✅ Google Calendar API dependencies
+    implementation(libs.google.api.client)  // Google API Client
+    implementation(libs.google.oauth.client)  // OAuth for authentication
+    implementation(libs.google.api.services.calendar)  // Google Calendar API
+//    // JSON parsing su
+//    pport for Google APIs
+    implementation(libs.google.http.client.gson)
     // Gif display
     implementation(libs.glide)
     implementation(libs.glide.compose)
