@@ -1,5 +1,6 @@
 [versions]
-agp = "8.8.2"
+accompanistFlowlayout = "0.32.0"
+agp = "8.9.1"
 androidGradle = "7.x.x"
 androidxLifecycleRuntimeKtx = "2.8.7"
 appcompatVersion = "1.7.0"
@@ -68,6 +69,7 @@ google-api-services-calendar = "v3-rev20240328-2.0.0"
 google-http-client-gson = "1.42.3"
 
 [libraries]
+accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanistFlowlayout" }
 androidx-appcompat-v120 = { module = "androidx.appcompat:appcompat", version.ref = "appcompatVersion" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }

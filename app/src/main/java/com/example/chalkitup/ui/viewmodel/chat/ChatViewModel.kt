@@ -7,6 +7,7 @@ import com.example.chalkitup.domain.model.User
 import com.example.chalkitup.domain.model.Message
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -28,7 +29,7 @@ import kotlinx.coroutines.tasks.await
  *
  */
 //@HiltViewModel
-class ChatViewModel : ViewModel() {
+class ChatViewModel: ViewModel() {
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
     val currentUserId = auth.currentUser?.uid ?: ""
@@ -120,7 +121,10 @@ class ChatViewModel : ViewModel() {
 
         newConversationId?.let { id ->
             viewModelScope.launch {
-                _messages.value = emptyList()   // Clear previous messages for a new chat
+
+                markConversationAsRead(id) // Mark conversations as read when opening
+
+
                 getMessages(id).collectLatest { newMessages ->
                     _messages.value = newMessages
                 }
@@ -198,7 +202,7 @@ class ChatViewModel : ViewModel() {
         val message = Message(
             senderId = currentUserId,
             text = text,
-            timestamp = System.currentTimeMillis()
+            timestamp = System.currentTimeMillis(),
         )
         try {
             // Add message to "messages" subcollection in the conversation
@@ -208,14 +212,34 @@ class ChatViewModel : ViewModel() {
                 .add(message)
                 .await()
 
-            // Update the "last message" and "timestamp" fields in the "conversation" document
-            db.collection("conversations")
-                .document(conversationId)
-                .update(
-                    "lastMessage", text,
-                    "timestamp", message.timestamp
-                )
-                .await()
+
+            val userDoc = db.collection("users").document(currentUserId).get().await()
+            val currentUserType = userDoc.getString("userType")
+
+            // Update the conversation document depending on the sender's type
+                if (currentUserType == "Student") {
+                    db.collection("conversations")
+                        .document(conversationId)
+                        .update(
+                            "lastMessage", text,
+                            "timestamp", message.timestamp,
+                            "lastMessageReadByStudent", true,   // sender (student) has read it
+                            "lastMessageReadByTutor", false       // recipient (tutor) hasn't read it
+                        )
+                        .await()
+
+                } else if (currentUserType == "Tutor") {
+                    db.collection("conversations")
+                        .document(conversationId)
+                        .update(
+                            "lastMessage", text,
+                            "timestamp", message.timestamp,
+                            "lastMessageReadByTutor", true,      // sender (tutor) has read it
+                            "lastMessageReadByStudent", false      // recipient (student) hasn't read it
+                        )
+                        .await()
+                }
+
             Log.d("Firestore", "Message successfully sent.")
 
         } catch (e: Exception) {
@@ -223,32 +247,53 @@ class ChatViewModel : ViewModel() {
         }
     }
 
+    private suspend fun markConversationAsRead(conversationId: String) {
+        try {
+            val userDoc = db.collection("users").document(currentUserId).get().await()
+            val userType = userDoc.getString("userType")
+
+            if (userType == "Student") {
+                db.collection("conversations")
+                    .document(conversationId)
+                    .update("lastMessageReadByStudent", true)
+                    .await()
+
+            } else if (userType == "Tutor") {
+                db.collection("conversations")
+                    .document(conversationId)
+                    .update("lastMessageReadByTutor", true)
+                    .await()
+            }
+
+        } catch (e: Exception) {
+            Log.e("ChatViewModel", "Error marking conversation as read", e)
+        }
+    }
+
+
     /**
      * Function to fetch messages for selected conversation.
      *
      * @param conversationId: current conversation ID
      */
     fun getMessages(conversationId: String): Flow<List<Message>> = callbackFlow {
+
         val messagesRef = db.collection("conversations")
             .document(conversationId)
             .collection("messages")
-            .orderBy("timestamp")
+            .orderBy("timestamp", Query.Direction.ASCENDING)
 
         // Set up a Firestore listener for the messages subcollection
-        val messagesListener = messagesRef
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    close(error)
-                    return@addSnapshotListener
-                }
-
-                // Map Firestore documents to Message objects
-                val messageList = snapshot?.documents?.mapNotNull {
-                    it.toObject(Message::class.java)
-                } ?: emptyList()
-                trySend(messageList)
+        val messagesListener = messagesRef.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                Log.e("ChatViewModel", "Messages listener error", error)
+                return@addSnapshotListener
             }
 
+            trySend(snapshot?.documents?.mapNotNull {
+                it.toObject(Message::class.java)
+            } ?: emptyList())
+        }
         awaitClose { messagesListener.remove() }
     }
 

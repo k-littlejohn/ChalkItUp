@@ -125,4 +125,8 @@ dependencies {
     // Gif display
     implementation(libs.glide)
     implementation(libs.glide.compose)
+
+    // this can be removed
+    implementation(libs.accompanist.flowlayout)
+
 }

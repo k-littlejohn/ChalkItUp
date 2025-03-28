@@ -150,7 +150,6 @@ class BookingViewModel : ViewModel() {
         db.collection("mail").add(studEmail)
             .addOnSuccessListener {
                 println("Appointment booked successfully!")
-                onSuccess()
             }
             .addOnFailureListener { e ->
                 println("Error booking appointment: ${e.message}")

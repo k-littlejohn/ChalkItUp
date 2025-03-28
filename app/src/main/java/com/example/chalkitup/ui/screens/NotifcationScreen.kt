@@ -3,6 +3,7 @@ package com.example.chalkitup.ui.screens
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,21 +18,26 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,7 +48,9 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.example.chalkitup.ui.viewmodel.NotifClass
 import com.example.chalkitup.ui.viewmodel.NotificationViewModel
 import com.google.firebase.Firebase
@@ -114,25 +122,38 @@ fun NotificationScreen(
                 .wrapContentSize(Alignment.Center)
         )
     }
+    val gradientBrushEmail = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF06C59C), // 5% Blue
+            Color(0xFF54A4FF) // 95% White
+        )
+    )
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(scrollState)
-            .background(color = Color(0xFF2495B0)),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(brush = gradientBrushEmail),
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
 
-        LoadNotifications { notification ->
-            selectedNotification = notification}
+            LoadNotifications { notification ->
+                selectedNotification = notification
+            }
 
+        }
     }
 
     // Long form version of notification when clicked
     selectedNotification?.let { notification ->
         NotifLargeForm(
             notif = notification,
-            onDismiss = { selectedNotification = null }
+            onDismiss = { selectedNotification = null },
+            navController = navController
         )
     }
 
@@ -148,13 +169,13 @@ fun LoadNotifications(
     Column(modifier = Modifier.padding(10.dp)) {
         notifications.forEach { notification ->
 
-            val formattedDate = try {
-                val date = LocalDate.parse(notification.notifDate, DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US))
-                date.format(DateTimeFormatter.ofPattern("MMM d", Locale.US)) // Outputs "Mar 6"
-            } catch (e: java.lang.Exception) {
-                "Invalid Date"
-            }
-            notification.notifDate = formattedDate
+//            val formattedDate = try {
+//                val date = LocalDate.parse(notification.notifDate, DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US))
+//                date.format(DateTimeFormatter.ofPattern("MMM d", Locale.US)) // Outputs "Mar 6"
+//            } catch (e: java.lang.Exception) {
+//                "Invalid Date"
+//            }
+           // notification.notifDate = formattedDate
 
             println("Notification: $notification")
 
@@ -302,10 +323,15 @@ fun PastNotifications(
 @Composable
 fun NotifLargeForm(
     notificationViewModel: NotificationViewModel = viewModel(),
+    navController: NavController,
     notif: NotifClass,
     onDismiss: () -> Unit
 ){
     val userType by notificationViewModel.userType.collectAsState()
+    val profilePictureUrl by notificationViewModel.profilePictureUrl.observeAsState()
+    LaunchedEffect(Unit){
+        notificationViewModel.loadProfilePicture(notif.otherID)
+    }
 
     AlertDialog(
         onDismissRequest = {
@@ -313,51 +339,188 @@ fun NotifLargeForm(
         },
 
         // Handles: Sessions (Booked/ Rescheduled/ Cancelled), Update, Messages
-        title = { Text(text = "Notification Details") },
+        //title = { Text(text = "Notification Details") },
         text = {
             Column {
                 when (notif.notifType) {
                     "Session" -> {
-                        Text(text = "$userType Session ${notif.sessType}")
+                        Text(text = "$userType Session ${notif.sessType}",
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth())
+                        Spacer(modifier = Modifier.height(8.dp))
                         if (userType == "Tutor") {
-                            Text(text = "Student: ${notif.otherName}")
+                            Text(
+                                text = "Student:              ",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
                         } else {
-                            Text(text = "Tutor: ${notif.otherName}")
+                            Text(
+                                text = "Tutor:              ",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
                         }
-                        Text(text = "Notification Time & Date: ${notif.notifTime} ${notif.notifDate}")
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
 
-                        Text(text = "Session Time: ${notif.sessTime}")
-                        Text(text = "Session Date: ${notif.sessDate}")
-                        Text(text = "Subject: ${notif.subject}")
-                        Text(text = "Grade: ${notif.grade}")
-                        Text(text = "Specialization: ${notif.spec}")
-                        Text(text = "Price: ${notif.price}")
-                        Text(text = "Location: ${notif.mode}")
-                        Text(text = "Session Comments: ${notif.comments}")
+                            // Profile Picture
+                            AsyncImage(
+                                model = profilePictureUrl ?: R.drawable.chalkitup,
+                                contentDescription = "Profile Picture",
+                                modifier = Modifier
+                                    .size(90.dp)
+                                    .clip(CircleShape)
+                                    .border(2.dp, Color.Gray, CircleShape)
+                                    .clickable {
+                                        navController.navigate("profile/${notif.otherID}")
+                                    }
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Text(text = notif.otherName,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.SemiBold)
+                        }
+//
+                        Row {
+                            Text(text = "Notification Date:   ",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold)
+                            Text(text = "${notif.notifTime} ${notif.notifDate}")
+                        }
+                        //Text(text = "Notification Time & Date: ${notif.notifTime} ${notif.notifDate}")
+                        Row {
+                            Text(text = "Session Time:         ",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold)
+                            Text(text = notif.sessTime)
+                        }
+                        //Text(text = "Session Time: ${notif.sessTime}")
+                        Row {
+                            Text(text = "Session Date:          ",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold)
+                            Text(text = notif.sessDate)
+                        }
+                        //Text(text = "Session Date: ${notif.sessDate}")
+                        Row {
+                            Text(
+                                text = "Subject:                    ",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(text = notif.subject.substringBefore(" ") + " " + notif.grade + " " + notif.spec)
+                        }
+                        //Text(text = "Subject: ${notif.subject}")
+                        //Text(text = "Grade: ${notif.grade}")
+                        //Text(text = "Specialization: ${notif.spec}")
+                        Row {
+                            Text(text = "Price:                        ",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold)
+                            Text(text = notif.price)
+                        }
+                        //Text(text = "Price: ${notif.price}")
+                        Row {
+                            Text(text = "Mode:                        ",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold)
+                            Text(text = notif.mode)
+                        }
+                        //Text(text = "Location: ${notif.mode}")
+                        if (notif.comments != "") {
+                            Text(
+                                text = "Comments:   ",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(text = notif.comments)
+                        }
                     }
                     "Update" -> {
-                        Text(text = "$userType Account Update")
-                        Text(text = "Notification Time & Date: ${notif.notifTime} ${notif.notifDate}")
-                        Text(text = "Comments: ${notif.comments}")
+                        Text(text = "$userType Account Update",
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth())
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row {
+                            Text(text = "Notification Date:   ",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold)
+                            Text(text = "${notif.notifTime} ${notif.notifDate}")
+                        }
+                        if (notif.comments != "") {
+                            Text(
+                                text = "Comments:   ",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(text = notif.comments)
+                        }
                     }
                     "Messages" -> {
                         Text(text =
                         if (userType == "Student") "Message - Tutor"
-                        else "Message - Student")
-                        Text(text = "Notification Time & Date: ${notif.notifTime} ${notif.notifDate}")
+                        else "Message - Student",
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth())
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row {
+                            Text(text = "Notification Date:   ",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold)
+                            Text(text = "${notif.notifTime} ${notif.notifDate}")
+                        }
                         Text(text =
                         if (userType == "Student") "A tutor has reached out to you"
                         else "A student has reached out to you")
                     }
                     "Deactivated" -> {
-                        Text(text = "Account - Deactivated")
-                        Text(text = "Notification Time & Date: ${notif.notifTime} ${notif.notifDate}")
-                        Text(text = "Comments: ${notif.comments}")
+                        Text(text = "Account - Deactivated",
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth())
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row {
+                            Text(text = "Notification Date:   ",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold)
+                            Text(text = "${notif.notifTime} ${notif.notifDate}")
+                        }
+                        if (notif.comments != "") {
+                            Text(
+                                text = "Comments:   ",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(text = notif.comments)
+                        }
                     }
                     "Approved" -> {
-                        Text(text = "Account - Approved")
-                        Text(text = "Notification Time & Date: ${notif.notifTime} ${notif.notifDate}")
-                        Text(text = "Comments: ${notif.comments}")
+                        Text(text = "Account - Approved",
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth())
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row {
+                            Text(text = "Notification Date:   ",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold)
+                            Text(text = "${notif.notifTime} ${notif.notifDate}")
+                        }
+                        if (notif.comments != "") {
+                            Text(
+                                text = "Comments:   ",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(text = notif.comments)
+                        }
                     }
                 }
             }

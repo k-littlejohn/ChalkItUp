@@ -21,6 +21,15 @@ import com.example.chalkitup.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.Alignment
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import coil.compose.AsyncImage
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import com.example.chalkitup.ui.viewmodel.AuthViewModel
+import com.example.chalkitup.ui.viewmodel.SettingsViewModel
+import com.google.firebase.auth.FirebaseAuth
+
 
 // Top app bar
 
@@ -28,10 +37,14 @@ import androidx.compose.ui.Alignment
 @Composable
 fun MyTopBar(
     navController: NavController,
-    onMenuClick: () -> Unit
+    onMenuClick: () -> Unit,
+    profilePictureUrl: String?,
+    authViewModel: AuthViewModel,
+    settingsViewModel: SettingsViewModel
 ) {
     var targetedProfileView by remember { mutableStateOf(false) }
 
+    var showDialog by remember { mutableStateOf(false) }
     // Holds the value of the current screen the user is on
     var currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
@@ -63,20 +76,20 @@ fun MyTopBar(
         //"home" -> Color(0xFFFFFFFF)//MaterialTheme.colorScheme.primary
         "profile","tutorAvailability","booking","home","start","login","signup","forgotPassword","termsAndCond","adminHome",
             "messages", "newMessage", "chat" -> Color(0xFF54A4FF) // Fill top-screen white space
-        "checkEmail","awaitingApproval", "editProfile" -> Color(0xFF06C59C) // Fill top-screen white space
+        "checkEmail","awaitingApproval", "editProfile","notifications" -> Color(0xFF06C59C) // Fill top-screen white space
         else -> Color.White
     }
 
     // Change text dynamically
     // Changes the text at the top based on what screen the user is on
     CenterAlignedTopAppBar(
-        modifier = Modifier.height(80.dp), // Increased height for icon, felt 80.dp looked the best
+        modifier = Modifier.height(110.dp), // Increased height for icon, felt 80.dp looked the best
         title = {
-            if (currentRoute == "home" || currentRoute == "editProfile") {
+            if (currentRoute == "home" || currentRoute == "editProfile" || currentRoute == "profile") {
                 Image(
-                    painter = painterResource(id = R.drawable.chalk_eraser2),
+                    painter = painterResource(id = R.drawable.logo1),
                     contentDescription = "Chalk & Eraser",
-                    modifier = Modifier.size(80.dp)
+                    modifier = Modifier.size(110.dp)
                 )
             } else if (currentRoute == "booking") { //May switch images around
                 Row(
@@ -117,8 +130,8 @@ fun MyTopBar(
                 ) {
                     Text(
                         text = when (currentRoute) {
-                            "profile" -> "Profile"
-                            "settings" -> "Settings"
+                           // "profile" -> ""
+                            "settings" -> ""
                             "messages" -> "Messages"
                             "notifications" -> "Notifications"
                             "newMessage" -> "New Chat"
@@ -175,7 +188,7 @@ fun MyTopBar(
                 }
             }
             // If viewing another user's profile, there is a back button
-            if (targetedProfileView) {
+            if (targetedProfileView || currentRoute == "notifications") {
                 IconButton(onClick = { navController.popBackStack() } ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
@@ -189,14 +202,59 @@ fun MyTopBar(
             when (currentRoute) {
                 // On the home page currently,
                 // there is a settings button in the top right
-                "home" -> {
-                    IconButton(onClick = { navController.navigate("settings") }) {
-                        Icon(
-                            Icons.Default.Settings, contentDescription = "Settings",
-                            modifier = Modifier.size(30.dp)
-                        )
+
+                 "home" -> {
+                        var expanded by remember { mutableStateOf(false) }
+
+                        Box {
+                            IconButton(onClick = { expanded = true },
+                                modifier = Modifier.size(65.dp)
+                            ) {
+                                AsyncImage(
+                                    model = profilePictureUrl ?: R.drawable.chalkitup,
+                                    contentDescription = "Profile",
+                                    modifier = Modifier
+                                        .size(55.dp)
+                                        .clip(CircleShape)
+                                        .border(4.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                                )
+                            }
+
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Profile") },
+                                    onClick = {
+                                        expanded = false
+                                        val currentUser = FirebaseAuth.getInstance().currentUser
+                                        if (currentUser != null) {
+                                            navController.navigate("profile/")
+                                        }
+                                    }
+                                )
+
+                                DropdownMenuItem(
+                                    text = { Text("Logout") },
+                                    onClick = {
+                                        expanded = false
+                                        authViewModel.signout()
+                                        navController.navigate("start")
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Delete Account", color = Color.Red) },
+                                    onClick = {
+                                        expanded = false
+                                        showDialog = true
+                                    }
+                                )
+                            }
+                        }
                     }
-                }
+
+
                 "profile" -> {
                     if (!targetedProfileView) {
                         IconButton(onClick = { navController.navigate("editProfile") }) {

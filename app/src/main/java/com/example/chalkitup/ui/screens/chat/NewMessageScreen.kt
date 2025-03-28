@@ -140,7 +140,7 @@ fun UserItem(
     Card(
         onClick = onClick,
         shape = RectangleShape,
-        colors = CardDefaults.cardColors(Color(0xFFF3F0FA)),
+        colors = CardDefaults.cardColors(Color.Transparent),
         elevation = CardDefaults.cardElevation(0.dp),
         modifier = Modifier
             .fillMaxWidth()
