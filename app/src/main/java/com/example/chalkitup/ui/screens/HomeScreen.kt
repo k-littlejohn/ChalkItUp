@@ -75,6 +75,7 @@ fun HomeScreen(
         )
     )
 
+
     if (showTutorial) {
         userType?.let { TutorialDialog(onDismiss = { showTutorial = false }, userType = it) }
     }
