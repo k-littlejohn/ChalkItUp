@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -128,5 +129,11 @@ dependencies {
 
     // this can be removed
     implementation(libs.accompanist.flowlayout)
+
+    //Chatbot AI needed dependencies
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
 
 }

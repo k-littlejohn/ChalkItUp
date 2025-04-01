@@ -1,5 +1,6 @@
 package com.example.chalkitup.ui.screens
 
+import androidx.compose.ui.graphics.painter.Painter
 import android.util.Log
 import androidx.compose.ui.res.painterResource
 import com.example.chalkitup.R
@@ -55,36 +56,25 @@ fun HomeScreen(
     homeViewModel: HomeViewModel = viewModel(),
     weatherViewModel: WeatherViewModel = viewModel()
 ) {
-
     val userType by homeViewModel.userType.collectAsState()
-
     var showTutorial by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        homeViewModel.checkFirstTimeLogin(
-            onSuccess = { showTutorial = true }
-        )
-        println("showtutorial value is $showTutorial")
-    }
-
     var selectedAppointment by remember { mutableStateOf<Appointment?>(null) }
     val userName by homeViewModel.userName.collectAsState()
 
-    // Observe Weather Data
     val weatherState by weatherViewModel.weather
-
-    // Extract Temperature and Condition (Cloud, Sunny etc)
     val temperature = weatherState?.current?.tempC?.toInt()?.toString() ?: "--"
     val condition = weatherState?.current?.condition?.text ?: "Unknown"
 
-    // Gradient Background
+    // Chat bubble state
+    var isChatOpen by remember { mutableStateOf(false) }
+
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
-            Color(0xFF54A4FF), // 5% Blue
+            Color(0xFF54A4FF),
             MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface
         )
     )
 
-    // Show dialog when showDialog is true
     if (showTutorial) {
         userType?.let { TutorialDialog(onDismiss = { showTutorial = false }, userType = it) }
     }
@@ -93,7 +83,7 @@ fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(gradientBrush),
-        contentAlignment = Alignment.CenterEnd
+        contentAlignment = Alignment.BottomEnd // Align chat bubble at the bottom right
     ) {
         Column(
             modifier = Modifier
@@ -101,31 +91,20 @@ fun HomeScreen(
                 .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-
-            // Row to hold both icons
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Information Icon Button
-                IconButton(
-                    onClick = { showTutorial = true },
-                ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = { showTutorial = true }) {
                     Icon(
                         imageVector = Icons.Default.Info,
                         contentDescription = "Tutorial",
                         tint = Color.White
                     )
                 }
-                // Image to the right of the Info icon
                 Image(
                     painter = painterResource(id = R.drawable.chalk_confused),
                     contentDescription = "Confused Chalk",
-                    modifier = Modifier
-                        .size(80.dp)
-                        .offset(x = (-28).dp)
+                    modifier = Modifier.size(80.dp).offset(x = (-28).dp)
                 )
             }
-
 
             Row(
                 modifier = Modifier
@@ -135,10 +114,7 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 GreetingSection(userName!!)
-
                 Spacer(modifier = Modifier.weight(4f))
-
-                // Update WeatherWidget with Real Data
                 WeatherWidget(
                     temperature = temperature,
                     condition = condition,
@@ -155,9 +131,24 @@ fun HomeScreen(
             }
         }
 
+        //Chat Icon Button (Always visible, opens chat on click)
+        val chatIcon: Painter = painterResource(id = R.drawable.chaticon3)
+
+        Image(
+            painter = chatIcon,
+            contentDescription = "Chat Icon",
+            modifier = Modifier
+                .size(61.dp).offset(x = (-28).dp).offset(y = (-30).dp)
+                .clickable { isChatOpen = true }
+        )
+
+// **Chat Popup** (Only visible when chat is opened)
+        if (isChatOpen) {
+            ChatPopup(onClose = { isChatOpen = false })
+        }
     }
 
-    // Appointment With More Details Popup
+    // **Appointment Popup**
     selectedAppointment?.let { appointment ->
         AppointmentPopup(
             navController = navController,
@@ -166,6 +157,7 @@ fun HomeScreen(
         )
     }
 }
+
 
 
 // User Greeting Above Calendar Based On Time of Day.
