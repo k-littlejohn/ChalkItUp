@@ -196,7 +196,7 @@ fun ProfileScreen(
             ) {
                 // Left Icon
                 Image(
-                    painter = painterResource(id = R.drawable.happy_eraser1),
+                    painter = painterResource(id = R.drawable.eraser_reading),
                     contentDescription = "Eraser",
                     modifier = Modifier.size(110.dp)
                 )
