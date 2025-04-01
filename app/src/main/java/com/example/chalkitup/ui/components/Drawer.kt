@@ -38,7 +38,7 @@ fun NavigationDrawer(
                 // Space and title for the "Subjects Offered" section
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Subjects Offered",
+                    text = "Study Timer",
                     modifier = Modifier.padding(start = 16.dp),
                     color = MaterialTheme.colorScheme.onBackground // Text color
                 )
@@ -50,7 +50,7 @@ fun NavigationDrawer(
                 NavigationDrawerItem(
                     label = {
                         Text(
-                            "Math",
+                            "Ask a Question",
                             color = MaterialTheme.colorScheme.onBackground
                         )
                     },
@@ -65,7 +65,7 @@ fun NavigationDrawer(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Available Tutors",
+                    text = "View Profile",
                     modifier = Modifier.padding(start = 16.dp),
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -75,7 +75,7 @@ fun NavigationDrawer(
                 NavigationDrawerItem(
                     label = {
                         Text(
-                            "Billy bob",
+                            "Dark Mode",
                             color = MaterialTheme.colorScheme.onBackground
                         )
                     },
