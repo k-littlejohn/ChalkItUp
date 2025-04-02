@@ -33,10 +33,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.chalkitup.ui.screens.MainScreen
 import com.example.chalkitup.ui.theme.ChalkitupTheme
 import com.example.chalkitup.ui.viewmodel.BookingManager
 import com.example.chalkitup.ui.viewmodel.OfflineDataManager
+import com.example.chalkitup.ui.viewmodel.ThemeViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.example.chalkitup.ui.viewmodel.UserProfile
 import com.google.android.libraries.places.api.Places
@@ -60,7 +62,11 @@ class MainActivity : ComponentActivity() {
         Places.initialize(this, "AIzaSyCp6eJq4S6fiAbSb-yOaiGfmZc1imPAxAM")
         Connection(this).isConnected
         setContent {
-            ChalkitupTheme {
+
+            val themeViewModel: ThemeViewModel = viewModel()
+            val darkTheme by themeViewModel.isDarkTheme
+
+            ChalkitupTheme(darkTheme = darkTheme) {
                 Surface {
                     CheckAuthStatus(this, lastUser = lastUser)
                 }

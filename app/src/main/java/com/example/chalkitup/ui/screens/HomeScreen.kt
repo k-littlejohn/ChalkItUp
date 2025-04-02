@@ -54,10 +54,19 @@ import androidx.compose.foundation.BorderStroke
 fun HomeScreen(
     navController: NavController,
     homeViewModel: HomeViewModel = viewModel(),
-    weatherViewModel: WeatherViewModel = viewModel()
+    weatherViewModel: WeatherViewModel = viewModel(),
+    askQuestion: Int
 ) {
     val userType by homeViewModel.userType.collectAsState()
     var showTutorial by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        homeViewModel.checkFirstTimeLogin(
+            onSuccess = { showTutorial = true }
+        )
+        println("showtutorial value is $showTutorial")
+    }
+
     var selectedAppointment by remember { mutableStateOf<Appointment?>(null) }
     val userName by homeViewModel.userName.collectAsState()
 
@@ -68,12 +77,17 @@ fun HomeScreen(
     // Chat bubble state
     var isChatOpen by remember { mutableStateOf(false) }
 
+    if (askQuestion == 1) {
+        isChatOpen = true
+    }
+
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
             Color(0xFF54A4FF),
             MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface
         )
     )
+
 
     if (showTutorial) {
         userType?.let { TutorialDialog(onDismiss = { showTutorial = false }, userType = it) }

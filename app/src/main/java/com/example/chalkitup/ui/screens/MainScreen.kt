@@ -1,8 +1,6 @@
 package com.example.chalkitup.ui.screens
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
@@ -21,6 +19,7 @@ import com.example.chalkitup.ui.nav.NavGraph
 import com.example.chalkitup.ui.viewmodel.AuthViewModel
 import com.example.chalkitup.ui.viewmodel.ProfileViewModel
 import com.example.chalkitup.ui.viewmodel.SettingsViewModel
+import com.example.chalkitup.ui.viewmodel.ThemeViewModel
 import kotlinx.coroutines.launch
 
 // Main Screen acts as a base for other screens to be loaded into
@@ -34,7 +33,6 @@ import kotlinx.coroutines.launch
  * and conditional visibility of top and bottom bars based on the current route.
  * It also observes the user's authentication state and navigates to the home screen if the user is logged in.
  */
-@RequiresApi(Build.VERSION_CODES.TIRAMISU) // Removing this gives an minimum required API error on the NavGraph call -Jeremelle
 @Composable
 fun MainScreen() {
     //------------------------------VARIABLES----------------------------------------------
@@ -115,7 +113,7 @@ fun MainScreen() {
                 onResult = {
                     if (it == true) {
                         println("approved")
-                        navController.navigate("home")
+                        navController.navigate("home/")
                     } else {
                         println("awaitingApproval")
                         navController.navigate("awaitingApproval")
@@ -134,9 +132,11 @@ fun MainScreen() {
 
     //------------------------------VARIABLES-END---------------------------------------------
 
+    val themeViewModel: ThemeViewModel = viewModel()
+
     // Modal navigation drawer that wraps the content of the screen.
     ModalNavigationDrawer(
-        drawerContent = { NavigationDrawer(navController, drawerState) }, // Drawer content (menu)
+        drawerContent = { NavigationDrawer(navController, drawerState, themeViewModel = themeViewModel) }, // Drawer content (menu)
         drawerState = drawerState, // Manage drawer state (open/closed)
         gesturesEnabled = false // Disable swipe gestures to open the drawer (if enabled, drawer is accessible from any screen)
     ) {
