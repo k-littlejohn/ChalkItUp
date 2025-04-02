@@ -22,6 +22,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
+import com.example.chalkitup.R
 
 // Bottom App Bar
 
@@ -50,16 +53,17 @@ fun BottomNavigationBar(
     val items = when (userType) {
         "Tutor" -> listOf(
             // List of the items that are displayed on the Bottom Bar for Tutors
-            BottomNavItem("home/", Icons.Default.Home, "Home"),         // Home icon with label "Home"
-            BottomNavItem("tutorAvailability", Icons.Default.Add, "Availability"),       // Availability icon with label "Availability"
-            BottomNavItem("messages", Icons.AutoMirrored.Filled.Message, "Messages"),// Messages icon with label "Messages"
-            BottomNavItem("profile/", Icons.Default.Person, "Profile")  // Profile icon with label "Profile"
+            BottomNavItem("home/", Icons.Default.Home, null, "Home"),         // Home icon with label "Home"
+            BottomNavItem("tutorAvailability", Icons.Default.Add,null, "Availability"),       // Availability icon with label "Availability"
+            BottomNavItem("messages", Icons.AutoMirrored.Filled.Message,null, "Messages"),// Messages icon with label "Messages"
+            BottomNavItem("profile/", Icons.Default.Person,null, "Profile")  // Profile icon with label "Profile"
         )
         "Student" -> listOf(
-            BottomNavItem("home/", Icons.Default.Home, "Home"),         // Home icon with label "Home"
-            BottomNavItem("booking", Icons.Default.Add, "Book"),       // Book icon with label "Book"
-            BottomNavItem("messages", Icons.AutoMirrored.Filled.Message, "Messages"), // Messages icon with label "Messages"
-            BottomNavItem("profile/", Icons.Default.Person, "Profile")  // Profile icon with label "Profile"
+            BottomNavItem("home/", Icons.Default.Home,null, "Home"),         // Home icon with label "Home"
+            BottomNavItem("booking", Icons.Default.Add,null, "Book"),       // Book icon with label "Book"
+            BottomNavItem("pomodoroTimer",null, painterResource(id = R.drawable.timer), "Timer"),
+            BottomNavItem("messages", Icons.AutoMirrored.Filled.Message,null, "Messages"), // Messages icon with label "Messages"
+            BottomNavItem("profile/", Icons.Default.Person,null, "Profile")  // Profile icon with label "Profile"
         )
         else -> emptyList()
     }
@@ -82,8 +86,12 @@ fun BottomNavigationBar(
 
     // Create the Bottom Navigation Bar
     NavigationBar(
-        containerColor = if (isPomodoroTimer) Color.Black else MaterialTheme.colorScheme.surface,
-        contentColor = if (isPomodoroTimer) Color.White else MaterialTheme.colorScheme.onSurface,
+        containerColor = if (isPomodoroTimer) Color.Black
+        else if (fillerBar) Color(0xFF54A4FF)
+        else MaterialTheme.colorScheme.surface,
+        contentColor = if (isPomodoroTimer) Color.White
+        else if (fillerBar) Color(0xFF54A4FF)
+        else MaterialTheme.colorScheme.onSurface,
     ) {
         if (fillerBar) {
             Unit
@@ -97,11 +105,21 @@ fun BottomNavigationBar(
                         indicatorColor = Color(0xFF06C59C),
                     ),
                     icon = {
-                        Icon(
-                            item.icon,
-                            contentDescription = item.label,
-                            tint = if (isPomodoroTimer) Color.White else MaterialTheme.colorScheme.onSurface
-                        )
+//                        Icon(
+//                            item.icon,
+//                            contentDescription = item.label,
+//                            tint = if (isPomodoroTimer) Color.White else MaterialTheme.colorScheme.onSurface
+//                        )
+                        if (item.iconVector != null) {
+                            Icon(imageVector = item.iconVector,
+                                contentDescription = item.label
+                            )
+                        } else if (item.iconPainter != null) {
+                            Icon(painter = item.iconPainter,
+                                contentDescription = item.label,
+//                                tint = if (isPomodoroTimer) Color.White else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     },
                     label = {
                         Text(
@@ -123,4 +141,8 @@ fun BottomNavigationBar(
 }
 
 // Data class to represent each item in the Bottom Navigation Bar
-data class BottomNavItem(val route: String, val icon: ImageVector, val label: String)
+data class BottomNavItem(
+    val route: String,
+    val iconVector: ImageVector? = null,
+    val iconPainter: Painter? = null,
+    val label: String)
