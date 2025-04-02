@@ -164,7 +164,7 @@ fun LoginScreen(
                                             "true",
                                             "user" // Assuming "user" type, adjust accordingly
                                         )
-                                        navController.navigate("home") },
+                                        navController.navigate("home/") },
                                     onEmailError = {
                                         offlineViewModel.removeUser(
                                             email
@@ -223,7 +223,7 @@ fun LoginScreen(
                                 offlineViewModel.offlineLoginWithEmail(
                                     email,
                                     password,
-                                    onSuccess = { navController.navigate("home") },
+                                    onSuccess = { navController.navigate("home/") },
                                     onEmailError = { navController.navigate("checkEmail/verify") },
                                     onTermsError = { navController.navigate("termsAndCond") },
                                     onError = { errorMessage = it },

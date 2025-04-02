@@ -50,14 +50,14 @@ fun BottomNavigationBar(
     val items = when (userType) {
         "Tutor" -> listOf(
             // List of the items that are displayed on the Bottom Bar for Tutors
-            BottomNavItem("home", Icons.Default.Home, "Home"),         // Home icon with label "Home"
+            BottomNavItem("home/", Icons.Default.Home, "Home"),         // Home icon with label "Home"
             BottomNavItem("tutorAvailability", Icons.Default.Add, "Availability"),       // Availability icon with label "Availability"
             BottomNavItem("messages", Icons.AutoMirrored.Filled.Message, "Messages"),// Messages icon with label "Messages"
             BottomNavItem("profile/", Icons.Default.Person, "Profile")  // Profile icon with label "Profile"
         )
         // List of the items that are displayed on the Bottom Bar for Students
         "Student" -> listOf(
-            BottomNavItem("home", Icons.Default.Home, "Home"),         // Home icon with label "Home"
+            BottomNavItem("home/", Icons.Default.Home, "Home"),         // Home icon with label "Home"
             BottomNavItem("booking", Icons.Default.Add, "Book"),       // Book icon with label "Book"
             BottomNavItem("messages", Icons.AutoMirrored.Filled.Message, "Messages"), // Messages icon with label "Messages"
             BottomNavItem("profile/", Icons.Default.Person, "Profile")  // Profile icon with label "Profile"
@@ -71,6 +71,9 @@ fun BottomNavigationBar(
 
     if (currentRoute == "profile") {
         currentRoute = "profile/"
+    }
+    if (currentRoute == "home") {
+        currentRoute = "home/"
     }
 
     val fillerBar = ("checkEmail" == currentRoute) || ("awaitingApproval" == currentRoute)

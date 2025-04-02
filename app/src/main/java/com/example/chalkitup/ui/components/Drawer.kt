@@ -52,7 +52,7 @@ fun NavigationDrawer(
                     onClick = {
                         // Close the drawer and navigate to the "home" screen when clicked
                         coroutineScope.launch { drawerState.close() }
-                        navController.navigate("home") // TODO edit the nav routes (going to home currently)
+                        navController.navigate("home/") // TODO edit the nav routes (going to home currently)
                     }
                 )
 
@@ -71,7 +71,7 @@ fun NavigationDrawer(
                     onClick = {
                         // Close the drawer and navigate to the "home" screen when clicked
                         coroutineScope.launch { drawerState.close() }
-                        navController.navigate("home")
+                        navController.navigate("home/1")
                     }
                 )
 

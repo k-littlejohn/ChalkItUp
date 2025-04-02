@@ -1,8 +1,6 @@
 package com.example.chalkitup.ui.nav
 
 import ForgotPasswordScreen
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -42,10 +40,8 @@ import com.example.chalkitup.ui.viewmodel.admin.AdminHomeViewModel
 // Navigation Center, NavHost with navController
 // On app launch, opens startScreen
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun NavGraph(navController: NavHostController) {
-
 
     NavHost(navController = navController, startDestination = "start") {
 
@@ -85,8 +81,9 @@ fun NavGraph(navController: NavHostController) {
         }
 
         // Home Screen
-        composable("home") {
-            HomeScreen(navController = navController)
+        composable("home/{askQuestion}") { backStackEntry ->
+            val askQuestion = backStackEntry.arguments?.getString("askQuestion")?.takeIf { it.isNotEmpty() } ?: "0"
+            HomeScreen(navController = navController, askQuestion = askQuestion.toInt())
         }
 
         // Notification Screen
