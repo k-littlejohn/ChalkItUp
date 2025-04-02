@@ -86,7 +86,7 @@ fun BottomNavigationBar(
 
     // Create the Bottom Navigation Bar
     NavigationBar(
-        containerColor = if (isPomodoroTimer) Color.Black
+        containerColor = if (isPomodoroTimer) Color(0xFF121212)
         else if (fillerBar) Color(0xFF54A4FF)
         else MaterialTheme.colorScheme.surface,
         contentColor = if (isPomodoroTimer) Color.White
