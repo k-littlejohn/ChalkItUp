@@ -36,6 +36,7 @@ import com.example.chalkitup.ui.viewmodel.SettingsViewModel
 import com.example.chalkitup.ui.viewmodel.TutorAvailabilityViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.example.chalkitup.ui.viewmodel.admin.AdminHomeViewModel
+import com.example.chalkitup.ui.screens.PomodoroScreen
 
 // Navigation Center, NavHost with navController
 // On app launch, opens startScreen
@@ -208,6 +209,11 @@ fun NavGraph(navController: NavHostController) {
                 navController = navController,
                 viewModel = viewmodel
             )
+        }
+
+        //Pomodoro Timer
+        composable("pomodoroTimer") {
+            PomodoroScreen(navController = navController)
         }
 
         // -- Screen
