@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.clickable
 
 // Navigation drawer
 
@@ -34,12 +35,17 @@ fun NavigationDrawer(
                 .background(MaterialTheme.colorScheme.background) // Set background color
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
-
                 // Space and title for the "Subjects Offered" section
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Study Timer",
-                    modifier = Modifier.padding(start = 16.dp),
+                    modifier = Modifier
+                        .padding(start = 16.dp)
+                        .clickable {
+                            coroutineScope.launch { drawerState.close() }
+                            // Navigate to Pomodoro Timer Screen when clicked
+                            navController.navigate("pomodoroTimer")
+                        },
                     color = MaterialTheme.colorScheme.onBackground // Text color
                 )
 
