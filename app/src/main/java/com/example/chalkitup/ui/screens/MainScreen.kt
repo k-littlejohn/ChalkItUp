@@ -113,7 +113,7 @@ fun MainScreen() {
                 onResult = {
                     if (it == true) {
                         println("approved")
-                        navController.navigate("home")
+                        navController.navigate("home/")
                     } else {
                         println("awaitingApproval")
                         navController.navigate("awaitingApproval")
