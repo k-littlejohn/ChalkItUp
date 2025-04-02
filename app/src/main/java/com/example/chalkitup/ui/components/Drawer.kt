@@ -6,6 +6,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -22,12 +24,21 @@ fun NavigationDrawer(
 ) {
     val darkTheme by themeViewModel.isDarkTheme
 
+    // Gradient brush for the screen's background.
+    val gradientBrush = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF06C59C), // 5% Blue
+            androidx.compose.material3.MaterialTheme.colorScheme.surface, androidx.compose.material3.MaterialTheme.colorScheme.surface,
+            androidx.compose.material3.MaterialTheme.colorScheme.surface, androidx.compose.material3.MaterialTheme.colorScheme.surface //95% white
+        )
+    )
+
     // Create a coroutine scope to manage state changes asynchronously
     val coroutineScope = rememberCoroutineScope()
 
     // ModalDrawerSheet is the main container for the drawer, with a background color set
     ModalDrawerSheet (
-        drawerContainerColor = MaterialTheme.colorScheme.primary, // Drawer background color
+        drawerContainerColor = Color(0xFF06C59C), //MaterialTheme.colorScheme.primary, // Drawer background color
     ) {
         // Drawer Header Section
         DrawerHeader()
@@ -35,7 +46,7 @@ fun NavigationDrawer(
         // Main content of the navigation drawer
         Box(
             modifier = Modifier.fillMaxWidth()
-                .background(MaterialTheme.colorScheme.background) // Set background color
+                .background(gradientBrush) // Set background color //TODO gradient is here
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
 
@@ -52,7 +63,7 @@ fun NavigationDrawer(
                     onClick = {
                         // Close the drawer and navigate to the "home" screen when clicked
                         coroutineScope.launch { drawerState.close() }
-                        navController.navigate("home/") // TODO edit the nav routes (going to home currently)
+                        navController.navigate("pomodoroTimer")
                     }
                 )
 
@@ -118,6 +129,7 @@ fun DrawerHeader() {
 
     Box(
         modifier = Modifier.fillMaxWidth()
+            .background(Color(0xFF06C59C))
     ) {
         Column(
             modifier = Modifier
