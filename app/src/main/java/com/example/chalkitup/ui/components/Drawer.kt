@@ -9,16 +9,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.chalkitup.ui.viewmodel.ThemeViewModel
 import kotlinx.coroutines.launch
-import androidx.compose.foundation.clickable
 
 // Navigation drawer
 
 @Composable
 fun NavigationDrawer(
     navController: NavController,
-    drawerState: DrawerState
+    drawerState: DrawerState,
+    themeViewModel: ThemeViewModel
 ) {
+    val darkTheme by themeViewModel.isDarkTheme
+
     // Create a coroutine scope to manage state changes asynchronously
     val coroutineScope = rememberCoroutineScope()
 
@@ -35,18 +38,22 @@ fun NavigationDrawer(
                 .background(MaterialTheme.colorScheme.background) // Set background color
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
-                // Space and title for the "Subjects Offered" section
+
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Study Timer",
-                    modifier = Modifier
-                        .padding(start = 16.dp)
-                        .clickable {
-                            coroutineScope.launch { drawerState.close() }
-                            // Navigate to Pomodoro Timer Screen when clicked
-                            navController.navigate("pomodoroTimer")
-                        },
-                    color = MaterialTheme.colorScheme.onBackground // Text color
+
+                NavigationDrawerItem(
+                    label = {
+                        Text(
+                            "Study Timer",
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    },
+                    selected = false,
+                    onClick = {
+                        // Close the drawer and navigate to the pomodoro screen when clicked
+                        coroutineScope.launch { drawerState.close() }
+                        navController.navigate("pomodoroTimer")
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -64,16 +71,8 @@ fun NavigationDrawer(
                     onClick = {
                         // Close the drawer and navigate to the "home" screen when clicked
                         coroutineScope.launch { drawerState.close() }
-                        navController.navigate("home")
+                        navController.navigate("home/1")
                     }
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "View Profile",
-                    modifier = Modifier.padding(start = 16.dp),
-                    color = MaterialTheme.colorScheme.onBackground
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -81,14 +80,29 @@ fun NavigationDrawer(
                 NavigationDrawerItem(
                     label = {
                         Text(
-                            "Dark Mode",
+                            "View Profile",
                             color = MaterialTheme.colorScheme.onBackground
                         )
                     },
                     selected = false,
                     onClick = {
                         coroutineScope.launch { drawerState.close() }
-                        navController.navigate("home")
+                        navController.navigate("profile/")
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                NavigationDrawerItem(
+                    label = {
+                        Text(
+                            if (darkTheme) "Switch to Light Mode" else "Switch to Dark Mode",
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    },
+                    selected = false,
+                    onClick = {
+                        themeViewModel.toggleTheme()
                     }
                 )
 
