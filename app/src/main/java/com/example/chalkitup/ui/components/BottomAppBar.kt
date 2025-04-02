@@ -49,18 +49,16 @@ fun BottomNavigationBar(
 
     val items = when (userType) {
         "Tutor" -> listOf(
-            // List of the items that are displayed on the Bottom Bar for Tutors
-            BottomNavItem("home", Icons.Default.Home, "Home"),         // Home icon with label "Home"
-            BottomNavItem("tutorAvailability", Icons.Default.Add, "Availability"),       // Availability icon with label "Availability"
-            BottomNavItem("messages", Icons.AutoMirrored.Filled.Message, "Messages"),// Messages icon with label "Messages"
-            BottomNavItem("profile/", Icons.Default.Person, "Profile")  // Profile icon with label "Profile"
+            BottomNavItem("home", Icons.Default.Home, "Home"),
+            BottomNavItem("tutorAvailability", Icons.Default.Add, "Availability"),
+            BottomNavItem("messages", Icons.AutoMirrored.Filled.Message, "Messages"),
+            BottomNavItem("profile/", Icons.Default.Person, "Profile")
         )
-        // List of the items that are displayed on the Bottom Bar for Students
         "Student" -> listOf(
-            BottomNavItem("home", Icons.Default.Home, "Home"),         // Home icon with label "Home"
-            BottomNavItem("booking", Icons.Default.Add, "Book"),       // Book icon with label "Book"
-            BottomNavItem("messages", Icons.AutoMirrored.Filled.Message, "Messages"), // Messages icon with label "Messages"
-            BottomNavItem("profile/", Icons.Default.Person, "Profile")  // Profile icon with label "Profile"
+            BottomNavItem("home", Icons.Default.Home, "Home"),
+            BottomNavItem("booking", Icons.Default.Add, "Book"),
+            BottomNavItem("messages", Icons.AutoMirrored.Filled.Message, "Messages"),
+            BottomNavItem("profile/", Icons.Default.Person, "Profile")
         )
         else -> emptyList()
     }
@@ -69,6 +67,9 @@ fun BottomNavigationBar(
     var currentRoute = navController.currentDestination?.route
     currentRoute = currentRoute?.substringBefore("/")
 
+    // Check if the current screen is "PomodoroTimer"
+    val isPomodoroTimer = currentRoute == "pomodoroTimer"
+
     if (currentRoute == "profile") {
         currentRoute = "profile/"
     }
@@ -76,9 +77,9 @@ fun BottomNavigationBar(
     val fillerBar = ("checkEmail" == currentRoute) || ("awaitingApproval" == currentRoute)
 
     // Create the Bottom Navigation Bar
-    NavigationBar (
-        containerColor = if (fillerBar) Color(0xFF54A4FF) else MaterialTheme.colorScheme.surface,
-        contentColor = if (fillerBar) Color(0xFF54A4FF) else MaterialTheme.colorScheme.onSurface,
+    NavigationBar(
+        containerColor = if (isPomodoroTimer) Color.Black else MaterialTheme.colorScheme.surface,
+        contentColor = if (isPomodoroTimer) Color.White else MaterialTheme.colorScheme.onSurface,
     ) {
         if (fillerBar) {
             Unit
@@ -87,24 +88,28 @@ fun BottomNavigationBar(
             items.forEach { item ->
                 NavigationBarItem(
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.onSurface,
-                        selectedTextColor = MaterialTheme.colorScheme.onSurface,
+                        selectedIconColor = if (isPomodoroTimer) Color.White else MaterialTheme.colorScheme.onSurface,
+                        selectedTextColor = if (isPomodoroTimer) Color.White else MaterialTheme.colorScheme.onSurface,
                         indicatorColor = Color(0xFF06C59C),
                     ),
                     icon = {
                         Icon(
                             item.icon,
-                            contentDescription = item.label
+                            contentDescription = item.label,
+                            tint = if (isPomodoroTimer) Color.White else MaterialTheme.colorScheme.onSurface
                         )
-                    }, // Set the icon for the item
-                    label = { Text(item.label) }, // Set the label for the item
-                    selected = currentRoute == item.route, // Highlight item if it's the current route
+                    },
+                    label = {
+                        Text(
+                            item.label,
+                            color = if (isPomodoroTimer) Color.White else MaterialTheme.colorScheme.onSurface
+                        )
+                    },
+                    selected = currentRoute == item.route,
                     onClick = {
-                        // Navigate to the corresponding screen when the item is clicked
                         navController.navigate(item.route) {
-                            launchSingleTop = true // Only one instance of this screen is launched
-                            restoreState =
-                                true // Restore the state of the screen when navigating back
+                            launchSingleTop = true
+                            restoreState = true
                         }
                     }
                 )
