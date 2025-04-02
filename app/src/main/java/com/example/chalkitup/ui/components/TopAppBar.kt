@@ -77,6 +77,7 @@ fun MyTopBar(
         "profile","tutorAvailability","booking","home","start","login","signup","forgotPassword","termsAndCond","adminHome",
             "messages", "newMessage", "chat" -> Color(0xFF54A4FF) // Fill top-screen white space
         "checkEmail","awaitingApproval", "editProfile","notifications" -> Color(0xFF06C59C) // Fill top-screen white space
+        "pomodoroTimer" -> Color(0xFF121212)
         else -> Color.White
     }
 
@@ -135,10 +136,12 @@ fun MyTopBar(
                             "messages" -> "Messages"
                             "notifications" -> "Notifications"
                             "newMessage" -> "New Chat"
+                            "pomodoroTimer" -> "Pomodoro Timer"
                             "start", "login", "signup", "forgotPassword", "checkEmail", "tutorAvailability", "termsAndCond", "adminHome", "awaitingApproval",
                                  "chat"-> ""
                             else -> "ChalkItUp Tutors"
-                        }
+                        },
+                        color = if (currentRoute == "pomodoroTimer") Color.White else MaterialTheme.colorScheme.onSurface,
                     )
                 }
             }
