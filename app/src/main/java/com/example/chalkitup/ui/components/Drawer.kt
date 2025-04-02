@@ -6,9 +6,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.chalkitup.R
 import com.example.chalkitup.ui.viewmodel.ThemeViewModel
 import kotlinx.coroutines.launch
 
@@ -22,22 +26,46 @@ fun NavigationDrawer(
 ) {
     val darkTheme by themeViewModel.isDarkTheme
 
+    // Gradient brush for the screen's background.
+    val gradientBrush = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF06C59C), // 5% Blue
+            androidx.compose.material3.MaterialTheme.colorScheme.surface, androidx.compose.material3.MaterialTheme.colorScheme.surface,
+            androidx.compose.material3.MaterialTheme.colorScheme.surface, androidx.compose.material3.MaterialTheme.colorScheme.surface //95% white
+        )
+    )
+
     // Create a coroutine scope to manage state changes asynchronously
     val coroutineScope = rememberCoroutineScope()
 
     // ModalDrawerSheet is the main container for the drawer, with a background color set
     ModalDrawerSheet (
-        drawerContainerColor = MaterialTheme.colorScheme.primary, // Drawer background color
+        drawerContainerColor = Color(0xFF06C59C), //MaterialTheme.colorScheme.primary, // Drawer background color
     ) {
         // Drawer Header Section
-        DrawerHeader()
+        //DrawerHeader()
 
         // Main content of the navigation drawer
         Box(
-            modifier = Modifier.fillMaxWidth()
-                .background(MaterialTheme.colorScheme.background) // Set background color
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(gradientBrush) // Set background color //TODO gradient is here
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
+
+                Row {
+                    Box(modifier = Modifier.weight(1f))
+                    IconButton(onClick = {
+                        coroutineScope.launch { drawerState.close() }
+                    }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_arrow_forward),
+                            contentDescription = "Home",
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -106,6 +134,17 @@ fun NavigationDrawer(
                     }
                 )
 
+//                IconButton(onClick = {
+//                    coroutineScope.launch { drawerState.close() }
+//                }
+//                ) {
+//                    Icon(
+//                        painter = painterResource(id = R.drawable.baseline_logout_24),
+//                        contentDescription = "Home",
+//                        tint = MaterialTheme.colorScheme.onBackground
+//                    )
+//                }
+
             }
         }
     }
@@ -117,17 +156,22 @@ fun NavigationDrawer(
 fun DrawerHeader() {
 
     Box(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFF06C59C))
     ) {
         Column(
             modifier = Modifier
             .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "Chalk It Up", fontSize = 20.sp,
-                color = MaterialTheme.colorScheme.onBackground
-            )
+            Row() {
+                Text(
+                    text = "ChalkItUp", fontSize = 20.sp,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+
+            }
         }
     }
 }
