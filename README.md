@@ -8,7 +8,7 @@
 
 ---
 
-## 📱 Overview
+## Overview
 
 ChalkItUp is an Android tutoring application that connects students and tutors through appointment scheduling, availability management, and in-app communication. The app supports the full tutoring workflow—from account access and discovery to booking, messaging, and session management—through a clean, mobile-first interface.
 
