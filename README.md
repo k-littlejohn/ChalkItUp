@@ -34,7 +34,6 @@ ChalkItUp is an Android tutoring application that connects students and tutors t
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/1d3d73ba-3c42-40ac-a4fc-7d081f797ba9" width="260"/>
-  <img src="https://github.com/user-attachments/assets/03edc7c0-3b80-4d3d-b8f1-dc78765a4054" width="260"/>
 </p>
 
 <p align="center">
@@ -50,8 +49,7 @@ ChalkItUp is an Android tutoring application that connects students and tutors t
 ## Book Appointment
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/473cd339-fe1c-4ee5-81df-5f035d7f9e8f" width="260"/>
-  <img src="https://github.com/user-attachments/assets/24fb941f-db2f-4211-ab8b-8f40ebe5fea8" width="260"/>
+  <img src="https://github.com/user-attachments/assets/03edc7c0-3b80-4d3d-b8f1-dc78765a4054" width="260"/>
 </p>
 
 <p align="center">
@@ -66,7 +64,8 @@ ChalkItUp is an Android tutoring application that connects students and tutors t
 
 ## Pomodoro Timer
 
-<p align="center">
+<p align="center"> 
+  <img src="https://github.com/user-attachments/assets/473cd339-fe1c-4ee5-81df-5f035d7f9e8f" width="260"/> // pomo
   <img src="https://github.com/user-attachments/assets/984b59ee-1a83-4051-814b-590743488910" width="260"/>
 </p>
 
@@ -83,6 +82,7 @@ ChalkItUp is an Android tutoring application that connects students and tutors t
 ## Messaging
 
 <p align="center">
+  <img src="https://github.com/user-attachments/assets/24fb941f-db2f-4211-ab8b-8f40ebe5fea8" width="260"/> // msg
   <img src="https://github.com/user-attachments/assets/e6abb850-bae4-4081-808d-e61437665849" width="300"/>
 </p>
 
