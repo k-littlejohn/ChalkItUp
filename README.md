@@ -13,111 +13,140 @@
 ChalkItUp is an Android tutoring application that connects students and tutors through appointment scheduling, availability management, and in-app communication. The app supports the full tutoring workflow—from account access and discovery to booking, messaging, and session management—through a clean, mobile-first interface.
 
 ---
+# ChalkItUp — Android Tutoring App
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/9865eee0-8f74-4a12-b435-fc353ba4b18d" alt="ChalkItUp Home" width="250"/>
+  <img src="https://github.com/user-attachments/assets/a9d2509c-c678-4a15-a5ee-9e1fbf07aafc" alt="Welcome Screen" width="300"/>
+  <img src="https://github.com/user-attachments/assets/9865eee0-8f74-4a12-b435-fc353ba4b18d" alt="ChalkItUp Home" width="250"/>
+</p>
+
+---
+
+## Overview
+
+ChalkItUp is an Android tutoring application designed to support academic scheduling, study coordination, and tutor–student interaction. The app emphasizes clear user flows, time-based session management, and mobile-first UI design.
+
+---
 
 ## Login & Signup
 
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/ab1bc45f-2121-4d45-9b3b-24571c837157" width="260"/>
-</p>
-
-<p align="center">
-  <em>User authentication entry point providing secure access to the application.</em>
-</p>
-
-- Login and signup flow for students and tutors  
-- Designed to support authentication-based personalization  
-- Entry point for all user-specific features  
+<table align="center">
+  <tr>
+    <td>
+      <img src="https://github.com/user-attachments/assets/ab1bc45f-2121-4d45-9b3b-24571c837157" width="220"/>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <em>User authentication screen providing secure access to the application.</em>
+    </td>
+  </tr>
+</table>
 
 ---
 
 ## Home Screen & Calendar
 
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/1d3d73ba-3c42-40ac-a4fc-7d081f797ba9" width="260"/>
-</p>
-
-<p align="center">
-  <em>Home dashboard with calendar-based appointment tracking.</em>
-</p>
-
-- Central navigation hub  
-- Calendar view of upcoming tutoring sessions  
-- Quick access to bookings, messages, and profile features  
+<table align="center">
+  <tr>
+    <td>
+      <img src="https://github.com/user-attachments/assets/1d3d73ba-3c42-40ac-a4fc-7d081f797ba9" width="220"/>
+    </td>
+    <td>
+      <img src="https://github.com/user-attachments/assets/03edc7c0-3b80-4d3d-b8f1-dc78765a4054" width="220"/>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center">
+      <em>Home dashboard with calendar-based appointment tracking and quick navigation.</em>
+    </td>
+  </tr>
+</table>
 
 ---
 
-## Book Appointment
+## 📅 Book Appointment
 
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/03edc7c0-3b80-4d3d-b8f1-dc78765a4054" width="260"/>
-</p>
-
-<p align="center">
-  <em>Appointment booking flow with subject selection, mode, and pricing options.</em>
-</p>
-
-- Students can browse and book tutors  
-- Booking is constrained by tutor availability  
-- Designed to support automated matching workflows  
+<table align="center">
+  <tr>
+    <td>
+      <img src="https://github.com/user-attachments/assets/03edc7c0-3b80-4d3d-b8f1-dc78765a4054" width="220"/>
+    </td>
+    <td>
+      <img src="https://github.com/user-attachments/assets/473cd339-fe1c-4ee5-81df-5f035d7f9e8f" width="220"/>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center">
+      <em>Appointment booking workflow with subject selection, mode options, and availability constraints.</em>
+    </td>
+  </tr>
+</table>
 
 ---
 
 ## Pomodoro Timer
 
-<p align="center"> 
-  <img src="https://github.com/user-attachments/assets/473cd339-fe1c-4ee5-81df-5f035d7f9e8f" width="260"/> 
-</p>
-
-<p align="center">
-  <em>Integrated Pomodoro timer to support focused study sessions.</em>
-</p>
-
-- Built-in productivity tool  
-- Designed to complement tutoring sessions  
-- Minimal, distraction-free UI  
+<table align="center">
+  <tr>
+    <td>
+      <img src="https://github.com/user-attachments/assets/473cd339-fe1c-4ee5-81df-5f035d7f9e8f" width="220"/>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <em>Integrated Pomodoro timer designed to support focused and structured study sessions.</em>
+    </td>
+  </tr>
+</table>
 
 ---
 
-## Messaging & Chatbot
+## Messaging & Chat
 
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/24fb941f-db2f-4211-ab8b-8f40ebe5fea8" width="260"/> 
-  <img src="https://github.com/user-attachments/assets/f25f3bee-68fe-4933-8fdc-905413b05110" width="260"/>
-</p>
-
-<p align="center">
-  <em>Conversation-based messaging interface for tutor–student communication.</em>
-</p>
-
-- In-app chat for session coordination  
-- Supports ongoing communication between tutors and students  
-- Familiar, user-friendly messaging layout  
+<table align="center">
+  <tr>
+    <td>
+      <img src="https://github.com/user-attachments/assets/24fb941f-db2f-4211-ab8b-8f40ebe5fea8" width="220"/>
+    </td>
+    <td>
+      <img src="https://github.com/user-attachments/assets/f25f3bee-68fe-4933-8fdc-905413b05110" width="220"/>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center">
+      <em>Conversation-based messaging interface supporting tutor–student communication.</em>
+    </td>
+  </tr>
+</table>
 
 ---
 
 ## Profile & Personalization
 
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/984b59ee-1a83-4051-814b-590743488910" width="260"/>
-</p>
-
-<p align="center">
-  <em>User profile with interests, notifications, and personalization options.</em>
-</p>
-
-- Tutor profiles include subjects and availability  
-- Student profiles support preferences and notifications  
-- Clean, readable layout optimized for mobile  
+<table align="center">
+  <tr>
+    <td>
+      <img src="https://github.com/user-attachments/assets/984b59ee-1a83-4051-814b-590743488910" width="220"/>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <em>User profile with interests, notifications, and personalization options.</em>
+    </td>
+  </tr>
+</table>
 
 ---
 
-## Core Features Summary
+## Core Features
 
-- User authentication and onboarding  
-- Calendar-based appointment management  
-- Tutor availability and booking workflows  
-- Real-time messaging  
-- Integrated productivity tools  
+- Secure login and onboarding flow  
+- Calendar-based session tracking  
+- Tutor availability and appointment scheduling  
+- In-app messaging and coordination  
+- Integrated study productivity tools  
 - Material Design–based UI  
 
 ---
