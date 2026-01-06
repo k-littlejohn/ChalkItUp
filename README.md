@@ -17,7 +17,9 @@ ChalkItUp is an Android tutoring application that connects students and tutors t
 ## Login & Signup
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/ab1bc45f-2121-4d45-9b3b-24571c837157" width="260"/>
+  <img src="https://github.com/user-attachments/assets/134e7ab0-41d9-4b61-bf6c-9f979e1dc0a4" width="260"/>
+  <img src="https://github.com/user-attachments/assets/2269d05a-82e2-4cd2-87c7-ba74bae4d488" width="260"/>
+  <img src="https://github.com/user-attachments/assets/39170272-602e-496f-acdd-96d67e0a5273" width="260"/>
 </p>
 
 <p align="center">
@@ -30,84 +32,56 @@ ChalkItUp is an Android tutoring application that connects students and tutors t
 
 ---
 
-## Home Screen & Calendar
+## Dark Mode
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/1d3d73ba-3c42-40ac-a4fc-7d081f797ba9" width="260"/>
+  <img src="https://github.com/user-attachments/assets/5e30bb47-1502-4125-a9a2-6bdbe58aafac" width="260"/>
+  <img src="https://github.com/user-attachments/assets/1578c515-61c0-4485-a8e5-154147d5016f" width="260"/>
+  <img src="https://github.com/user-attachments/assets/7d261ee3-3256-4c8c-ba23-40b704ae5742" width="260"/>
 </p>
 
 <p align="center">
-  <em>Home dashboard with calendar-based appointment tracking.</em>
+  <em>Optional dark mode theme designed to reduce eye strain and improve readability in low-light environments.</em>
 </p>
-
-- Central navigation hub  
-- Calendar view of upcoming tutoring sessions  
-- Quick access to bookings, messages, and profile features  
 
 ---
 
-## Book Appointment
+## Home Screen, Calendar, Booking & Profile
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/03edc7c0-3b80-4d3d-b8f1-dc78765a4054" width="260"/>
+  <img src="https://github.com/user-attachments/assets/a866b244-f68b-45a6-8abd-41d2aa7492a0" width="260"/>
+  <img src="https://github.com/user-attachments/assets/f726744c-64a4-481b-ae01-aa9994206c2c" width="260"/>
+  <img src="https://github.com/user-attachments/assets/c4b51075-9a2a-49dc-81d2-467e047c6171" width="260"/>
 </p>
 
 <p align="center">
-  <em>Appointment booking flow with subject selection, mode, and pricing options.</em>
+  <em>Main dashboard with calendar-based session tracking, appointment booking, and user profile access.</em>
 </p>
 
-- Students can browse and book tutors  
-- Booking is constrained by tutor availability  
-- Designed to support automated matching workflows  
+- Central navigation hub for the application  
+- Calendar view displaying upcoming tutoring sessions  
+- Appointment booking with subject selection, mode, and pricing options  
+- Booking constrained by tutor availability and scheduling rules  
+- Profile access with interests, notifications, and personalization
 
 ---
 
-## Pomodoro Timer
+## Messaging, Pomodoro & Chatbot
 
-<p align="center"> 
-  <img src="https://github.com/user-attachments/assets/473cd339-fe1c-4ee5-81df-5f035d7f9e8f" width="260"/> 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/f32728aa-57aa-4d81-b62a-4abfc0825498" width="260"/>
+  <img src="https://github.com/user-attachments/assets/95c29d97-92ae-4e0c-99c9-33dae29f96cf" width="260"/>
+  <img src="https://github.com/user-attachments/assets/48bf33e3-9682-4b37-9da3-769a5416ead3" width="260"/>
 </p>
 
 <p align="center">
-  <em>Integrated Pomodoro timer to support focused study sessions.</em>
+  <em>Built-in communication and productivity tools supporting tutoring sessions and focused study.</em>
 </p>
 
-- Built-in productivity tool  
-- Designed to complement tutoring sessions  
-- Minimal, distraction-free UI  
-
----
-
-## Messaging & Chatbot
-
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/24fb941f-db2f-4211-ab8b-8f40ebe5fea8" width="260"/> 
-  <img src="https://github.com/user-attachments/assets/f25f3bee-68fe-4933-8fdc-905413b05110" width="260"/>
-</p>
-
-<p align="center">
-  <em>Conversation-based messaging interface for tutor–student communication.</em>
-</p>
-
-- In-app chat for session coordination  
-- Supports ongoing communication between tutors and students  
-- Familiar, user-friendly messaging layout  
-
----
-
-## Profile & Personalization
-
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/984b59ee-1a83-4051-814b-590743488910" width="260"/>
-</p>
-
-<p align="center">
-  <em>User profile with interests, notifications, and personalization options.</em>
-</p>
-
-- Tutor profiles include subjects and availability  
-- Student profiles support preferences and notifications  
-- Clean, readable layout optimized for mobile  
+- In-app messaging for tutor–student coordination  
+- Integrated Pomodoro timer for structured focus sessions  
+- AI-assisted chatbot for guidance and interaction  
+- Clean, intuitive interfaces designed for mobile use  
 
 ---
 
