@@ -10,7 +10,7 @@
 
 ## Overview
 
-ChalkItUp is an Android tutoring application that connects students and tutors through appointment scheduling, availability management, and in-app communication. The app supports the full tutoring workflow—from account access and discovery to booking, messaging, and session management—through a clean, mobile-first interface.
+ChalkItUp is an Android tutoring application that connects students and tutors through appointment scheduling, availability management, and in-app communication. The app supports the full tutoring workflow from account access and discovery to booking, messaging, and session management—through a clean, mobile-first interface.
 
 ---
 
@@ -35,9 +35,9 @@ ChalkItUp is an Android tutoring application that connects students and tutors t
 ## Dark Mode
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/5e30bb47-1502-4125-a9a2-6bdbe58aafac" width="260"/>
-  <img src="https://github.com/user-attachments/assets/1578c515-61c0-4485-a8e5-154147d5016f" width="260"/>
-  <img src="https://github.com/user-attachments/assets/7d261ee3-3256-4c8c-ba23-40b704ae5742" width="260"/>
+  <img src="https://github.com/user-attachments/assets/5e30bb47-1502-4125-a9a2-6bdbe58aafac" width="260" height="560"/>
+  <img src="https://github.com/user-attachments/assets/1578c515-61c0-4485-a8e5-154147d5016f" width="260" height="560"/>
+  <img src="https://github.com/user-attachments/assets/7d261ee3-3256-4c8c-ba23-40b704ae5742" width="260" height="560"/>
 </p>
 
 <p align="center">
@@ -49,9 +49,9 @@ ChalkItUp is an Android tutoring application that connects students and tutors t
 ## Home Screen, Calendar, Booking & Profile
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/a866b244-f68b-45a6-8abd-41d2aa7492a0" width="260"/>
-  <img src="https://github.com/user-attachments/assets/f726744c-64a4-481b-ae01-aa9994206c2c" width="260"/>
-  <img src="https://github.com/user-attachments/assets/c4b51075-9a2a-49dc-81d2-467e047c6171" width="260"/>
+  <img src="https://github.com/user-attachments/assets/a866b244-f68b-45a6-8abd-41d2aa7492a0" width="260" height="560"/>
+  <img src="https://github.com/user-attachments/assets/f726744c-64a4-481b-ae01-aa9994206c2c" width="260" height="560"/>
+  <img src="https://github.com/user-attachments/assets/c4b51075-9a2a-49dc-81d2-467e047c6171" width="260" height="560"/>
 </p>
 
 <p align="center">
@@ -69,9 +69,9 @@ ChalkItUp is an Android tutoring application that connects students and tutors t
 ## Messaging, Pomodoro & Chatbot
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/f32728aa-57aa-4d81-b62a-4abfc0825498" width="260"/>
-  <img src="https://github.com/user-attachments/assets/95c29d97-92ae-4e0c-99c9-33dae29f96cf" width="260"/>
-  <img src="https://github.com/user-attachments/assets/48bf33e3-9682-4b37-9da3-769a5416ead3" width="260"/>
+  <img src="https://github.com/user-attachments/assets/f32728aa-57aa-4d81-b62a-4abfc0825498" width="260" height="560"/>
+  <img src="https://github.com/user-attachments/assets/95c29d97-92ae-4e0c-99c9-33dae29f96cf" width="260" height="560"/>
+  <img src="https://github.com/user-attachments/assets/48bf33e3-9682-4b37-9da3-769a5416ead3" width="260" height="560"/>
 </p>
 
 <p align="center">
