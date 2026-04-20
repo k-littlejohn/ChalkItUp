@@ -17,9 +17,9 @@ ChalkItUp is an Android tutoring application that connects students and tutors t
 ## Login & Signup
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/9b6dfa22-e2fe-4a62-9281-54690cbb26fc" width="230" height="560"/>
-  <img src="https://github.com/user-attachments/assets/2269d05a-82e2-4cd2-87c7-ba74bae4d488" width="230" height="560"/>
-  <img src="https://github.com/user-attachments/assets/39170272-602e-496f-acdd-96d67e0a5273" width="230" height="560">
+  <img src="https://github.com/user-attachments/assets/9b6dfa22-e2fe-4a62-9281-54690cbb26fc" width="200" height="560"/>
+  <img src="https://github.com/user-attachments/assets/2269d05a-82e2-4cd2-87c7-ba74bae4d488" width="200" height="560"/>
+  <img src="https://github.com/user-attachments/assets/39170272-602e-496f-acdd-96d67e0a5273" width="200" height="560">
 </p>
 
 <p align="center">
